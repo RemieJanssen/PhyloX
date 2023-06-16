@@ -71,8 +71,82 @@ class TestClassOrchard(unittest.TestCase):
         )
         self.assertTrue(is_orchard(network1))
 
+    def test_is_orchard_add_root(self):
+        network1 = DiNetwork(
+            edges=[(2, 3), (2, 4), (3, 4), (3, 5), (4, -1)],
+        )
+        self.assertTrue(is_orchard(network1))
+
     def test_is_orchard_false(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 5), (4, 5), (3, 6), (4, 6), (5, 7), (6, 8)],
         )
         self.assertFalse(is_orchard(network1))
+
+class TestClassStackFree(unittest.TestCase):
+    def test_is_stack_free(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4)],
+        )
+        self.assertTrue(is_stack_free(network1))
+
+    def test_is_stack_free_2(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+        )
+        self.assertTrue(is_stack_free(network1))
+
+    def test_is_stack_free_false_stack(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 8), (8, 5), (8, 9), (5, 6)],
+        )
+        self.assertFalse(is_stack_free(network1))    
+
+    def test_is_stack_free_w_shape(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 8), (8, 5), (8, 9), (5, 6)],
+        )
+        self.assertTrue(is_stack_free(network1))    
+
+    def test_is_stack_free_false_diamond(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 5), (5, 6)],
+        )
+        self.assertFalse(is_stack_free(network1))
+
+class TestClassTreeBased(unittest.TestCase):
+    def test_is_tree_based(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4)],
+        )
+        self.assertTrue(is_tree_based(network1))
+
+    def test_is_tree_based_2(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+        )
+        self.assertTrue(is_tree_based(network1))
+
+    def test_is_tree_based_stack(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 8), (8, 5), (8, 9), (5, 6)],
+        )
+        self.assertTrue(is_tree_based(network1))    
+
+    def test_is_tree_based_w_shape(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 8), (8, 5), (8, 9), (5, 6)],
+        )
+        self.assertTrue(is_tree_based(network1))    
+
+    def test_is_tree_based_diamond(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 5), (5, 6)],
+        )
+        self.assertTrue(is_tree_based(network1))
+
+    def test_is_tree_based_false(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 7), (6, 7), (7, 8), (2, 6)],
+        )
+        self.assertFalse(is_tree_based(network1))
