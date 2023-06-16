@@ -1,5 +1,5 @@
-from .exceptions import InvalidMoveDefinition
-from .movetype import MoveType
+from phylox.exceptions import InvalidMoveDefinition
+from phylox.rearrangement.movetype import MoveType
 
 
 class Move(object):

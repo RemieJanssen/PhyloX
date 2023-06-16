@@ -1,0 +1,1 @@
+from .invalidmovedefinition import InvalidMoveDefinition

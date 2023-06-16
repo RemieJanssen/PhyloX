@@ -1,4 +1,7 @@
 import networkx as nx
+import random
+
+LABEL_ATTR = "label"
 
 class DiNetwork(nx.DiGraph):
     def __init__(self, *args, **kwargs):
@@ -6,7 +9,7 @@ class DiNetwork(nx.DiGraph):
         super().__init__(edges, *args, **kwargs)
         self.add_nodes_from(kwargs.get("nodes", []))
         for label in kwargs.get("labels", []):
-            self.nodes[label[0]]["label"] = label[1]
+            self.nodes[label[0]][LABEL_ATTR] = label[1]
 
     @property
     def leaves(self):

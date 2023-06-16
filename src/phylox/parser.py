@@ -9,17 +9,9 @@ import pandas as pd
 from pathlib import Path
 import multiprocessing
 from multiprocessing import Manager
-#from BetaSplittingNetwork_Tools import *
 from ExtractNetworkProperties import *
 import itertools
 
-
-############################################
-# MAIN
-############################################
-
-############################################
-# General parameters.
 
 
 
