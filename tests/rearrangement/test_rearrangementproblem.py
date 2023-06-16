@@ -192,3 +192,36 @@ class TestRearrangementProblem(unittest.TestCase):
             InvalidMoveException, match="reattachment creates parallel edges"
         ):
             apply_move(network, m)
+
+    def test_apply_valid_vertical_plus(self):
+        network1 = DiNetwork(
+            edges=[[0, 1], [1, 2], [1, 3]],
+            labels=[[2, "a"], [3, "b"]],
+        )
+        network2 = DiNetwork(
+            edges=[[0, 1], [1, 2], [1, 3], [2, 3], [2, 4], [3, 5]],
+            labels=[[4, "a"], [5, "b"]],
+        )
+        m = Move(
+            start_edge=(1, 2),
+            end_edge=(1, 3),
+            network=network1,
+            move_type=MoveType.VPLU,
+        )
+        problem = RearrangementProblem(network1, network2, move_type=MoveType.VPLU)
+        problem.check_solution([m])
+
+    def test_apply_invalid_vertical_plus(self):
+        network = DiNetwork(
+            edges=[[0, 1], [1, 2], [1, 3]],
+        )
+        m = Move(
+            start_edge=(1, 2),
+            end_edge=(0, 1),
+            network=network,
+            move_type=MoveType.VPLU,
+        )
+        with pytest.raises(
+            InvalidMoveException, match="end node is reachable from start node"
+        ):
+            apply_move(network, m)

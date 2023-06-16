@@ -65,3 +65,39 @@ class TestMoveClass(unittest.TestCase):
             move_type=MoveType.NONE,
         )
         assert m.move_type == MoveType.NONE
+
+    def test_make_move_vplu(self):
+        m = Move(
+            move_type=MoveType.VPLU,
+            start_edge=(0, 1),
+            end_edge=(2, 3),
+            start_node=5,
+            end_node=6,
+        )
+        assert m.move_type == MoveType.VPLU
+
+    def test_make_move_vplu_infer_new_nodes(self):
+        network = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3)],
+        )
+        m = Move(
+            move_type=MoveType.VPLU,
+            start_edge=(1, 2),
+            end_edge=(1, 3),
+            network=network,
+        )
+        assert m.move_type == MoveType.VPLU
+
+    def test_make_move_vplu_infer_new_nodes_invalid(self):
+        network = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3)],
+        )
+        with pytest.raises(
+            InvalidMoveDefinitionException,
+            match="Either a start_node and end_node, or a network must be given.",
+        ):
+            Move(
+                move_type=MoveType.VPLU,
+                start_edge=(1, 2),
+                end_edge=(1, 3),
+            )

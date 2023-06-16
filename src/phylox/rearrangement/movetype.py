@@ -6,6 +6,7 @@ class MoveType(str, Enum):
     TAIL = "TAIL"
     HEAD = "HEAD"
     RSPR = "RSPR"
-    VPLU = "VPLU"  # not currently in use
-    VMIN = "VMIN"  # not currently in use
+    VPLU = "VPLU"
+    VMIN = "VMIN"
     VERT = "VERT"
+    ALL = "ALL"

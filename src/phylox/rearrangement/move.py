@@ -104,23 +104,20 @@ class Move(object):
                 self.end_edge = kwargs["end_edge"]
                 self.start_node = kwargs.get("start_node", None)
                 self.end_node = kwargs.get("end_node", None)
-                if self.start_node in network.nodes:
+                network = kwargs.get("network", None)
+                if (self.start_node is None or self.end_node is None) and network is None:
                     raise InvalidMoveDefinitionException(
-                        "Start node must not be in the network."
-                    )
-                if self.end_node in network.nodes:
-                    raise InvalidMoveDefinitionException(
-                        "End node must not be in the network."
-                    )
-                if self.start_edge == self.end_edge:
-                    raise InvalidMoveDefinitionException(
-                        "Start edge must not be the end edge."
+                        "Either a start_node and end_node, or a network must be given."
                     )
                 if self.start_node is None:
                     self.start_node = find_unused_node(network)
                 if self.end_node is None:
                     self.end_node = find_unused_node(network, exclude=[self.start_node])
 
+                if self.start_edge == self.end_edge:
+                    raise InvalidMoveDefinitionException(
+                        "Start edge must not be the end edge."
+                    )
             except KeyError:
                 raise InvalidMoveDefinitionException(
                     "Missing one of start_edge, end_edge."
@@ -138,6 +135,8 @@ class Move(object):
 
 
     def is_type(self, move_type):
+        if self.move_type == MoveType.ALL:
+            return True
         if (
             self.move_type == MoveType.NONE
             or (

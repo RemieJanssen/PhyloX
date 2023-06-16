@@ -47,13 +47,21 @@ def check_valid(network, move):
         if move.target[0] == move.moving_edge[0]:
             raise InvalidMoveException("reattachment creates parallel edges")
     elif move.is_type(MoveType.VPLU):
+        if move.start_node in network.nodes:
+            raise InvalidMoveException(
+                "Start node must not be in the network."
+            )
+        if move.end_node in network.nodes:
+            raise InvalidMoveException(
+                "End node must not be in the network."
+            )
         if nx.has_path(network, move.end_edge[1], move.start_edge[0]) or move.start_edge == move.end_edge:
             raise InvalidMoveException("end node is reachable from start node")
     elif move.is_type(MoveType.VMIN):
-        parent_0 = network.parent(removed_edge[0], exclude=[removed_edge[1]])
-        child_0 = network.child(removed_edge[0], exclude=[removed_edge[1]])
-        parent_1 = network.parent(removed_edge[1], exclude=[removed_edge[0]])
-        child_1 = network.child(removed_edge[1], exclude=[removed_edge[0]])
+        parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
+        child_0 = network.child(move.removed_edge[0], exclude=[move.removed_edge[1]])
+        parent_1 = network.parent(move.removed_edge[1], exclude=[move.removed_edge[0]])
+        child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
         if parent_0==parent_1 and child_0==child_1:
             raise InvalidMoveException("removal creates parallel edges")
         if not (CheckMovable(network, move.removed_edge, move.removed_edge[0]) and CheckMovable(network, move.removed_edge, move.removed_edge[1])):
