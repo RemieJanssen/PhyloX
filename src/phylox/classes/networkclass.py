@@ -1,6 +1,6 @@
 from enum import Enum
 
-class NetworkClass(str, Enum):
+class DiNetworkClass(str, Enum):
     TC = "tree-child"
     TB = "tree-based"
     OR = "orchard"
