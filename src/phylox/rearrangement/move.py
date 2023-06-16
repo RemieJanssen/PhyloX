@@ -2,6 +2,7 @@ from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveExcepti
 from phylox.rearrangement.movetype import MoveType
 from copy import deepcopy
 from phylox.rearrangement.movability import check_valid
+from phylox.base import find_unused_node
 
 def apply_move(network, move):
     """
@@ -30,10 +31,23 @@ def apply_move(network, move):
             ]
         )
         return new_network
-    if move.move_type in [MoveType.NONE]:
+    elif move.move_type in [MoveType.VPLU]:
+        new_network.remove_edges_from([move.start_edge, move.end_edge])        
+        new_network.add_edges_from([(move.start_edge[0], move.start_node), (move.start_node, move.start_edge[1]),(move.end_edge[0], move.end_node), (move.end_node, move.end_edge[1]), (move.start_node,move.end_node)])
+        return new_network
+    elif move.move_type in [MoveType.VMIN]:
+        parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
+        child_0 = network.child(move.removed_edge[0], exclude=[move.removed_edge[1]])
+        parent_1 = network.parent(move.removed_edge[1], exclude=[move.removed_edge[0]])
+        child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
+        new_network.remove_edges_from([(parent_0, move.removed_edge[0]), (move.removed_edge[0], child_0),(parent_1, move.removed_edge[1]), (move.removed_edge[1], child_1), move.removed_edge])
+        new_network.add_edges_from([(parent_0, child_0), (parent_1, child_1)])
+        return new_network
+    elif move.move_type in [MoveType.NONE]:
         return network
-    # TODO implement vertical moves
     raise InvalidMove("only tail or head moves are currently valid.")
+
+
 
 def apply_move_sequence(network, seq_moves):
     for move in seq_moves:
@@ -53,11 +67,11 @@ class Move(object):
             return
 
         # TAIL/HEAD move (i.e. RSPR/horizontal)
-        if self.move_type == MoveType.RSPR:
+        elif self.move_type == MoveType.RSPR:
             raise InvalidMoveDefinitionException(
                 "rSPR moves must be defined as moves of type tail or head."
             )
-        if self.move_type in [MoveType.TAIL, MoveType.HEAD]:
+        elif self.move_type in [MoveType.TAIL, MoveType.HEAD]:
             try:
                 self.origin = kwargs["origin"]
                 self.moving_edge = kwargs["moving_edge"]
@@ -78,19 +92,50 @@ class Move(object):
                 )
 
             return
-
-        # TODO Write vertical move parsing
-        if self.move_type == MoveType.VPLU:
+        # VERT move (i.e. SPR/vertical)
+        elif self.move_type == MoveType.VERT:
+            raise InvalidMoveDefinitionException(
+                "vertical moves must be defined as moves of type VPLU or VMIN."
+            )
+        # VPLU/VMIN move
+        elif self.move_type == MoveType.VPLU:
             try:
                 self.start_edge = kwargs["start_edge"]
                 self.end_edge = kwargs["end_edge"]
-                self.start_node = kwargs["start_node"]
-                self.end_node = kwargs["end_node"]
+                self.start_node = kwargs.get("start_node", None)
+                self.end_node = kwargs.get("end_node", None)
+                if self.start_node in network.nodes:
+                    raise InvalidMoveDefinitionException(
+                        "Start node must not be in the network."
+                    )
+                if self.end_node in network.nodes:
+                    raise InvalidMoveDefinitionException(
+                        "End node must not be in the network."
+                    )
+                if self.start_edge == self.end_edge:
+                    raise InvalidMoveDefinitionException(
+                        "Start edge must not be the end edge."
+                    )
+                if self.start_node is None:
+                    self.start_node = find_unused_node(network)
+                if self.end_node is None:
+                    self.end_node = find_unused_node(network, exclude=[self.start_node])
+
             except KeyError:
                 raise InvalidMoveDefinitionException(
-                    "Missing one of start_edge, end_edge, start_node, or end_node."
+                    "Missing one of start_edge, end_edge."
                 )
-            return
+        elif self.move_type == MoveType.VMIN:
+            try:
+                self.edge = kwargs["removed_edge"]
+            except KeyError:
+                raise InvalidMoveDefinitionException(
+                    "Missing removed_edge in definition."
+                )
+        else:
+            raise InvalidMoveDefinitionException("Invalid move type.")
+
+
 
     def is_type(self, move_type):
         if (

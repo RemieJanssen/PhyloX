@@ -13,6 +13,7 @@ from phylox.rearrangement.movetype import MoveType
 from phylox.exceptions import InvalidMoveException, InvalidMoveDefinitionException
 
 
+
 def check_valid(network, move):
     """
     Checks whether a move is valid.
@@ -22,7 +23,6 @@ def check_valid(network, move):
     """
     if move.move_type == MoveType.NONE:
         return
-
     if move.is_type(MoveType.RSPR):
         if not network.has_edge(
             move.origin[0], move.moving_node
@@ -46,9 +46,20 @@ def check_valid(network, move):
             raise InvalidMoveException("reattachment would create a cycle")
         if move.target[0] == move.moving_edge[0]:
             raise InvalidMoveException("reattachment creates parallel edges")
-        return
-
-    raise InvalidMoveException("Only rSPR moves are supported currently")
+    elif move.is_type(MoveType.VPLU):
+        if nx.has_path(network, move.end_edge[1], move.start_edge[0]) or move.start_edge == move.end_edge:
+            raise InvalidMoveException("end node is reachable from start node")
+    elif move.is_type(MoveType.VMIN):
+        parent_0 = network.parent(removed_edge[0], exclude=[removed_edge[1]])
+        child_0 = network.child(removed_edge[0], exclude=[removed_edge[1]])
+        parent_1 = network.parent(removed_edge[1], exclude=[removed_edge[0]])
+        child_1 = network.child(removed_edge[1], exclude=[removed_edge[0]])
+        if parent_0==parent_1 and child_0==child_1:
+            raise InvalidMoveException("removal creates parallel edges")
+        if not (CheckMovable(network, move.removed_edge, move.removed_edge[0]) and CheckMovable(network, move.removed_edge, move.removed_edge[1])):
+            raise InvalidMoveException("removal creates parallel edges")
+    else:
+        raise InvalidMoveException("Only rSPR and vertical moves are supported currently")
 
 
 
