@@ -1,2 +1,2 @@
 from phylox.generators import *
-from phylox.dinetwork import DiNetwork
+from phylox.dinetwork import *

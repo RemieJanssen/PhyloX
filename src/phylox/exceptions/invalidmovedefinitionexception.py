@@ -1,4 +1,4 @@
-class InvalidMoveDefinition(Exception):
+class InvalidMoveDefinitionException(Exception):
     """Exception raised when a move definition is invalid.
 
     Attributes:

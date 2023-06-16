@@ -1,1 +1,2 @@
-from .invalidmovedefinition import InvalidMoveDefinition
+from .invalidmovedefinitionexception import InvalidMoveDefinitionException
+from .invalidmoveexception import InvalidMoveException

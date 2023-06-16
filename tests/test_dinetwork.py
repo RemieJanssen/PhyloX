@@ -1,6 +1,6 @@
 import unittest
 
-from phylox import DiNetwork
+from phylox import DiNetwork, LABEL_ATTR
 
 class TestDiNetwork(unittest.TestCase):
     def test_init(self):
@@ -16,9 +16,9 @@ class TestDiNetwork(unittest.TestCase):
         )
         self.assertCountEqual(list(network.nodes), [1, 2, 3])
         self.assertCountEqual(list(network.edges), [(1, 2), (2, 3)])
-        self.assertEqual(network.nodes[1]["label"], "a")
-        self.assertEqual(network.nodes[2]["label"], "b")
-        self.assertEqual(network.nodes[3]["label"], "c")
+        self.assertEqual(network.nodes[1][LABEL_ATTR], "a")
+        self.assertEqual(network.nodes[2][LABEL_ATTR], "b")
+        self.assertEqual(network.nodes[3][LABEL_ATTR], "c")
         
     def test_leaves(self):
         network = DiNetwork(
