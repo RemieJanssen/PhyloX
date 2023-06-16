@@ -24,6 +24,7 @@ classifiers = [
 pythonpath = [
   ".", "src",
 ]
+addopts = "--cov --cov-report term-missing"
 
 [project.urls]
 "Homepage" = "https://github.com/RemieJanssen/PhyloX"
