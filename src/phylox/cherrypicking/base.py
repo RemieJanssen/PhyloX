@@ -1,4 +1,5 @@
 from enum import Enum
+from copy import deepcopy
 
 class CHERRYTYPE(Enum):
     CHERRY = 1
@@ -19,27 +20,29 @@ def is_second_in_reducible_pair(network, x):
     return False
 
 def reduce_pair(network, x, y):
+    network = deepcopy(network)
+
     cherry_type = check_cherry(network, x, y)
     if cherry_type == CHERRYTYPE.CHERRY:
-        for px in network.predecessors(x):
-            network.remove_node(x)
-            for ppx in network.predecessors(px):
-                network.remove_node(px)
-                network.add_edge(ppx,y)
-            return True
+        px = network.parent(x)
+        network.remove_node(x)
+        if network.out_degree(px) == 1:
+            ppx = network.parent(px)
+            network.remove_node(px)
+            network.add_edge(ppx,y)
     if cherry_type == CHERRYTYPE.RETICULATEDCHERRY:
-        for px in network.predecessors(x):
-            for py in network.predecessors(y):
-                network.remove_edge(py,px)
-                if network.in_degree(px) == 1:
-                    for ppx in network.predecessors(px):
-                        network.add_edge(ppx, x)
-                        network.remove_node(px)
-                for ppy in network.predecessors(py):
-                    network.add_edge(ppy, y)
-                    network.remove_node(py)
-                return True
-    return False    
+        px = network.parent(x)
+        py = network.parent(y)
+        network.remove_edge(py,px)
+        if network.in_degree(px) == 1:
+            ppx = network.parent(px)
+            network.add_edge(ppx, x)
+            network.remove_node(px)
+        if network.out_degree(py) == 1:
+            ppy = network.parent(py)
+            network.add_edge(ppy, y)
+            network.remove_node(py)
+    return network, cherry_type
 
 def check_cherry(network, x, y):
     if network.has_node(x):

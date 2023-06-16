@@ -1,5 +1,5 @@
 from copy import deepcopy
-from phylox.cherrypicking import is_second_in_reducible_pair, reduce_pair
+from phylox.cherrypicking import is_second_in_reducible_pair, reduce_pair, CHERRYTYPE
 
 def is_binary(network):
     binary_node_types = [
@@ -34,12 +34,10 @@ def is_orchard(network):
     while not done:
         checked_all_leaves = True
         for leaf in leaves:
-            print("leaf", leaf)
             pair = is_second_in_reducible_pair(network_copy, leaf)
-            print("pair", pair)
             if pair:
-                reduced = reduce_pair(network_copy, *pair)
-                if reduced == "cherry":
+                network_copy, cherry_type = reduce_pair(network_copy, *pair)
+                if cherry_type ==  CHERRYTYPE.CHERRY:
                     leaves.remove(pair[0])
                 checked_all_leaves = False
                 break
