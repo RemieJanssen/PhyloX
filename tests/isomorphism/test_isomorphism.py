@@ -78,3 +78,25 @@ class TestIsomorphism(unittest.TestCase):
             labels=[(5, "a"), (6, "b")],
         )
         self.assertFalse(is_isomorphic(network1, network2, partial_isomorphism=[(6, 5), (5, 6)]))
+
+    def test_isomorphism_ignore_labels(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        self.assertTrue(is_isomorphic(network1, network2, ignore_labels=True))
+        
+    def test_isomorphism_ignore_labels_partial_isom(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        self.assertFalse(is_isomorphic(network1, network2, ignore_labels=True, partial_isomorphism=[(6, 5), (5, 6)]))
