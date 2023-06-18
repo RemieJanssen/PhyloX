@@ -58,9 +58,53 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
 
 
 
-def _count_automorphisms(network, ignore_labels=False, partial_isomorphism=None):
+def _count_automorphisms(network, ignore_labels=False, partial_isomorphism=None, nodes_available=None, nodes_to_do=None):
+    """
+    Determines the number of automorphisms of a network.
 
-    pass
+    :param network: a phylogenetic network, i.e., a DAG with leaf labels.
+    :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.
+    :param partial_isomorphism: a partial isomorphism between the network and itself.
+    :param nodes_available: the nodes that are available to be matched.
+    :param nodes_to_do: the nodes that still need to be matched.
+    :return: the number of automorphisms of the network.
+
+    """
+    nodes_available = nodes_available or []
+    nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
+    same_labels = same_isometry_labels_and_labels
+    if ignore_labels:
+        same_labels = same_isometry_labels
+
+    number_of_automorphisms = 1
+    while nodes_to_do:
+        node_pair_to_remove = partial_isomorphism.pop()
+        node_to_remove = node_pair_to_remove[0]
+        nodes_to_do.remove(node_to_remove)
+        matches = 1
+        for try_to_match_node in nodes_available:
+            if is_isomorphic(
+                network, 
+                network, 
+                partial_isomorphism=partial_isomorphism+[(node_to_remove, try_to_match_node)],
+                ignore_labels=ignore_labels
+            ):
+                matches += 1
+        number_of_automorphisms *= matches
+        nodes_available.append(node_to_remove)
+    return number_of_automorphisms
 
 def count_automorphisms(network, ignore_labels=False):
-    pass
+    """
+    Determines the number of automorphisms of a network.
+
+    :param network: a phylogenetic network, i.e., a DAG with leaf labels.
+    :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.
+    :return: the number of automorphisms of the network.
+    """
+    partial_isomorphism = [(a,a) for a in network.nodes()]
+    return _count_automorphisms(
+        network, 
+        ignore_labels=ignore_labels, 
+        partial_isomorphism=partial_isomorphism,
+    )

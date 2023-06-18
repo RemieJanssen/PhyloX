@@ -1,7 +1,7 @@
 import unittest
 
 from phylox import DiNetwork, LABEL_ATTR
-from phylox.isomorphism import is_isomorphic
+from phylox.isomorphism import is_isomorphic, count_automorphisms
 
 class TestIsomorphism(unittest.TestCase):
     def test_isomorphism(self):
@@ -100,3 +100,20 @@ class TestIsomorphism(unittest.TestCase):
             labels=[(5, "a"), (6, "b")],
         )
         self.assertFalse(is_isomorphic(network1, network2, ignore_labels=True, partial_isomorphism=[(6, 5), (5, 6)]))
+
+class TestAutomorphism(unittest.TestCase):
+    def test_automorphism_simple(self):
+        network = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4)],
+            labels=[(3, "a"), (4, "b")],
+        )
+        self.assertEqual(count_automorphisms(network), 1)
+        self.assertEqual(count_automorphisms(network, ignore_labels=True), 2)
+
+    def test_automorphism_simple(self):
+        network = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 7), (6, 8)],
+            labels=[(7, "a"), (8, "b")],
+        )
+        self.assertEqual(count_automorphisms(network), 2)
+        self.assertEqual(count_automorphisms(network, ignore_labels=True), 4)
