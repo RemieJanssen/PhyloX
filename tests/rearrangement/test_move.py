@@ -101,3 +101,28 @@ class TestMoveClass(unittest.TestCase):
                 start_edge=(1, 2),
                 end_edge=(1, 3),
             )
+
+    def test_random_move(self):
+        network = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3)],
+        )
+        m = Move.random_move(network)
+        assert m.move_type in [
+            MoveType.HEAD,
+            MoveType.TAIL,
+            MoveType.RSPR,
+            MoveType.VPLU,
+        ]
+
+    def test_random_move(self):
+        network = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3)],
+        )
+        m = Move.random_move(
+            network,
+            move_type_probabilities={MoveType.TAIL: 1.0},
+        )
+        self.assertIn(m.move_type, [
+            MoveType.TAIL,
+        ])
+        self.assertIn(m.moving_edge, network.edges)

@@ -3,6 +3,8 @@ from phylox.rearrangement.movetype import MoveType
 from copy import deepcopy
 from phylox.rearrangement.movability import check_valid
 from phylox.base import find_unused_node
+from phylox.rearrangement.invertsequence import from_edge
+import numpy as np
 
 def apply_move(network, move):
     """
@@ -150,3 +152,41 @@ class Move(object):
         ):
             return True
         return move_type == self.move_type
+
+    @classmethod
+    def random_move(
+        cls,
+        network,
+        available_tree_nodes=None,
+        available_reticulations=None,
+        move_type_probabilities={MoveType.TAIL: 0.4, MoveType.HEAD: 0.4, MoveType.VPLU: 0.1, MoveType.VMIN: 0.1},
+    ):
+        available_tree_nodes = available_tree_nodes or []
+        available_reticulations = available_reticulations or []
+        edges = list(network.edges())
+        num_edges = len(edges)
+        move_type_probabilities_keys = list(move_type_probabilities.keys())
+        movetype_index = np.random.choice(
+            len(move_type_probabilities_keys), p=tuple(move_type_probabilities.values())
+        )
+        movetype = move_type_probabilities_keys[movetype_index]
+        if movetype in [MoveType.TAIL, MoveType.HEAD]:
+            moving_edge = edges[np.random.choice(num_edges)]
+            target = edges[np.random.choice(num_edges)]
+            moving_endpoint_index = 0 if movetype == MoveType.TAIL else 1
+            moving_endpoint = moving_edge[moving_endpoint_index]
+            origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)
+            return Move(move_type=movetype, origin=origin, moving_edge=moving_edge, target=target)
+        elif movetype == MoveType.VPLU:
+            if not available_tree_nodes or not available_reticulations:
+                raise ValueError(
+                    "available_tree_nodes and available_reticulations must be specified for VPLU moves."
+                )
+            start_edge = edges[np.random.choice(num_edges)]
+            end_edge = edges[np.random.choice(num_edges)]
+            start_node = np.random.choice(available_tree_nodes)
+            end_node = np.random.choice(available_reticulations)
+            return Move(move_type=movetype, start_edge=start_edge, end_edge=end_edge, start_node=start_node, end_node=end_node)
+        elif movetype == MoveType.VMIN:
+            removed_edge = edges[np.random.choice(num_edges)]
+            return Move(move_type=movetype, removed_edge=removed_edge)

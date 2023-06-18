@@ -1,6 +1,6 @@
 # Find the original location of the moving_endpoint,
 # That is, the edge from which we remove it.
-def From_Edge(network, moving_edge, moving_endpoint):
+def from_edge(network, moving_edge, moving_endpoint):
     """
     Finds the original location (from-edge) of the moving_endpoint of an edge if it is moved.
 
@@ -9,8 +9,8 @@ def From_Edge(network, moving_edge, moving_endpoint):
     :param moving_endpoint: a node of the network, which must be an endpoint of the edge.
     :return: a pair of nodes (p,c) where p and c are a parent and child of the moving_endpoint such that they are both not part of the moving_edge.
     """
-    other_parent = Parent(network, moving_endpoint, exclude=moving_edge)
-    other_child = Child(network, moving_endpoint, exclude=moving_edge)
+    other_parent = network.parent(moving_endpoint, exclude=moving_edge)
+    other_child = network.child(moving_endpoint, exclude=moving_edge)
     return (other_parent, other_child)
 
 

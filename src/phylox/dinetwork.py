@@ -11,6 +11,10 @@ class DiNetwork(nx.DiGraph):
         for label in kwargs.get("labels", []):
             self.nodes[label[0]][LABEL_ATTR] = label[1]
 
+    @classmethod
+    def from_newick(cls, newick):
+        pass
+
     @property
     def leaves(self):
         return set([node for node in self.nodes if self.is_leaf(node)])
