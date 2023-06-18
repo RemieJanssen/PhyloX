@@ -17,7 +17,7 @@ def apply_move(network, move):
     if move.move_type in [MoveType.TAIL, MoveType.HEAD]:
         if move.moving_node in move.target:
             # move does not impact the network
-            return True
+            return network
         new_network.remove_edges_from(
             [
                 (move.origin[0], move.moving_node),
@@ -126,7 +126,7 @@ class Move(object):
                 )
         elif self.move_type == MoveType.VMIN:
             try:
-                self.edge = kwargs["removed_edge"]
+                self.removed_edge = kwargs["removed_edge"]
             except KeyError:
                 raise InvalidMoveDefinitionException(
                     "Missing removed_edge in definition."
@@ -178,10 +178,8 @@ class Move(object):
             origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)
             return Move(move_type=movetype, origin=origin, moving_edge=moving_edge, target=target)
         elif movetype == MoveType.VPLU:
-            if not available_tree_nodes or not available_reticulations:
-                raise ValueError(
-                    "available_tree_nodes and available_reticulations must be specified for VPLU moves."
-                )
+            available_reticulations = list(available_reticulations) or [find_unused_node(network)]
+            available_tree_nodes = list(available_tree_nodes) or [find_unused_node(network, exclude=available_reticulations)]
             start_edge = edges[np.random.choice(num_edges)]
             end_edge = edges[np.random.choice(num_edges)]
             start_node = np.random.choice(available_tree_nodes)

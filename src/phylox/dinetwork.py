@@ -17,15 +17,25 @@ class DiNetwork(nx.DiGraph):
 
     @property
     def leaves(self):
-        return set([node for node in self.nodes if self.is_leaf(node)])
+        if not hasattr(self, "_leaves"):
+            self._leaves = set([node for node in self.nodes if self.is_leaf(node)])
+        return self._leaves
+
+    def _set_roots(self):
+        self._roots = set([node for node in self.nodes if self.is_root(node)])
+        return self._roots
 
     @property
     def roots(self):
-        return set([node for node in self.nodes if self.is_root(node)])
+        if not hasattr(self, "_roots"):
+            self._set_roots()
+        return self._roots
 
     @property
     def reticulation_number(self):
-        return sum([max(self.in_degree(node) - 1, 0) for node in self.nodes])
+        if not hasattr(self, "_reticulation_number"):
+            self._reticulation_number = sum([max(self.in_degree(node) - 1, 0) for node in self.nodes])
+        return self._reticulation_number
 
     def child(self, node, exclude=[], randomNodes=False):
         """

@@ -28,7 +28,7 @@ def RL_Case1(N1, N2, x_1, isom_N1_N2, isom_N2_N1, randomNodes=False):
         # If the other child $c_2$ of $p_2$ is a retic, then we can add it.
         if p_2 == t_2:
             return [], [], x_1, c_2
-        if CheckMovable(N2, (p_2, x_2), x_2):
+        if check_movable(N2, (p_2, x_2), x_2):
             q_2 = Parent(N2, x_2, exclude=[p_2])
             if x_2 == t_2:
                 #                print("(p,x) movable and x=t")
@@ -67,7 +67,7 @@ def RL_Case1(N1, N2, x_1, isom_N1_N2, isom_N2_N1, randomNodes=False):
         for node in N2.nodes():
             if N2.in_degree(node) == 2:
                 for parent in N2.predecessors(node):
-                    if parent != p_2 and CheckMovable(N2, (parent, node), node):
+                    if parent != p_2 and check_movable(N2, (parent, node), node):
                         s_2 = parent
                         r_2 = node
             if s_2 != None:
@@ -140,7 +140,7 @@ def RL_Case3(N1, N2, x_1, isom_N1_N2, isom_N2_N1, randomNodes=False):
         r_2 = FindRetic(N2, excludedSet=isom_N2_N1.keys(), randomNodes=randomNodes)
         s_2 = None
         for parent in N2.predecessors(r_2):
-            if CheckMovable(N2, (parent, r_2), r_2):
+            if check_movable(N2, (parent, r_2), r_2):
                 if not randomNodes:
                     s_2 = parent
                     break
@@ -160,7 +160,7 @@ def RL_Case3(N1, N2, x_1, isom_N1_N2, isom_N2_N1, randomNodes=False):
             q_2, p_2 = p_2, q_2
             cp_2, cq_2 = cq_2, cp_2
         #        print(p_2 , q_2, cp_2, cq_2)
-        if CheckMovable(N2, (p_2, cp_2), cp_2):
+        if check_movable(N2, (p_2, cp_2), cp_2):
             #            print("movable cp_2")
             return [], [((p_2, cp_2), cp_2, (q_2, cq_2))], x_1, cp_2
         else:
@@ -212,7 +212,7 @@ def Permute_Leaves_Head(network1, network2, isom_1_2, isom_2_1, label_dict_1, la
     for node in network1:
         if network1.in_degree(node) == 2:
             for parent in network1.predecessors(node):
-                if CheckMovable(network1, (parent, node), node):
+                if check_movable(network1, (parent, node), node):
                     t = parent
                     r = node
         if r:

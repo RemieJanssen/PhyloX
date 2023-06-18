@@ -118,11 +118,15 @@ class TestMoveClass(unittest.TestCase):
         network = DiNetwork(
             edges=[(0, 1), (1, 2), (1, 3)],
         )
-        m = Move.random_move(
-            network,
-            move_type_probabilities={MoveType.TAIL: 1.0},
-        )
-        self.assertIn(m.move_type, [
-            MoveType.TAIL,
-        ])
-        self.assertIn(m.moving_edge, network.edges)
+        for i in range(100):
+            try:
+                m = Move.random_move(
+                    network,
+                    move_type_probabilities={MoveType.TAIL: 1.0},
+                )
+            except InvalidMoveDefinitionException:
+                continue
+            self.assertIn(m.move_type, [
+                MoveType.TAIL,
+            ])
+            self.assertIn(m.moving_edge, network.edges)

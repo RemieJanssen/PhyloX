@@ -64,8 +64,10 @@ def check_valid(network, move):
         child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
         if parent_0==parent_1 and child_0==child_1:
             raise InvalidMoveException("removal creates parallel edges")
-        if not (CheckMovable(network, move.removed_edge, move.removed_edge[0]) and CheckMovable(network, move.removed_edge, move.removed_edge[1])):
+        if not (check_movable(network, move.removed_edge, move.removed_edge[0]) and check_movable(network, move.removed_edge, move.removed_edge[1])):
             raise InvalidMoveException("removal creates parallel edges")
+        if network.out_degree(move.removed_edge[1]) == 0:
+            raise InvalidMoveException("removes a leaf")
     else:
         raise InvalidMoveException("Only rSPR and vertical moves are supported currently")
 
@@ -100,3 +102,32 @@ def all_valid_moves(network, tail_moves=True, head_moves=True):
 
 
 
+# Checks whether an endpoint of an edge is movable.
+def check_movable(network, moving_edge, moving_endpoint):
+    """
+    Checks whether an endpoint of an edge is movable in a network.
+
+    :param network: a phylogenetic network, i.e., a DAG with labeled leaves.
+    :param moving_edge: an edge in the network.
+    :param moving_endpoint: a node, specifically, an endpoint of the moving_edge.
+    :return: True if the endpoint of the edge is movable in the network, False otherwise.
+    """
+    if moving_endpoint == moving_edge[0]:
+        # Tail move
+        if network.in_degree(moving_endpoint) in (0, 2):
+            # cannot move the tail if it is a reticulation or root
+            return False
+    elif moving_endpoint == moving_edge[1]:
+        # Head move
+        if network.out_degree(moving_endpoint) in (0, 2):
+            # cannot move the head if it is a tree node or leaf
+            return False
+    else:
+        # Moving endpoint is not part of the moving edge
+        return False
+    # Now check for triangles, by finding the other parent and child of the moving endpoint
+    parent_of_moving_endpoint = network.parent(moving_endpoint, exclude=[moving_edge[0]])
+    child_of_moving_endpoint = network.child(moving_endpoint, exclude=[moving_edge[1]])
+    # if there is an edge from the parent to the child, there is a triangle
+    # Otherwise, it is a movable edge
+    return not network.has_edge(parent_of_moving_endpoint, child_of_moving_endpoint)

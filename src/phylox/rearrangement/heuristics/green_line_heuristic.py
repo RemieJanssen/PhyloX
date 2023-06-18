@@ -60,7 +60,7 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
         return [], [], z, up
     # Case1b: z is not a reticulation
     # z is a tree node
-    if CheckMovable(N, (z, x), z):
+    if check_movable(N, (z, x), z):
         # Case1bi: (z,x) is movable
         # Find a reticulation u in N not in the isomorphism yet
         # TODO: Can first check if the other parent of x suffices here, should heuristcally be better

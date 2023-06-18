@@ -1,24 +1,26 @@
 import networkx as nx
-from RearrDistance_Tools import *
+import numpy as np
 import os
 import sys
 from phylox.isomorphism import count_automorphisms
 from phylox.rearrangement.movetype import MoveType
 from phylox.rearrangement.move import apply_move, Move
 from phylox.rearrangement.invertsequence import from_edge
+from phylox.base import find_unused_node
+from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 
 
 def acceptance_probability(
     network,
+    result_network,
     move,
     move_type_probabilities,
     number_of_leaves=None,
     current_reticulation_number=None,
     symmetries=False,
-    result_network=None,
 ):
-    current_reticulation_number = current_reticulation_number or network.reticulation_number()
-    number_of_leaves = number_of_leaves or network.leaf_number()
+    current_reticulation_number = current_reticulation_number or network.reticulation_number
+    number_of_leaves = number_of_leaves or len(network.leaves)
     p = 0
     if move.move_type in [MoveType.TAIL, MoveType.HEAD]:
         p = 1
@@ -41,63 +43,74 @@ def acceptance_probability(
             )
     if symmetries:
         # correct for number of representations, i.e., symmetries.
-        result_network = result_network or apply_move(network, move)
         p *= count_automorphisms(network) / count_automorphisms(result_network)
     return p
 
 
 def sample_mcmc_networks(
-    number_of_leaves,
-    max_retics,
+    starting_network,
     move_type_probabilities,
+    restriction_map=None,
     correct_symmetries=True,
     burn_in=1000,
-    number_of_networks=1,
+    number_of_samples=1,
+    add_root_if_necessary=False,
 ):
-    network = nx.DiGraph()
-    network.add_nodes_from([str(k) for k in range(2 * number_of_leaves)])
-    network.add_edges_from([(str(k), str(k + number_of_leaves)) for k in range(number_of_leaves)])
-    current_reticulation_number = 0
-    root = Root(network)
-    network.add_edges_from([(0, root)])
-    print(network.nodes())
-    available_reticulations = ["r" + str(k + 1) for k in range(max_retics)]
-    available_tree_nodes = [str(k + 2 * number_of_leaves) for k in range(max_retics)]
+    network = starting_network.copy()
+    current_reticulation_number = network.reticulation_number
+    number_of_leaves = len(network.leaves)
+    if add_root_if_necessary:
+        for root in network.roots:
+            if network.out_degree(root) >= 1:
+                new_root = find_unused_node(network)
+                network.add_edges_from([(new_root, root)])
+                root = new_root
+        roots = network._set_roots()
+    available_reticulations = set()
+    available_tree_nodes = set()
 
-    for index in range(number_of_networks):
+    sample = []
+
+    for index in range(number_of_samples):
         non_moves = 0
         for j in range(burn_in):
-            move = Move.random_move(
-                network,
-                available_tree_nodes=available_tree_nodes,
-                available_reticulations=available_reticulations,
-                move_type_probabilities=move_type_probabilities,
-            )
-            result = False
-            if random.random() < AcceptanceProb(
-                move,
-                number_of_leaves,
-                current_reticulation_number,
-                max_retics,
-                move_type_probabilities,
-                symmetries=correct_symmetries,
-                network=network,
-                result_network=result,
-            ):
-                if not (move.move_type == MoveType.VPLU and current_reticulation_number == max_retics):
-                    result = DoMove(network, move)
-            if result:
-                if move.move_type == [MoveType.TAIL, MoveType.HEAD]:
-                    network = result
-                if move.move_type == MoveType.VPLU:
-                    current_reticulation_number += 1
-                    available_tree_nodes.remove(move[3])
-                    available_reticulations.remove(move[4])
-                    network = result
-                if move.move_type == MoveType.VMIN:
-                    current_reticulation_number -= 1
-                    available_tree_nodes += [move[1][0]]
-                    available_reticulations += [move[1][1]]
-                    network = result
-            else:
+            print(j)
+            try:
+                move = Move.random_move(
+                    network,
+                    available_tree_nodes=available_tree_nodes,
+                    available_reticulations=available_reticulations,
+                    move_type_probabilities=move_type_probabilities,
+                )
+                result_network = apply_move(network, move)
+            except (InvalidMoveException, InvalidMoveDefinitionException) as e:
                 non_moves += 1
+                continue
+            if np.random.random() > acceptance_probability(
+                network,
+                result_network,
+                move,
+                move_type_probabilities,
+                number_of_leaves=number_of_leaves,
+                current_reticulation_number=current_reticulation_number,
+                symmetries=correct_symmetries,
+            ):
+                non_moves += 1
+                continue
+            if not (restriction_map is None or restriction_map(result_network)):
+                non_moves += 1
+                continue
+            if move.move_type == [MoveType.TAIL, MoveType.HEAD]:
+                network = result_network
+            if move.move_type == MoveType.VPLU:
+                current_reticulation_number += 1
+                available_tree_nodes.discard(move.start_node)
+                available_reticulations.discard(move.end_node)
+                network = result_network
+            if move.move_type == MoveType.VMIN:
+                current_reticulation_number -= 1
+                available_tree_nodes.add(move.removed_edge[0])
+                available_reticulations.add(move.removed_edge[1])
+                network = result_network
+        sample.append(network)
+    return sample
