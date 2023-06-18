@@ -68,7 +68,7 @@ class TestIsomorphism(unittest.TestCase):
         )
         self.assertFalse(is_isomorphic(network1, network2, partial_isomorphism=[(3, 4), (4, 3)]))
 
-    def test_isomorphism_with_partial_isomorphism_on_leaves_swapped(self):
+    def test_isomorphism_with_partial_isomorphism_on_leaves_swapped2(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
             labels=[(5, "a"), (6, "b")],
@@ -110,7 +110,7 @@ class TestAutomorphism(unittest.TestCase):
         self.assertEqual(count_automorphisms(network), 1)
         self.assertEqual(count_automorphisms(network, ignore_labels=True), 2)
 
-    def test_automorphism_simple(self):
+    def test_automorphism_larger(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 7), (6, 8)],
             labels=[(7, "a"), (8, "b")],
@@ -118,7 +118,7 @@ class TestAutomorphism(unittest.TestCase):
         self.assertEqual(count_automorphisms(network), 2)
         self.assertEqual(count_automorphisms(network, ignore_labels=True), 4)
 
-    def test_automorphism_simple(self):
+    def test_automorphism_larger_strange_labels(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 7), (6, 8)],
             labels=[(7, "a"), (8, "a")],
