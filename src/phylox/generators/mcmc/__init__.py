@@ -1,1 +1,1 @@
-from .MCMCSamplerVerticalMoves import *
+from .base import *
