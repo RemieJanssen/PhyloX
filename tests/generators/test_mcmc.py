@@ -102,7 +102,6 @@ class TestMCMCSamples(unittest.TestCase):
         self.assertEqual(len(samples), 10)
 
     def test_sample_horizontal_stack_free(self):
-
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 7), (6, 8)],
         )
@@ -113,10 +112,11 @@ class TestMCMCSamples(unittest.TestCase):
         samples = sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
-            number_of_samples=10,
-            burn_in=20,
+            number_of_samples=100,
+            burn_in=25,
+            correct_symmetries=False,
             restriction_map=is_stack_free,
         )
-        self.assertEqual(len(samples), 10)
+        self.assertEqual(len(samples), 100)
         for sample in samples:
             self.assertTrue(is_stack_free(sample))
