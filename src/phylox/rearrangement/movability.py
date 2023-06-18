@@ -73,35 +73,6 @@ def check_valid(network, move):
 
 
 
-# Returns all valid moves in the network
-# List of moves in format (moving_edge,moving_endpoint,to_edge)
-# change move options to move_type
-def all_valid_moves(network, tail_moves=True, head_moves=True):
-    """
-    Finds all valid moves of a certain type in a network.
-
-    :param network: a phylogenetic network.
-    :param tail_moves: boolean value that determines whether tail moves are used (Default: True).
-    :param head_moves: boolean value that determines whether head moves are used (Default: True).
-    :return: A list of all valid tail/head/rSPR moves in the network.
-    """
-    validMoves = []
-    headOrTail = []
-    if tail_moves:
-        headOrTail.append(0)
-    if head_moves:
-        headOrTail.append(1)
-    for moving_edge in network.edges():
-        for to_edge in network.edges():
-            for end in headOrTail:
-                if CheckValid(network, moving_edge, moving_edge[end], to_edge) and moving_edge[
-                    end] not in to_edge:  # Last part is to prevent valid moves that result in isomorphic networks. TODO: To use this for internally labeled networks, remove this condition
-                    validMoves.append((moving_edge, moving_edge[end], to_edge))
-    return validMoves
-
-
-
-
 # Checks whether an endpoint of an edge is movable.
 def check_movable(network, moving_edge, moving_endpoint):
     """
