@@ -114,7 +114,7 @@ class TestMoveClass(unittest.TestCase):
             assert m.move_type in [
                 MoveType.HEAD,
                 MoveType.TAIL,
-                MoveType.RSPR,
+                MoveType.VMIN,
                 MoveType.VPLU,
             ]
 
