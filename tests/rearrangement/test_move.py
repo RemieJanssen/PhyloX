@@ -106,16 +106,17 @@ class TestMoveClass(unittest.TestCase):
         network = DiNetwork(
             edges=[(0, 1), (1, 2), (1, 3)],
         )
-        try:
-            m = Move.random_move(network)
-        except InvalidMoveDefinitionException:
-            return
-        assert m.move_type in [
-            MoveType.HEAD,
-            MoveType.TAIL,
-            MoveType.RSPR,
-            MoveType.VPLU,
-        ]
+        for i in range(100):
+            try:
+                m = Move.random_move(network)
+            except InvalidMoveDefinitionException:
+                return
+            assert m.move_type in [
+                MoveType.HEAD,
+                MoveType.TAIL,
+                MoveType.RSPR,
+                MoveType.VPLU,
+            ]
 
     def test_random_move_tail(self):
         network = DiNetwork(
