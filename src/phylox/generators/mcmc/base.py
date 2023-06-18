@@ -99,7 +99,7 @@ def sample_mcmc_networks(
             if not (restriction_map is None or restriction_map(result_network)):
                 non_moves += 1
                 continue
-            if move.move_type == [MoveType.TAIL, MoveType.HEAD]:
+            if move.move_type in [MoveType.TAIL, MoveType.HEAD]:
                 network = result_network
             if move.move_type == MoveType.VPLU:
                 current_reticulation_number += 1
