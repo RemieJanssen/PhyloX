@@ -74,7 +74,6 @@ def sample_mcmc_networks(
     for index in range(number_of_samples):
         non_moves = 0
         for j in range(burn_in):
-            print(j)
             try:
                 move = Move.random_move(
                     network,
