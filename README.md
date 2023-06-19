@@ -12,3 +12,18 @@ pip install phylox
 ## Usage
 
 You can load the package methods with `import phylox` in python.
+
+## Release:
+
+release current version
+```
+git checkout release
+git merge master
+git tag [version number]
+python -m build
+python -m twine upload --repository pypi dist/*
+```
+
+set new version number in master branch
+ - CHANGELOG.md
+ - pyproject.toml

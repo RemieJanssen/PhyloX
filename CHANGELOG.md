@@ -14,8 +14,13 @@ Types of changes:
 - Security in case of vulnerabilities.
 
 
+## [0.0.2] - (Unreleased)
 
-## [0.0.1] - (Unreleased)
+### Added
+
+- release and version tag explanation.
+
+## [0.0.1] - (2023-06-18)
 
 ### Changed
 
