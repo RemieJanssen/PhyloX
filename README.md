@@ -21,6 +21,9 @@ precommit is yet to be configured, for now, simply run black and isort.
 
 ### Release
 
+set new version number in master branch
+ - CHANGELOG.md
+
 release current version
 ```
 git checkout main
@@ -30,7 +33,5 @@ git merge master
 python -m build
 python -m twine upload --repository pypi dist/*
 ```
-
 set new version number in master branch
- - CHANGELOG.md
  - pyproject.toml
