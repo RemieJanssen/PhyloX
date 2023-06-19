@@ -1,6 +1,8 @@
 from copy import deepcopy
-from phylox.cherrypicking import is_second_in_reducible_pair, reduce_pair, CHERRYTYPE
+
 import networkx as nx
+
+from phylox.cherrypicking import CHERRYTYPE, is_second_in_reducible_pair, reduce_pair
 
 
 def is_binary(network):

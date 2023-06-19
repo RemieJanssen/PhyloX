@@ -1,10 +1,12 @@
-from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
-from phylox.rearrangement.movetype import MoveType
 from copy import deepcopy
-from phylox.rearrangement.movability import check_valid
-from phylox.base import find_unused_node
-from phylox.rearrangement.invertsequence import from_edge
+
 import numpy as np
+
+from phylox.base import find_unused_node
+from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
+from phylox.rearrangement.invertsequence import from_edge
+from phylox.rearrangement.movability import check_valid
+from phylox.rearrangement.movetype import MoveType
 
 
 def apply_move(network, move):

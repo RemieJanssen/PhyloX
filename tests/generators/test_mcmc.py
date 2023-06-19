@@ -1,11 +1,12 @@
 import unittest
+
 import pytest
 
-from phylox.generators.mcmc import sample_mcmc_networks
 from phylox import DiNetwork
-from phylox.rearrangement.movetype import MoveType
-from phylox.isomorphism import is_isomorphic
 from phylox.classes.dinetwork import is_stack_free
+from phylox.generators.mcmc import sample_mcmc_networks
+from phylox.isomorphism import is_isomorphic
+from phylox.rearrangement.movetype import MoveType
 
 
 class TestMCMCSamples(unittest.TestCase):

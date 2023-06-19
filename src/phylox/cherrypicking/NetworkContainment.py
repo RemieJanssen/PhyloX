@@ -1,9 +1,11 @@
-import networkx as nx
 import ast
-import time
-import matplotlib.pyplot as plt
-import random
 import itertools
+import random
+import time
+
+import networkx as nx
+
+import matplotlib.pyplot as plt
 
 random.seed(a=1234321)
 

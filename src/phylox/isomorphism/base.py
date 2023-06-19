@@ -1,6 +1,8 @@
-import networkx as nx
-from phylox.dinetwork import LABEL_ATTR
 from copy import deepcopy
+
+import networkx as nx
+
+from phylox.dinetwork import LABEL_ATTR
 
 ISOMETRY_LABEL_ATTR = "isometry_label"
 ISOMETRY_LABEL_TAG = "isometry_label_tag_"

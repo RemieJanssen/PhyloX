@@ -1,7 +1,7 @@
 import unittest
 
-from phylox import DiNetwork, LABEL_ATTR
-from phylox.isomorphism import is_isomorphic, count_automorphisms
+from phylox import LABEL_ATTR, DiNetwork
+from phylox.isomorphism import count_automorphisms, is_isomorphic
 
 
 class TestIsomorphism(unittest.TestCase):

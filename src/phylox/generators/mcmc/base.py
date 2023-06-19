@@ -1,13 +1,15 @@
-import networkx as nx
-import numpy as np
 import os
 import sys
-from phylox.isomorphism import count_automorphisms
-from phylox.rearrangement.movetype import MoveType
-from phylox.rearrangement.move import apply_move, Move
-from phylox.rearrangement.invertsequence import from_edge
+
+import networkx as nx
+import numpy as np
+
 from phylox.base import find_unused_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
+from phylox.isomorphism import count_automorphisms
+from phylox.rearrangement.invertsequence import from_edge
+from phylox.rearrangement.move import Move, apply_move
+from phylox.rearrangement.movetype import MoveType
 
 
 def acceptance_probability(

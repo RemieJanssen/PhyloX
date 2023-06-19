@@ -1,5 +1,5 @@
-from enum import Enum
 from copy import deepcopy
+from enum import Enum
 
 
 class CHERRYTYPE(Enum):

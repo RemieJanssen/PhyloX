@@ -1,16 +1,17 @@
 # These functions are implementations of the algorithms of Remie Janssen's PhD thesis
 
-import networkx as nx
-import random
-import sys
-from copy import deepcopy
-from collections import deque
-import re
 import ast
+import random
+import re
+import sys
 import time
+from collections import deque
+from copy import deepcopy
 
+import networkx as nx
+
+from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 from phylox.rearrangement.movetype import MoveType
-from phylox.exceptions import InvalidMoveException, InvalidMoveDefinitionException
 
 
 def check_valid(network, move):

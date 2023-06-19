@@ -1,6 +1,6 @@
 import unittest
 
-from phylox import DiNetwork, LABEL_ATTR
+from phylox import LABEL_ATTR, DiNetwork
 from phylox.classes import *
 
 
