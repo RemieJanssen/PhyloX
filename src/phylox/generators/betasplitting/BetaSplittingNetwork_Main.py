@@ -16,7 +16,6 @@
 # from BetaSplittingNetwork_Tools import *
 
 
-
 # ############################################
 # # I/O
 # ############################################
@@ -27,8 +26,8 @@
 # beta            = -0.0
 # # Number of reticulations
 # retics          = 10
-# # Edge addition type; 
-# #  default = None, in which case edges are added uniformly; 
+# # Edge addition type;
+# #  default = None, in which case edges are added uniformly;
 # #  otherwise, float value gives the probability of stopping the random walk
 # local           = None
 # # output type: pl=parent list, el=edge list, nw=newick (not implemented)
@@ -65,15 +64,11 @@
 #     sys.exit()
 
 
-
-
 # ############################################
 # # MAIN: Simulate network
 # ############################################
 
 
-
 # tree = simulateBetaSplitting(tree_size, beta)
 # network = GenerateNetwork(tree,retics,local)
 # print(OutputNetwork(network,out_type))
-

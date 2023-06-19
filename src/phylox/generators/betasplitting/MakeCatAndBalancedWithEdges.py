@@ -26,7 +26,7 @@
 # # Number of networks per tree, reticulation number, and method.
 # nb_networks     = 100
 
-# # Folder 
+# # Folder
 # folder = "balanced_and_caterpillar/"
 
 # ############################################
@@ -47,14 +47,13 @@
 #     return tree
 
 
-
 # def Caterpillar_Tree(n):
 #     tree = nx.DiGraph()
 #     tree.add_node(n+1)
 #     for i in range(1,n):
 #         tree.add_edges_from([(n+i,i),(n+i,n+i+1)])
 #     tree=nx.relabel_nodes(tree,{2*n:n})
-#     return tree             
+#     return tree
 
 # # Set all parameters for network simulation.
 # all_sim = []
@@ -66,8 +65,8 @@
 # for out_type in ["el","pl"]:
 #     this_path = folder+out_type
 #     if not os.path.exists(this_path):
-#         os.makedirs(this_path) 
-    
+#         os.makedirs(this_path)
+
 
 # # Simulate networks
 # for tree_type in ["balanced","caterpillar"]:
@@ -81,12 +80,12 @@
 #         for out_type in ["el","pl"]:
 #             this_path = folder+out_type+tree_prefix+"/0"
 #             if not os.path.exists(this_path):
-#                 os.makedirs(this_path) 
+#                 os.makedirs(this_path)
 #             f=open(this_path+"/1.txt", 'w')
 #             f.write(OutputNetwork(tree,out_type))
-#             f.close()    
+#             f.close()
 
-        
+
 #         # Method to simulate a single network.
 #         def runsubproc(pars):
 #             # Simulate tree.
@@ -97,17 +96,14 @@
 #             for out_type in ["el", "pl"]:
 #                 this_path = folder+out_type+tree_prefix+filepath_network
 #                 if not os.path.exists(this_path):
-#                     os.makedirs(this_path) 
+#                     os.makedirs(this_path)
 #                 filename = this_path+index_txt
 #                 if not os.path.exists(filename):
 #                     f=open(filename, 'w')
 #                     f.write(OutputNetwork(network,out_type))
-#                     f.close()    
+#                     f.close()
 
 #         #p = multiprocessing.Pool(nb_threads)
 #         #p.map(runsubproc, all_sim)
 #         for par in all_sim:
 #             runsubproc(par)
-        
-
-

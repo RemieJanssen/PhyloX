@@ -7,13 +7,11 @@
 # import itertools
 
 
-
-
 # #For each choice of reticulation arcs, calculate the distance between all pairs of taxa
 # #Add up all these distances for each pair, weighed by the probability of this embedded tree
 # #The hyb rates are e^(-hybridization_rate*sum_for_pair-offset) for each pair.
 # #####
-# #Updating distances between pairs can be done smartly: 
+# #Updating distances between pairs can be done smartly:
 # #  for a speciation event, the distances simply increase by two times the time to speciation, and the new species copies the distances from its sister species
 # #  for an extinction event, the distances simply increase by two times the time to speciation, and the distances to the extinct species are removed.
 # #  for a HGT event, only the rates for the receiving taxon have to be updated. They can be computed from the distances to the receiving and the donating easily
@@ -21,7 +19,7 @@
 # def UpdateHybridizationRates():
 #     return False
 #     #This is done within the CalculateNetwork function
-    
+
 
 # def GammaDistributionPDF(value,mean,shape):
 #     scale = mean/shape
@@ -34,9 +32,8 @@
 #     return parent_rate
 
 
-
-# def CalculateAllNewRates(parent_rates, update_shape, 
-#             speciation_rate_mean, speciation_rate_shape, 
+# def CalculateAllNewRates(parent_rates, update_shape,
+#             speciation_rate_mean, speciation_rate_shape,
 #             ext_used, extinction_rate_mean, extinction_rate_shape,
 #             hgt_used, hgt_rate_mean, hgt_rate_shape
 #             ):
@@ -49,11 +46,11 @@
 #         hgt_rate = CalculateNewRate(parent_rates[2],hgt_rate_mean,hgt_rate_shape,update_shape)
 #     return (sp_rate,ext_rate,hgt_rate)
 
-# def DistanceToRate(distance,        
+# def DistanceToRate(distance,
 #         hybridization_left_bound,
 #         hybridization_right_bound,
 #         hybridization_left_rate,
-#         hybridization_right_rate    
+#         hybridization_right_rate
 #         ):
 #     #TODO Update this rate function, make it more of a gradual switch?
 #     if distance<=hybridization_left_bound:
@@ -70,7 +67,7 @@
 #     for v in network.nodes():
 #         if network.out_degree(v)==0 and v not in leaves_to_keep:
 #             remove_nodes.add(v)
-    
+
 #     #remove the sinks that we don't want to keep
 #     while remove_nodes:
 #         removed_node = remove_nodes.pop()
@@ -79,21 +76,21 @@
 #         for p in parents:
 #             if network.out_degree(p)==0:
 #                 remove_nodes.add(p)
-        
-#     #optionally: suppress biconnected components with indegree-1 and outdegree-1    
+
+#     #optionally: suppress biconnected components with indegree-1 and outdegree-1
 #     if suppress_trivial_blobs:
 #         #TODO: write this function.
 #         #What to do with the length of the resulting arc? the blob may have multiple paths, do we average?
 #         print("suppressing trivial blobs is not implemented yet")
-    
-   
-#     #suppress degree-2 nodes 
+
+
+#     #suppress degree-2 nodes
 #     network = SuppressDegree2(network)
-#     return network    
+#     return network
 
 
 # def SuppressDegree2(network):
-#     to_remove =[]    
+#     to_remove =[]
 #     to_check = set(list(network.nodes())[:])
 #     while to_check:
 #         v=to_check.pop()
@@ -113,7 +110,6 @@
 #                 network[parent][child]['prob']=out_edge_prob
 #     network.remove_nodes_from(to_remove)
 #     return network
-    
 
 
 # def CalculateNetwork(time_limit = 1.0,
@@ -194,12 +190,12 @@
 #             nw.add_weighted_edges_from([(splitting_leaf,current_node,0),(splitting_leaf,current_node+1,0)], weight = 'length')
 #             #Update the rates and distances
 #             #rates
-#             leaf_rates[current_node]=CalculateAllNewRates(leaf_rates[splitting_leaf],update_shape, 
-#                 speciation_rate_mean, speciation_rate_shape, 
+#             leaf_rates[current_node]=CalculateAllNewRates(leaf_rates[splitting_leaf],update_shape,
+#                 speciation_rate_mean, speciation_rate_shape,
 #                 ext_used, extinction_rate_mean, extinction_rate_shape,
 #                 hgt_used, hgt_rate_mean, hgt_rate_shape)
 #             leaf_rates[current_node+1]=CalculateAllNewRates(leaf_rates[splitting_leaf],update_shape,
-#                 speciation_rate_mean, speciation_rate_shape, 
+#                 speciation_rate_mean, speciation_rate_shape,
 #                 ext_used, extinction_rate_mean, extinction_rate_shape,
 #                 hgt_used, hgt_rate_mean, hgt_rate_shape)
 #             current_speciation_rate += leaf_rates[current_node][0]+leaf_rates[current_node+1][0]-leaf_rates[splitting_leaf][0]
@@ -222,9 +218,9 @@
 
 #             leaves.add(current_node)
 #             leaves.add(current_node+1)
-#             leaves.remove(splitting_leaf)            
+#             leaves.remove(splitting_leaf)
 #             del leaf_rates[splitting_leaf]
-#             current_node+=2            
+#             current_node+=2
 
 
 #         elif random_number < (current_extinction_rate + current_speciation_rate) / total_rate:
@@ -243,7 +239,7 @@
 #             if extinction_leaf == None:
 #                 if not simple_output:
 #                     print("ouch, extinction rate computed wrong")
-            
+
 #             #Update the rates and distances
 #             #rates
 #             current_speciation_rate -= leaf_rates[extinction_leaf][0]
@@ -254,12 +250,12 @@
 #                 for l in leaves:
 #                     if l!=extinction_leaf:
 #                         if (extinction_leaf,l) in distances.keys():
-#                             del distances[(extinction_leaf,l)] 
+#                             del distances[(extinction_leaf,l)]
 #                         else:
 #                             del distances[(l,extinction_leaf)]
-                        
+
 #             del leaf_rates[extinction_leaf]
-#             leaves.remove(extinction_leaf)            
+#             leaves.remove(extinction_leaf)
 #             no_of_extinct+=1
 
 #         elif random_number < (current_extinction_rate + current_speciation_rate + current_hgt_rate) / total_rate:
@@ -268,7 +264,7 @@
 #             ######################
 #             if not simple_output:
 #                 print("HGT")
-            
+
 #             random_number = random.random()*current_hgt_rate
 #             for leaf,rates in leaf_rates.items():
 #                 if random_number < rates[2]:
@@ -291,16 +287,16 @@
 #                 no_of_hybrids+=1
 #                 #Update the rates and distances
 #                 #rates
-#                 leaf_rates[current_node+1]=CalculateAllNewRates(tuple(prob*x + (1-prob)*y for x, y in zip(leaf_rates[hgt_acceptor_leaf], leaf_rates[hgt_donor_leaf])),update_shape, 
-#                     speciation_rate_mean, speciation_rate_shape, 
+#                 leaf_rates[current_node+1]=CalculateAllNewRates(tuple(prob*x + (1-prob)*y for x, y in zip(leaf_rates[hgt_acceptor_leaf], leaf_rates[hgt_donor_leaf])),update_shape,
+#                     speciation_rate_mean, speciation_rate_shape,
 #                     ext_used, extinction_rate_mean, extinction_rate_shape,
 #                     hgt_used, hgt_rate_mean, hgt_rate_shape)
 #                 leaf_rates[current_node]  =leaf_rates[hgt_donor_leaf]
 #                 current_speciation_rate += leaf_rates[current_node+1][0]-leaf_rates[hgt_acceptor_leaf][0]
 #                 current_extinction_rate += leaf_rates[current_node+1][1]-leaf_rates[hgt_acceptor_leaf][1]
-#                 current_hgt_rate        += leaf_rates[current_node+1][2]-leaf_rates[hgt_acceptor_leaf][2]        
+#                 current_hgt_rate        += leaf_rates[current_node+1][2]-leaf_rates[hgt_acceptor_leaf][2]
 #                 del leaf_rates[hgt_donor_leaf]
-#                 del leaf_rates[hgt_acceptor_leaf]            
+#                 del leaf_rates[hgt_acceptor_leaf]
 #                 #distances
 #                 if hyb_used:
 #                     for l in leaves:
@@ -333,9 +329,9 @@
 
 #     #        else:
 #     #            print("trying HGT with only one leaf")
-#     #             #Do nothing, there is only one leaf.    
-            
-                
+#     #             #Do nothing, there is only one leaf.
+
+
 #         else:
 #             ######################
 #             #    Hybridization   #
@@ -345,7 +341,7 @@
 #         	#i.e.: pick two leaf nodes, create a hybrid between these two leaves
 #             random_number = random.random()*current_hybridization_rate
 #             for pair,distance in distances.items():
-#         	    pair_rate = DistanceToRate(distance,        
+#         	    pair_rate = DistanceToRate(distance,
 #                     hybridization_left_bound,
 #                     hybridization_right_bound,
 #                     hybridization_left_rate,
@@ -369,8 +365,8 @@
 
 #             #Update the rates and distances
 #             #rates
-#             leaf_rates[current_node+1]  =CalculateAllNewRates(tuple(prob*x + (1-prob)*y for x, y in zip(leaf_rates[hyb_pair[0]], leaf_rates[hyb_pair[1]])),update_shape, 
-#                     speciation_rate_mean, speciation_rate_shape, 
+#             leaf_rates[current_node+1]  =CalculateAllNewRates(tuple(prob*x + (1-prob)*y for x, y in zip(leaf_rates[hyb_pair[0]], leaf_rates[hyb_pair[1]])),update_shape,
+#                     speciation_rate_mean, speciation_rate_shape,
 #                     ext_used, extinction_rate_mean, extinction_rate_shape,
 #                     hgt_used, hgt_rate_mean, hgt_rate_shape)
 #             leaf_rates[current_node+2]  =leaf_rates[hyb_pair[0]]
@@ -399,9 +395,9 @@
 #                         pair_1 = (l,hyb_pair[1])
 #                     pair_1_distance = distances[pair_1]
 #                     distances[(l,current_node+3)]=pair_1_distance
-#     #                del distances[pair_1]            
+#     #                del distances[pair_1]
 #                 distances[(l,current_node+1)]=prob*pair_0_distance+(1-prob)*pair_1_distance
-                
+
 #             if (hyb_pair[0],hyb_pair[1]) in distances:
 #                 distances[(current_node+2,current_node+3)]=distances[(hyb_pair[0],hyb_pair[1])]
 #             else:
@@ -410,7 +406,6 @@
 #             distances[(current_node+1,current_node+3)]=distances[(hyb_pair[1],current_node+1)]
 
 
-            
 #             remove_pairs = []
 #             for pair in distances:
 #                 if hyb_pair[0] in pair or hyb_pair[1] in pair:
@@ -425,10 +420,9 @@
 #             leaves.add(current_node+1)
 #             leaves.add(current_node+2)
 #             leaves.add(current_node+3)
-#             current_node+=4 
-                
-                
-        
+#             current_node+=4
+
+
 #         #Now extend all pendant edges of extant taxa
 #         if len(leaves)==0:
 #             break
@@ -437,20 +431,20 @@
 #             for p in nw.predecessors(l):
 #                 pl = p
 #             nw[pl][l]['length']+=extra_time
-            
+
 #         #Compute the new rates
 #         current_hybridization_rate = 0
 #         if hyb_used:
 #             for pair,distance in distances.items():
 #                 distances[pair]+=2*extra_time
-#                 current_hybridization_rate+=DistanceToRate(distances[pair],        
+#                 current_hybridization_rate+=DistanceToRate(distances[pair],
 #                     hybridization_left_bound,
 #                     hybridization_right_bound,
 #                     hybridization_left_rate,
 #                     hybridization_right_rate)
-        
+
 #         total_rate = current_speciation_rate + current_extinction_rate + current_hgt_rate + current_hybridization_rate
-        
+
 #         #Compute the time of the next event
 #         extra_time    = np.random.exponential(1/total_rate)
 #         current_time += extra_time
@@ -468,13 +462,11 @@
 #             for p in nw.predecessors(l):
 #                 pl = p
 #             nw[pl][l]['length']+=extra_time
-            
+
 #     return nw,hybrid_nodes,leaves,no_of_extinct
-    
 
 
 # ######################## MAIN ########################
-
 
 
 # import numpy as np
@@ -513,7 +505,6 @@
 # ##
 
 
-
 # #random.gammavariate(alpha, beta)
 # #shape and scale
 # #On wiki,   alpha = k = `shape'   and    beta = theta = `scale'
@@ -539,23 +530,23 @@
 #         i+=1
 #         params["speciation_rate_mean"] = float(sys.argv[i])
 #         i+=1
-#         speciation_rate_shape = float(sys.argv[i])  
+#         speciation_rate_shape = float(sys.argv[i])
 #     if arg == "-noext" or arg == "--no_extinction":
-#         params["ext_used"] = False  
+#         params["ext_used"] = False
 #     if arg == "-oe" or arg == "--only_extant":
-#         only_extant = True  
+#         only_extant = True
 #     if arg == "-ext" or arg == "--extinction_parameters":
 #         i+=1
 #         params["extinction_rate_mean"] = float(sys.argv[i])
 #         i+=1
-#         params["extinction_rate_shape"] = float(sys.argv[i])    
+#         params["extinction_rate_shape"] = float(sys.argv[i])
 #         if params["extinction_rate_mean"]==0:
 #             params["ext_used"] = False
 #     if arg == "-hgt" or arg == "--hgt_parameters":
 #         i+=1
 #         params["hgt_rate_mean"] = float(sys.argv[i])
 #         i+=1
-#         params["hgt_rate_shape"] = float(sys.argv[i])        
+#         params["hgt_rate_shape"] = float(sys.argv[i])
 #         params["hgt_used"] = True
 #     if arg == "-hyb" or arg == "--hybridization_factor":
 #         i+=1
@@ -582,9 +573,6 @@
 #     sys.exit()
 
 
-
-
-
 # #Find a network
 # if params["taxa_limit"]:
 #     leaves = []
@@ -602,9 +590,6 @@
 #     network = RestrictToLeafSet(network,leaves)
 
 
-
-
-
 # for e in network.edges:
 #     info =""
 #     if e[0] in hybrid_nodes:
@@ -616,13 +601,7 @@
 #         info += "H"+str(hybrid_nodes[e[1]])
 #     else:
 #         info += str(e[1])
-#     print(info)#,network[e[0]][e[1]]['length']) 
-
-
-
-
-
-
+#     print(info)#,network[e[0]][e[1]]['length'])
 
 
 # #### To use: argparse version:

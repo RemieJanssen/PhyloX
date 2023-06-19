@@ -24,7 +24,6 @@
 # ##
 
 
-
 # ###############################2. I/O############################
 # option_help = False
 # i = 1
@@ -45,7 +44,7 @@
 #     if arg == "-bfs" or arg == "--bfsearch":
 #         bfSearch = True
 #     if arg == "-dd" or arg == "--deepdive":
-#         deep_dive = True    
+#         deep_dive = True
 #     if arg == "-s" or arg == "--simple":
 #         simple = True
 #     if arg == "-rt" or arg == "--runtime":
@@ -54,7 +53,7 @@
 #         randomNodes = True
 #     if arg == "-rep" or arg == "--repeats":
 #         i+=1
-#         repeats = int(sys.argv[i])        
+#         repeats = int(sys.argv[i])
 #     if arg == "-help" or arg == "--help":
 #         option_help = True
 #     i += 1
@@ -62,8 +61,6 @@
 # if len(sys.argv)==1 or option_help or (deep_dive and bfSearch):
 #     print("Mandatory arguments:\n -f or --filename followed by the filename of the file containing two networks \n\nOptional arguments:\n -e or --edges if the input file contains a list of edges in the form [(x1,y1),...,(xn,yn)] with xi and yi integers or strings in the form \"string\". If this option is not selected, the input is assumed to consist of two newick strings.\n -t or --tail for only using tail moves, instead of tail and head moves.\n -h or --head for only using head moves, instead of tail and head moves.\n -r or --random to pick random nodes whenever arbitrary nodes are required in the heuristics.\n -rt or --runtime to also record the runtime of the algorithm and the time to read the trees from file.\n -bfs or --bfsearch for using a breadth first search to find the an optimal sequence.\n -tl or --timelimit followed by a number of seconds to set a timelimit for the bfs. If no answer is found before the time runs out, the algorithm just returns a lower bound on the distance.\n\nThe output is given as a list of moves in the format:\n  moving_edge, moving_endpoint, to_edge")
 #     sys.exit()
-
-
 
 
 # ####################################################
@@ -147,16 +144,16 @@
 #             sequence = Red_Line_Random(N,M,repeats=repeats)
 #         else:
 #             sequence = Red_Line(N,M)
-#     else: 
+#     else:
 #         if not simple:
 #             print("Computing a sequence using the `green-line' heuristic.")
 #         if randomNodes:
 #             if not simple:
 #                 print("Picking random nodes whenever arbitrary nodes are required.")
-#             sequence = Green_Line_Random(N,M,head_moves=headMoves,repeats=repeats) 
-#         else: 
-#             sequence = Green_Line(N,M,head_moves=headMoves) 
-            
+#             sequence = Green_Line_Random(N,M,head_moves=headMoves,repeats=repeats)
+#         else:
+#             sequence = Green_Line(N,M,head_moves=headMoves)
+
 # if runtime:
 #     time_stop_searching = time.time()
 #     if simple:
@@ -166,9 +163,6 @@
 #         print("Finding the sequence cost "+str(time_stop_searching-time_start_searching)+" seconds.")
 
 
-
-           
-            
 # if not simple:
 #     print("Sequence:")
 # if sequence==False:
@@ -186,18 +180,15 @@
 #     sys.exit()
 # if edges:
 #     sequence = ReplaceNodeNamesByOriginal(N,sequence)
-    
-# #Print the output 
 
-   
+# #Print the output
+
+
 # if simple:
-#     print(";"+str(len(sequence))+";"+str(sequence),end='')    
+#     print(";"+str(len(sequence))+";"+str(sequence),end='')
 # else:
 #     for move in sequence:
 #         if len(move)==4:
-#             print(str(move[0])+" "+str(move[1])+" "+str(move[3]))    
+#             print(str(move[0])+" "+str(move[1])+" "+str(move[3]))
 #         if len(move)==3:
-#             print(str(move[0])+" "+str(move[1])+" "+str(move[2]))    
-    
-    
-
+#             print(str(move[0])+" "+str(move[1])+" "+str(move[2]))

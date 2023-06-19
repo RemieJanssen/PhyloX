@@ -40,7 +40,7 @@
 #         It `cuts' the reticulation arcs to produce a tree that can be converted to Newick
 # AAF PHYLOGENETIC NETWORK CLASS
 #         Class for a phylogenetic network
-#         Contains methods 
+#         Contains methods
 # 		to add pairs to the network from a sequence
 # 		to compute scores of edges (inheritance and number of embedded trees)
 #                 to reduce pairs (not used if input consists of only trees)
@@ -90,12 +90,12 @@
 #     tree = nx.DiGraph()
 #     if distances:
 #         edges.append((1,2,0))
-#         tree.add_weighted_edges_from(edges,weight='length')        
+#         tree.add_weighted_edges_from(edges,weight='length')
 #     else:
 #         edges.append((1,2))
 #         tree.add_edges_from(edges)
 #     return tree, leaves, current_labels, distances
-    
+
 # #Auxiliary function to convert list of lists to tree (graph)
 # #Works recursively, where we keep track of the nodes we have already used
 # #Leaves are nodes with negative integer as ID, and already existing taxa are coupled to node IDs by current_labels.
@@ -109,12 +109,12 @@
 #         for i in range(0,len(nestedList),2):
 #             t = nestedList[i]
 #             length = nestedList[i+1]
-#             if type(t)==list: #Not a leaf 
+#             if type(t)==list: #Not a leaf
 #                 edges.append((top_node,current_node,length))
 #                 extra_edges, extra_leaves, current_labels, current_node = NestedList_To_Tree(t,current_node,current_labels,distances=distances)
 #             else: #A leaf
 #                 if str(t) not in current_labels:
-#                     current_labels[str(t)] = -len(current_labels) 
+#                     current_labels[str(t)] = -len(current_labels)
 #                 edges.append((top_node,current_labels[str(t)],length))
 #                 extra_edges = []
 #                 extra_leaves = set([current_labels[str(t)]])
@@ -123,12 +123,12 @@
 #     else:
 #         #no lengths/distances, so each subtree is simply an element of nestedList
 #         for t in nestedList:
-#             if type(t)==list: 
+#             if type(t)==list:
 #                 edges.append((top_node,current_node))
 #                 extra_edges, extra_leaves, current_labels, current_node = NestedList_To_Tree(t,current_node,current_labels)
-#             else: 
+#             else:
 #                 if str(t) not in current_labels:
-#                     current_labels[str(t)] = -len(current_labels) 
+#                     current_labels[str(t)] = -len(current_labels)
 #                 edges.append((top_node,current_labels[str(t)]))
 #                 extra_edges = []
 #                 extra_leaves = set([current_labels[str(t)]])
@@ -147,19 +147,15 @@
 # ################################################################################
 
 
-
- 
-      
-
 # #Checks whether a given cherry-picking sequence `seq' reduces a given tree `tree'
 # #if not,    returns false
-# #otherwise, returns the indices of the pairs that actually reduce a cherry in the tree 
+# #otherwise, returns the indices of the pairs that actually reduce a cherry in the tree
 # def Sequence_Reduces_Tree(seq,tree):
 #     t_copy=deepcopy(tree)
 #     indices = []
 #     for i, pair in enumerate(seq):
 #         if t_copy.reduce_pair(*pair):
-#             indices +=[i] 
+#             indices +=[i]
 #             if len(t_copy.nw.edges)==1:
 #                 return indices
 #     return False
@@ -189,8 +185,6 @@
 #     return seq, red_trees
 
 
-
-
 # ################################################################################
 # ################################################################################
 # ################################################################################
@@ -202,7 +196,6 @@
 # ################################################################################
 
 
-
 # #Methods for sets of phylogenetic trees
 # class Input_Set:
 #     def __init__(self, newick_strings = []):
@@ -212,25 +205,25 @@
 #         self.labels = dict()
 #         self.labels_reversed = dict()
 #         self.leaves = set()
-        
+
 #         #the current best sequence we have found for this set of trees
 #         self.best_seq = None
 #         #the list of reduced trees for each of the pairs in the best sequence
 #         self.best_red_trees = None
-        
+
 #         #the best sequence for the algorithm using lengths as input as well
 #         self.best_seq_with_lengths = None
 #         #the sets of reduced trees for each pair in this sequence
 #         self.best_seq_with_lengths_red_trees = None
 #         #the height of each pair in this sequence
 #         self.best_seq_with_lengths_heights = None
-        
+
 #         #true if distances are used
 #         self.distances = True
 #         #computation times
 #         self.CPS_Compute_Time = 0
 #         self.CPS_Compute_Reps = 0
-        
+
 #         #read the input trees in 'newick_strings'
 #         for n in newick_strings:
 #             tree = PhT()
@@ -238,7 +231,7 @@
 #             self.labels, distances_in_tree = tree.Tree_From_Newick(newick = n, current_labels = self.labels)
 #             self.distances = self.distances and distances_in_tree
 #         self.leaves = list(self.labels)
-        
+
 #         #make a reverse dictionary for the leaf labels, to look up the label of a given node
 #         for l,i in self.labels.items():
 #             self.labels_reversed[i] = l
@@ -277,7 +270,7 @@
 #         for i in range(repeats):
 #             print(i+1)
 #             if lengths:
-#                 new, reduced_trees, seq_heights = Heuristic(progress=progress)  
+#                 new, reduced_trees, seq_heights = Heuristic(progress=progress)
 #                 print("found sequence of length: "+str(len(new)))
 #             else:
 #                 new, reduced_trees = Heuristic(progress=progress)
@@ -321,14 +314,11 @@
 #             return self.best_seq
 
 
-
-
-
 #     #Version of the code that uses minimal memory: recompute reducible pairs when necessary.
 #     def CPHeuristic(self, progress=False):
 #         if progress:
 #             print("Copying all inputs to reduce on")
-#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.         
+#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
 #         copy_of_inputs = deepcopy(self)
 #         if progress:
 #             print("Done, starting reduction of trees")
@@ -363,7 +353,7 @@
 #     def CPHeuristicStorePairs(self, progress=False):
 #         if progress:
 #             print("Copying all inputs to reduce on")
-#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere. 
+#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
 #         copy_of_inputs = deepcopy(self)
 #         if progress:
 #             print("Done")
@@ -396,7 +386,7 @@
 #             list_of_cherries = random_tree.Find_All_Reducible_Pairs()
 #             random_cherry = random.choice(list(list_of_cherries))
 
-#               #OR: (Get a random reducible pair from all pairs)  
+#               #OR: (Get a random reducible pair from all pairs)
 #               #Note that this would result in a different algorithm than CPHeuristic, so we use the previous option
 # #            random_cherry = random.choice(list(reducible_pairs.keys()))
 
@@ -416,20 +406,20 @@
 #     def CPHeuristicLengths(self, progress=False):
 #         if progress:
 #             print("Copying all inputs to reduce on")
-#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere. 
+#         #Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
 #         copy_of_inputs = deepcopy(self)
 #         if progress:
 #             print("Done")
 #         CPS = []
 #         reduced_trees = []
 #         heights_seq = []
-        
+
 #         candidate_leaves = deepcopy(self.leaves)
 #         # Make dict of reducible pairs
 #         if progress:
 #             print("finding all reducible pairs")
 #         reducible_pairs = self.Find_All_Pairs()
-#         current_heights = dict()    #for each reducible pair: [0] gives height, [1] the number of trees it was computed in.      
+#         current_heights = dict()    #for each reducible pair: [0] gives height, [1] the number of trees it was computed in.
 
 #         if progress:
 #             print("found all reducible pairs")
@@ -469,8 +459,8 @@
 #                     lowest_cherry       = pair
 #                     lowest_height       = height_pair
 #                     lowest_height_tuple = height_pair_tuple
-                        
-                    
+
+
 #             CPS         += [lowest_cherry]
 #             heights_seq += [lowest_height_tuple]
 #             reduced_by_lowest_cherry = copy_of_inputs.Reduce_Pair_In_All(lowest_cherry, reducible_pairs = reducible_pairs)
@@ -515,7 +505,6 @@
 #         return reducible_pairs
 
 
-
 #     #UReturns the updated dictionary of reducible pairs in all trees after a reduction (with the trees they reduce as values)
 #     #we only need to update for the trees that got reduced: 'new_red_treed'
 #     def Update_Reducible_Pairs(self, reducible_pairs, new_red_trees):
@@ -553,7 +542,7 @@
 #                 if t.reduce_pair(*pair):
 #                     reduced_trees_for_pair+=[i]
 #                     if len(t.nw.edges())<=1:
-#                         del self.trees[i]   
+#                         del self.trees[i]
 #         return set(reduced_trees_for_pair)
 
 
@@ -571,7 +560,7 @@
 #             if new_pairs:
 #                 seq += new_pairs
 #                 for p in new_pairs:
-#                     red_trees_p = self.Reduce_Pair_In_All(p) 
+#                     red_trees_p = self.Reduce_Pair_In_All(p)
 #                     reduced_tree_sets += [red_trees_p]
 #                     candidate_leaves   = candidate_leaves | set(p)
 #         return seq, reduced_tree_sets
@@ -662,25 +651,20 @@
 #                 seq.pop(i)
 #                 reduced_trees.pop(i)
 #                 #Update reduced_trees for the relevant trees
-#                    #First remove all j in relevant_tree_indices 
-#                 for tree_index_set in reduced_trees:                
+#                    #First remove all j in relevant_tree_indices
+#                 for tree_index_set in reduced_trees:
 #                     for j in relevant_tree_indices:
 #                         tree_index_set.discard(j)
 #                    #Now add them back at the right places, according to "new_relevant_pairs_for_trees"
 #                 for j in relevant_tree_indices:
 #                     for index in new_relevant_pairs_for_trees[j]:
-#                         reduced_trees[index].add(j)                  
+#                         reduced_trees[index].add(j)
 #                 if progress:
 #                     print("New length is "+str(len(seq)))
 #                     print("Continue at position "+str(i))
 #             else:
 #                 i+=1
-#         return seq, reduced_trees 
-
-
-
-        
-
+#         return seq, reduced_trees
 
 
 # ################################################################################
@@ -694,7 +678,6 @@
 # ################################################################################
 
 
-
 # #A class representing a phylogenetic tree
 # #Contains methods to reduce trees
 # class PhT:
@@ -703,12 +686,12 @@
 #         self.nw = nx.DiGraph()
 #         #the set of leaf labels of the network
 #         self.leaves = set()
-    
+
 #     #Builds a tree from a newick string
 #     def Tree_From_Newick(self, newick = None, current_labels = dict()):
 #         self.nw, self.leaves, current_labels, distances = Newick_To_Tree(newick, current_labels)
 #         return current_labels, distances
-        
+
 #     #Checks whether the pair (x,y) forms a cherry in the tree
 #     def Is_Cherry(self,x,y):
 #         if (not x in self.leaves) or (not y in self.leaves):
@@ -720,7 +703,7 @@
 #         for p in self.nw.predecessors(y):
 #             py=p
 #         return px==py
-   
+
 #     #Returns the height of (x,y) if it is a cherry:
 #     #     i.e.: length(p,x)+length(p,y)/2
 #     #Returns false otherwise
@@ -736,8 +719,8 @@
 #         if px==py:
 #             height = [float(self.nw[px][x]['length']),float(self.nw[py][y]['length'])]
 #             return height
-#         return False 
-        
+#         return False
+
 
 #     #suppresses a degree-2 node v and returns true if successful
 #     # the new arc has length length(p,v)+length(v,c)
@@ -756,7 +739,7 @@
 #             self.nw.remove_node(v)
 #             return True
 #         return False
- 
+
 #     #reduces the pair (x,y) in the tree if it is present as cherry
 #     # i.e., removes the leaf x and its incoming arc, and then cleans up its parent node.
 #     # note that if px, and py have different lengths, the length of px is lost in the new network.
@@ -769,7 +752,7 @@
 #         for p in self.nw.predecessors(x):
 #             px=p
 #         for p in self.nw.predecessors(y):
-#             py=p 
+#             py=p
 #         if self.Is_Cherry(x,y):
 #             self.nw.remove_node(x)
 #             self.leaves.remove(x)
@@ -796,8 +779,8 @@
 #         for l in self.leaves:
 #             red_pairs=red_pairs.union(self.Find_Pairs_With_First(l))
 #         return red_pairs
-        
-        
+
+
 # ################################################################################
 # ################################################################################
 # ################################################################################
@@ -827,7 +810,7 @@
 #              for node in network_nodes:
 #                  if self.nw.in_degree(node)>1:
 #                      self.no_of_hybrids+=1
-#                      enumerated_parents = list(enumerate(self.nw.predecessors(node))) 
+#                      enumerated_parents = list(enumerate(self.nw.predecessors(node)))
 #                      for i,parent in enumerated_parents:
 #                          if i==0:
 #                              self.hybrid_nodes[node]=self.no_of_hybrids
@@ -842,8 +825,8 @@
 #     def Find_Root(self):
 #         for node in self.nw.nodes:
 #             if self.nw.in_degree(node)==0:
-#                 self.root = node  
-#                 return node           
+#                 self.root = node
+#                 return node
 
 #     #Returns a newick string for the tree
 #     def Newick(self,probabilities = False):
@@ -881,9 +864,6 @@
 #     '''
 
 
-
-
-
 # ################################################################################
 # ################################################################################
 # ################################################################################
@@ -893,8 +873,6 @@
 # ################################################################################
 # ################################################################################
 # ################################################################################
-
-
 
 
 # #A class for phylogenetic networks
@@ -941,7 +919,7 @@
 #             self.nw = network
 #             self.no_nodes = len(list(self.nw))
 #             self.Compute_Leaf_Nodes()
-#         #if a network 'best_tree_from_network' is given, extract the best tree from this network and use this tree as the network            
+#         #if a network 'best_tree_from_network' is given, extract the best tree from this network and use this tree as the network
 #         elif best_tree_from_network:
 #             self.nw.add_edges_from(best_tree_from_network.Best_Tree())
 #             self.labels = best_tree_from_network.labels
@@ -978,7 +956,7 @@
 #         self.leaf_nodes = dict()
 #         for v in self.labels:
 #             self.leaf_nodes[self.labels[v]]=v
-            
+
 #     #Returns the level (retirculations in the largest biconnected component) of the network
 #     def Level(self, recompute = False):
 #         if recompute or not self.level:
@@ -988,10 +966,9 @@
 #                 blob = nx.Graph(b_edges)
 #                 lvl = max(lvl, blob.number_of_edges() - blob.number_of_nodes() +1)
 #             self.level = lvl
-#         return self.level 
-                  
-    
-    
+#         return self.level
+
+
 #     #Add the probabilities for each edge, returns true
 #     # probabilties of hybrid edges are stored as edge property 'prob' (i.e. fraction of TREES THAT GO THROUGH THE RETICULATION NODE that use this edge)
 #     # probabilities of all edges are stored in 'probability_all'
@@ -1050,8 +1027,8 @@
 #         else:
 #             height_pair_y_real = length_incoming_y
 #             height_goal_x+=height[1]-height_pair_y_real
-        
-        
+
+
 #         self.nw.add_edge(node_y,self.no_nodes,no_of_trees=no_of_trees_incoming_y+len(red_trees-current_trees), length=height_pair_y_real)
 #         self.nw[parent_node_y][node_y]['length'] = length_incoming_y - height_pair_y_real
 #         self.leaf_nodes.pop(self.labels[y],False)
@@ -1065,7 +1042,7 @@
 #             self.leaves.add(x)
 #             self.labels[x]=self.no_nodes+1
 #             self.leaf_nodes[self.no_nodes+1]=x
-#             self.no_nodes+=2          
+#             self.no_nodes+=2
 #         #x is already in the network, so create a reticulate cherry (x,y)
 #         else:
 #             node_x=self.labels[x]
@@ -1079,7 +1056,7 @@
 #                 self.nw[px][node_x]['no_of_trees']+=len(red_trees)
 #                 self.no_nodes+=1
 #             #create a new reticulation vertex above x to attach the hybrid arc to
-#             else: 
+#             else:
 #                 height_pair_x = min(height_goal_x,length_incoming_x)
 #                 self.nw.add_edge(node_y,node_x,no_of_trees=len(red_trees), length=height_goal_x-height_pair_x)
 #                 self.nw.add_edge(node_x,self.no_nodes+1,no_of_trees = no_of_trees_incoming_x+len(red_trees), length = height_pair_x)
@@ -1089,9 +1066,6 @@
 #                 self.leaf_nodes[self.no_nodes+1]=x
 #                 self.no_nodes+=2
 #         return True
-
-
-    
 
 
 #     #returns the 'best tree' in the network
@@ -1178,7 +1152,7 @@
 #         restrictedNetwork.IsANetwork()
 #         restrictedNetwork.ScoreEdges()
 #         return restrictedNetwork
-        
+
 
 #     #Returns true if (x_label,y_label) forms a cherry in the network, false otherwise
 #     def Is_Cherry(self,x_label,y_label):
@@ -1250,7 +1224,7 @@
 #             self.nw.remove_node(v)
 #             return True
 #         return False
- 
+
 #     #reduces the pair (x_label,y_label) if it is reducible in the network
 #     #returns a new set reducible pairs that involve the leaves x_label and y_label
 #     def reduce_pair(self,x_label,y_label):
@@ -1263,9 +1237,9 @@
 #         for p in self.nw.predecessors(x):
 #             px=p
 #         for p in self.nw.predecessors(y):
-#             py=p 
+#             py=p
 #         if self.Is_Cherry(x_label,y_label):
-#             self.reducible_pairs.difference_update(set([(x_label,y_label),(y_label,x_label)])) 
+#             self.reducible_pairs.difference_update(set([(x_label,y_label),(y_label,x_label)]))
 #             self.nw.remove_node(x)
 #             self.leaves.remove(x_label)
 #             self.labels.pop(x_label,False)
@@ -1284,7 +1258,7 @@
 #             self.reducible_pairs=self.reducible_pairs.union(new_pairs-set([("no_leaf","no_leaf")]))
 #             return new_pairs
 #         return set()
-    
+
 
 #     #Returns all reducible pairs in the network where x_label is the first element of the pair
 #     def Find_Pairs_With_First(self,x_label):
@@ -1339,7 +1313,7 @@
 #                             retic_cherries.add((self.leaf_nodes[ccpx],x_label))
 #         return cherries-set([(x_label,x_label)]), retic_cherries-set([(x_label,x_label)])
 
-#     #Returns all reticulate cherries in the network where x_label is the second element of the pair    
+#     #Returns all reticulate cherries in the network where x_label is the second element of the pair
 #     def Find_Retic_Cherry_Second(self,x_label):
 #         pairs = set()
 #         x = self.labels[x_label]
@@ -1352,7 +1326,7 @@
 #                     for ccpx in self.nw.successors(cpx):
 #                         if ccpx in self.leaf_nodes:
 #                             pairs.add((self.leaf_nodes[ccpx],x_label))
-#         return pairs-set([(x_label,x_label)]) 
+#         return pairs-set([(x_label,x_label)])
 
 #     #Returns all reducible pairs in the network
 #     # also sets this as value of self.reducible_pairs
@@ -1367,15 +1341,9 @@
 #     # also sets these as values of self.cherries and self.reticulate_cherries
 #     def Find_All_Reducible_Pairs_Separated(self):
 #         self.reticulated_cherries=set()
-#         self.cherries=set()        
+#         self.cherries=set()
 #         for l in self.leaves:
 #             added_cherries, added_retic_cherries = self.Find_Pairs_With_Second_Separated(l)
 #             self.cherries=self.reticulated_cherries.union(added_cherries)
 #             self.reticulated_cherries=self.reticulated_cherries.union(added_retic_cherries)
 #         return(self.cherries, self.reticulated_cherries)
-
-
-
-
-
-

@@ -13,7 +13,6 @@
 # ##
 
 
-
 # ###############################2. I/O############################
 
 # i = 1
@@ -31,11 +30,6 @@
 #     if arg == "-no_inheritence":
 #         inheritence = False
 #     i += 1
-
-
-
-
-
 
 
 # nw = nx.DiGraph()
@@ -86,7 +80,7 @@
 #             nw[pl1][l1]['prob'] = 1-prob
 #             hybrid_nodes[l0]=no_of_hybrids
 #             hybrid_nodes[l1]=no_of_hybrids
-#             current_node+=1 
+#             current_node+=1
 #     #Now extend all pendant edges
 #     for l in leaves:
 #         pl = -1
@@ -151,9 +145,7 @@
 #         else:
 #             info += str(e[1])
 #         info += ","
-#         info += str(e[2]['length']) + ",1.0" 
+#         info += str(e[2]['length']) + ",1.0"
 #         if 'prob' in e[2]:
 #             info = info[:-3] + str(e[2]['prob'])
-#         print(info) 
-
-
+#         print(info)

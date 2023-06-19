@@ -15,14 +15,13 @@
 # from scipy.special import gamma, loggamma
 
 
-
 # ############################################
 # # Simulation functions
 # ############################################
 
-# # a_n is a normalizing constant defined in 
-# # Equation (2) of Aldous1996 (so the sum of 
-# # the values is equal to 1. It is not 
+# # a_n is a normalizing constant defined in
+# # Equation (2) of Aldous1996 (so the sum of
+# # the values is equal to 1. It is not
 # # computed here to save time.
 # def a_n(beta):
 #     return 1
@@ -42,14 +41,14 @@
 #     tree.add_node(n+1)
 #     tree.node[n+1]['label'] = n
 #     last_internal_node       = n+1
-#     last_leaf_node           = 0 
+#     last_leaf_node           = 0
 #     queue                    = [n+1]
 #     # Insert one node at each iteration.
 #     while queue:
 #         node        = queue.pop()
 #         n_node      = tree.node[node].get('label')
 #         # Internal node. Splits again.
-#         if (n_node > 1): 
+#         if (n_node > 1):
 #             # Compute the "probability" to split n in (i|n-1), where i=1,..,n-1
 #             q_n   = computeProb(n_node,beta)
 #             split = random.choices(population=list(range(1,n_node)), weights=q_n, k=1)[0]
@@ -90,13 +89,13 @@
 #     if nx.has_path(network,edge2[1],edge1[0]):
 #         edge1,edge2=edge2,edge1
 #     length1 = network[edge1[0]][edge1[1]].get('length')
-#     prob1 = network[edge1[0]][edge1[1]].get('prob')    
+#     prob1 = network[edge1[0]][edge1[1]].get('prob')
 #     length2 = network[edge2[0]][edge2[1]].get('length')
-#     prob2 = network[edge2[0]][edge2[1]].get('prob')    
+#     prob2 = network[edge2[0]][edge2[1]].get('prob')
 #     #add an edge from edge1 to edge2
 #     network.remove_edges_from([edge1,edge2])
 #     network.add_edges_from([(edge1[0],new_nodes[0]),(new_nodes[0],edge1[1]),(edge2[0],new_nodes[1]),(new_nodes[1],edge2[1]),(new_nodes[0],new_nodes[1])])
-    
+
 #     #If the original network had lengths and probabilities, add these to the subdivided arcs as well.
 #     if length1!=None:
 #         l11 = random.random()*length1
@@ -114,7 +113,6 @@
 #         network[new_nodes[1]][edge2[1]]['prob']=prob2
 #     #TODO: add probabilities and length to the other new arcs as well?
 
-    
 
 # #Pick two edges uniformly at random and add an edge between these
 # def AddEdgeHorizontal(network,leaves = None,new_nodes=None):
@@ -135,10 +133,8 @@
 #     AddEdgeBetween(network,edges[edge_indices[0]],edges[edge_indices[1]],new_nodes=new_nodes)
 
 
-    
-    
 # #Pick one edge, move a random number of edges through the network to find a second edge
-# #Add and edge between the two edges.    
+# #Add and edge between the two edges.
 # def AddEdgeLocal(network,new_nodes=None,stop_prob=0.2,max_steps=None,max_tries=None):
 #     try_number = 1
 #     while max_tries==None or try_number<=max_tries:
@@ -183,6 +179,3 @@
 #             for p in network.predecessors(v):
 #                 output+=" "+str(p)
 #     return output
-
-
-

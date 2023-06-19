@@ -3,6 +3,7 @@ import random
 
 LABEL_ATTR = "label"
 
+
 class DiNetwork(nx.DiGraph):
     def __init__(self, *args, **kwargs):
         edges = kwargs.get("edges", [])
@@ -34,7 +35,9 @@ class DiNetwork(nx.DiGraph):
     @property
     def reticulation_number(self):
         if not hasattr(self, "_reticulation_number"):
-            self._reticulation_number = sum([max(self.in_degree(node) - 1, 0) for node in self.nodes])
+            self._reticulation_number = sum(
+                [max(self.in_degree(node) - 1, 0) for node in self.nodes]
+            )
         return self._reticulation_number
 
     def child(self, node, exclude=[], randomNodes=False):

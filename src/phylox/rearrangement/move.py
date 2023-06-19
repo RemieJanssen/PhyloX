@@ -6,6 +6,7 @@ from phylox.base import find_unused_node
 from phylox.rearrangement.invertsequence import from_edge
 import numpy as np
 
+
 def apply_move(network, move):
     """
     Apply a move to the network, not in place.
@@ -34,21 +35,36 @@ def apply_move(network, move):
         )
         return new_network
     elif move.move_type in [MoveType.VPLU]:
-        new_network.remove_edges_from([move.start_edge, move.end_edge])        
-        new_network.add_edges_from([(move.start_edge[0], move.start_node), (move.start_node, move.start_edge[1]),(move.end_edge[0], move.end_node), (move.end_node, move.end_edge[1]), (move.start_node,move.end_node)])
+        new_network.remove_edges_from([move.start_edge, move.end_edge])
+        new_network.add_edges_from(
+            [
+                (move.start_edge[0], move.start_node),
+                (move.start_node, move.start_edge[1]),
+                (move.end_edge[0], move.end_node),
+                (move.end_node, move.end_edge[1]),
+                (move.start_node, move.end_node),
+            ]
+        )
         return new_network
     elif move.move_type in [MoveType.VMIN]:
         parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
         child_0 = network.child(move.removed_edge[0], exclude=[move.removed_edge[1]])
         parent_1 = network.parent(move.removed_edge[1], exclude=[move.removed_edge[0]])
         child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
-        new_network.remove_edges_from([(parent_0, move.removed_edge[0]), (move.removed_edge[0], child_0),(parent_1, move.removed_edge[1]), (move.removed_edge[1], child_1), move.removed_edge])
+        new_network.remove_edges_from(
+            [
+                (parent_0, move.removed_edge[0]),
+                (move.removed_edge[0], child_0),
+                (parent_1, move.removed_edge[1]),
+                (move.removed_edge[1], child_1),
+                move.removed_edge,
+            ]
+        )
         new_network.add_edges_from([(parent_0, child_0), (parent_1, child_1)])
         return new_network
     elif move.move_type in [MoveType.NONE]:
         return network
     raise InvalidMove("only tail or head moves are currently valid.")
-
 
 
 def apply_move_sequence(network, seq_moves):
@@ -107,7 +123,9 @@ class Move(object):
                 self.start_node = kwargs.get("start_node", None)
                 self.end_node = kwargs.get("end_node", None)
                 network = kwargs.get("network", None)
-                if (self.start_node is None or self.end_node is None) and network is None:
+                if (
+                    self.start_node is None or self.end_node is None
+                ) and network is None:
                     raise InvalidMoveDefinitionException(
                         "Either a start_node and end_node, or a network must be given."
                     )
@@ -134,8 +152,6 @@ class Move(object):
         else:
             raise InvalidMoveDefinitionException("Invalid move type.")
 
-
-
     def is_type(self, move_type):
         if self.move_type == MoveType.ALL:
             return True
@@ -159,7 +175,12 @@ class Move(object):
         network,
         available_tree_nodes=None,
         available_reticulations=None,
-        move_type_probabilities={MoveType.TAIL: 0.4, MoveType.HEAD: 0.4, MoveType.VPLU: 0.1, MoveType.VMIN: 0.1},
+        move_type_probabilities={
+            MoveType.TAIL: 0.4,
+            MoveType.HEAD: 0.4,
+            MoveType.VPLU: 0.1,
+            MoveType.VMIN: 0.1,
+        },
     ):
         available_tree_nodes = available_tree_nodes or []
         available_reticulations = available_reticulations or []
@@ -176,15 +197,30 @@ class Move(object):
             moving_endpoint_index = 0 if movetype == MoveType.TAIL else 1
             moving_endpoint = moving_edge[moving_endpoint_index]
             origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)
-            return Move(move_type=movetype, origin=origin, moving_edge=moving_edge, target=target)
+            return Move(
+                move_type=movetype,
+                origin=origin,
+                moving_edge=moving_edge,
+                target=target,
+            )
         elif movetype == MoveType.VPLU:
-            available_reticulations = list(available_reticulations) or [find_unused_node(network)]
-            available_tree_nodes = list(available_tree_nodes) or [find_unused_node(network, exclude=available_reticulations)]
+            available_reticulations = list(available_reticulations) or [
+                find_unused_node(network)
+            ]
+            available_tree_nodes = list(available_tree_nodes) or [
+                find_unused_node(network, exclude=available_reticulations)
+            ]
             start_edge = edges[np.random.choice(num_edges)]
             end_edge = edges[np.random.choice(num_edges)]
             start_node = np.random.choice(available_tree_nodes)
             end_node = np.random.choice(available_reticulations)
-            return Move(move_type=movetype, start_edge=start_edge, end_edge=end_edge, start_node=start_node, end_node=end_node)
+            return Move(
+                move_type=movetype,
+                start_edge=start_edge,
+                end_edge=end_edge,
+                start_node=start_node,
+                end_node=end_node,
+            )
         elif movetype == MoveType.VMIN:
             removed_edge = edges[np.random.choice(num_edges)]
             return Move(move_type=movetype, removed_edge=removed_edge)

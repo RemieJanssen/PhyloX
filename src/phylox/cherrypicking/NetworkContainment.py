@@ -7,6 +7,7 @@ import itertools
 
 random.seed(a=1234321)
 
+
 def find_cherry(N, x):
     lst = list()
     for p in N.predecessors(x):
@@ -19,7 +20,7 @@ def find_cherry(N, x):
                     if t == 1:
                         for pcc in N.successors(pc):
                             if N.out_degree(pcc) == 0:
-                                lst.append((pcc,x))
+                                lst.append((pcc, x))
     return lst
 
 
@@ -55,12 +56,12 @@ def reduce_pair(N, x, y):
             N.remove_node(x)
             for ppx in N.predecessors(px):
                 N.remove_node(px)
-                N.add_edge(ppx,y)
+                N.add_edge(ppx, y)
             return True
     if k == 2:
         for px in N.predecessors(x):
             for py in N.predecessors(y):
-                N.remove_edge(py,px)
+                N.remove_edge(py, px)
                 if N.in_degree(px) == 1:
                     for ppx in N.predecessors(px):
                         N.add_edge(ppx, x)
@@ -71,11 +72,12 @@ def reduce_pair(N, x, y):
                 return True
     return False
 
+
 def find_tcs(N):
     lst1 = list()
     for x in N.nodes():
         if N.out_degree(x) == 0:
-            cherry1 = find_cherry(N,x)
+            cherry1 = find_cherry(N, x)
             lst1.extend(cherry1)
     lst2 = list()
     while lst1:
@@ -84,8 +86,8 @@ def find_tcs(N):
         if (k == 1) or (k == 2):
             reduce_pair(N, *cherry)
             lst2.append(cherry)
-            lst1.extend(find_cherry(N,cherry[1]))
-            lst1.extend(find_ret_cherry(N,cherry[1]))
+            lst1.extend(find_cherry(N, cherry[1]))
+            lst1.extend(find_ret_cherry(N, cherry[1]))
     return lst2
 
 
@@ -98,7 +100,7 @@ def cps_reduces_network(N, lst):
 
 
 def tcn_contains(N, M):
-    return cps_reduces_network(M,find_tcs(N))
+    return cps_reduces_network(M, find_tcs(N))
 
 
 def tester(foldername):
@@ -107,26 +109,37 @@ def tester(foldername):
     reps = 4
     folder_name = foldername
     f = open("./" + folder_name + "/data.txt", "w+")
-    f.write("leaves;reticulations;reticulations_subnetwork;repetition;subnetwork;running_time\n")
+    f.write(
+        "leaves;reticulations;reticulations_subnetwork;repetition;subnetwork;running_time\n"
+    )
     f.close()
-    
-    allIndices = list(itertools.product(range(stepLeavesRetics, maxLeavesRetics+1,stepLeavesRetics),range(stepLeavesRetics, maxLeavesRetics+1,stepLeavesRetics),range(stepLeavesRetics, maxLeavesRetics+1,stepLeavesRetics),range(reps)))
+
+    allIndices = list(
+        itertools.product(
+            range(stepLeavesRetics, maxLeavesRetics + 1, stepLeavesRetics),
+            range(stepLeavesRetics, maxLeavesRetics + 1, stepLeavesRetics),
+            range(stepLeavesRetics, maxLeavesRetics + 1, stepLeavesRetics),
+            range(reps),
+        )
+    )
     print(list(allIndices)[0])
     random.shuffle(allIndices)
     print(list(allIndices)[0])
     for i in allIndices:
-        if i[2]<=i[1]:
-            leaves,reticulations,reticulationsSubnetwork,rep = i
+        if i[2] <= i[1]:
+            leaves, reticulations, reticulationsSubnetwork, rep = i
             index1 = "0000000" + str(leaves)
             index1 = index1[-4:]
             index2 = "0000000" + str(reticulations)
             index2 = index2[-4:]
             index3 = "0000000" + str(reticulationsSubnetwork)
             index3 = index3[-4:]
-            index = "n="+index1+"_k=" + index2+ "_kSub="+index3 + "_rep=" + str(rep)
+            index = (
+                "n=" + index1 + "_k=" + index2 + "_kSub=" + index3 + "_rep=" + str(rep)
+            )
             name = index + ".txt"
- 
-            test = open("./" + folder_name+"/"+ name, "r")
+
+            test = open("./" + folder_name + "/" + name, "r")
             line1 = test.read()
             test.close()
             line1 = line1.split("\n")
@@ -138,13 +151,26 @@ def tester(foldername):
             start = time.time()
             contains = tcn_contains(N, M)
             end = time.time()
-            runningTime = end-start;
+            runningTime = end - start
             f = open("./" + folder_name + "/data.txt", "a+")
-            f.write(index1 + " ; " + index2 + " ; " + index3 + " ; " + str(rep) + " ; " + str(contains) + " ; " + str(runningTime) + "\n")
+            f.write(
+                index1
+                + " ; "
+                + index2
+                + " ; "
+                + index3
+                + " ; "
+                + str(rep)
+                + " ; "
+                + str(contains)
+                + " ; "
+                + str(runningTime)
+                + "\n"
+            )
             f.close()
 
 
-#path of the folder with all input files
+# path of the folder with all input files
 foldername = "tests"
-#use network containment on all input files and store the data in data.txt in the same folder
+# use network containment on all input files and store the data in data.txt in the same folder
 tester(foldername)

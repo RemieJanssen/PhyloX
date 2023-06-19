@@ -196,7 +196,7 @@
 #         for reticulations in range(stepLeavesRetics, maxLeavesRetics+1,stepLeavesRetics):
 #             for reticulationsSubnetwork in range(stepLeavesRetics, reticulations+1,stepLeavesRetics):
 #                 for rep in range(reps):
-        
+
 #                     index1 = "0000000" + str(leaves)
 #                     index1 = index1[-4:]
 #                     index2 = "0000000" + str(reticulations)
@@ -204,7 +204,7 @@
 #                     index3 = "0000000" + str(reticulationsSubnetwork)
 #                     index3 = index3[-4:]
 #                     index = "n="+index1+"_k=" + index2+ "_kSub="+index3 + "_rep=" + str(rep)
-        
+
 #                     print(index)
 #                     if os.path.isfile("./" + folder_name + "/" + index + ".txt"):
 #                         print("already exists")
@@ -243,11 +243,6 @@
 #                         f.close()
 #     end = time.time()
 #     print("time elapsed:", end - start, "seconds")
-    
-
-
-
-
 
 
 # #Name of the folder to put all input files in

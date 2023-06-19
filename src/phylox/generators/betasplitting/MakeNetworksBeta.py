@@ -31,11 +31,10 @@
 # # Number of cores in your computer (trees are simulated in parallel to save time).
 # nb_threads      = 4
 
-# # Folder 
+# # Folder
 # folder = "Beta_Splitting_Networks_"+str(leaves)+"/"
 
 # ############################################
-
 
 
 # # Set all parameters for network simulation.
@@ -48,8 +47,8 @@
 # for out_type in ["el","pl"]:
 #     this_path = folder+out_type
 #     if not os.path.exists(this_path):
-#         os.makedirs(this_path) 
-    
+#         os.makedirs(this_path)
+
 
 # # Simulate networks
 # for b in betas:
@@ -59,20 +58,20 @@
 #         tree_prefix  = "/"+str(b)+"/"+str(t+1)
 #         tree_path = folder+"el"+tree_prefix+"/0/1.txt"
 #         if os.path.exists(tree_path):
-#             tree        = nx.read_edgelist(tree_path,create_using=nx.DiGraph()) 
+#             tree        = nx.read_edgelist(tree_path,create_using=nx.DiGraph())
 #             relabel_dict = {node: int(node) for node in tree.nodes}
-#             tree=nx.relabel_nodes(tree,relabel_dict)             
+#             tree=nx.relabel_nodes(tree,relabel_dict)
 #         else:
 #             tree        = simulateBetaSplitting(leaves, b)
 #             for out_type in ["el","pl"]:
 #                 this_path = folder+out_type+tree_prefix+"/0"
 #                 if not os.path.exists(this_path):
-#                     os.makedirs(this_path) 
+#                     os.makedirs(this_path)
 #                 f=open(this_path+"/1.txt", 'w')
 #                 f.write(OutputNetwork(tree,out_type))
-#                 f.close()    
+#                 f.close()
 
-        
+
 #         # Method to simulate a single network.
 #         def runsubproc(pars):
 #             # Simulate tree.
@@ -83,17 +82,14 @@
 #             for out_type in ["el", "pl"]:
 #                 this_path = folder+out_type+tree_prefix+filepath_network
 #                 if not os.path.exists(this_path):
-#                     os.makedirs(this_path) 
+#                     os.makedirs(this_path)
 #                 filename = this_path+index_txt
 #                 if not os.path.exists(filename):
 #                     f=open(filename, 'w')
 #                     f.write(OutputNetwork(network,out_type))
-#                     f.close()    
+#                     f.close()
 
 #         #p = multiprocessing.Pool(nb_threads)
 #         #p.map(runsubproc, all_sim)
 #         for par in all_sim:
 #             runsubproc(par)
-        
-
-

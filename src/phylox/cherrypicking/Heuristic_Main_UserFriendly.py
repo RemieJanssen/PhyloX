@@ -77,7 +77,6 @@
 #     sys.exit()
 
 
-
 # #####################################################################
 # #####################################################################
 # ##############             Read the input                 ###########
@@ -98,8 +97,6 @@
 # tree_set = CPH.Input_Set(newick_strings = inputs)
 
 
-
-
 # #####################################################################
 # #####################################################################
 # ##############            Find the sequence               ###########
@@ -108,12 +105,11 @@
 
 # #Run the heuristic to find a cherry-pciking sequence `seq' for the set of input trees.
 # #Arguments are set as given by the terminal arguments
-# seq = tree_set.CPSBound(repeats = option_repeats_argument, 
-#                     progress    = option_progress, 
-#                     track       = option_track, 
-#                     lengths     = option_lengths, 
+# seq = tree_set.CPSBound(repeats = option_repeats_argument,
+#                     progress    = option_progress,
+#                     track       = option_track,
+#                     lengths     = option_lengths,
 #                     time_limit  = option_timeLimit_argument)
-
 
 
 # #####################################################################
@@ -129,15 +125,15 @@
 # #Output the raw network.
 # f.write("Best network in Newick format;\r\n")
 # if option_lengths:
-#     network = CPH.PhN(seq = tree_set.best_seq_with_lengths, 
-#             reduced_trees = tree_set.best_seq_with_lengths_red_trees, 
+#     network = CPH.PhN(seq = tree_set.best_seq_with_lengths,
+#             reduced_trees = tree_set.best_seq_with_lengths_red_trees,
 #             heights       = tree_set.best_seq_with_lengths_heights)
 # else:
-#     network = CPH.PhN(seq = tree_set.best_seq, 
+#     network = CPH.PhN(seq = tree_set.best_seq,
 #             reduced_trees = tree_set.best_red_trees)
 # #Cut the network into a tree to find the newick string
-# cuttree = CPH.CutTree(network    = network.nw, 
-#                     current_node = network.no_nodes, 
+# cuttree = CPH.CutTree(network    = network.nw,
+#                     current_node = network.no_nodes,
 #                     leaf_labels  = network.leaf_nodes)
 # f.write(cuttree.Newick(probabilities = True)+"\r\n")
 # f.write(cuttree.Newick(probabilities = False)+"\r\n")

@@ -4,4 +4,5 @@ class InvalidMoveDefinitionException(Exception):
     Attributes:
         message -- explanation of the error
     """
+
     pass

@@ -2,6 +2,7 @@ from copy import deepcopy
 from phylox.cherrypicking import is_second_in_reducible_pair, reduce_pair, CHERRYTYPE
 import networkx as nx
 
+
 def is_binary(network):
     binary_node_types = [
         [0, 1],  # root
@@ -15,6 +16,7 @@ def is_binary(network):
         if degrees not in binary_node_types:
             return False
     return True
+
 
 def is_orchard(network):
     if len(network) == 0:
@@ -38,7 +40,7 @@ def is_orchard(network):
             pair = is_second_in_reducible_pair(network_copy, leaf)
             if pair:
                 network_copy, cherry_type = reduce_pair(network_copy, *pair)
-                if cherry_type ==  CHERRYTYPE.CHERRY:
+                if cherry_type == CHERRYTYPE.CHERRY:
                     leaves.remove(pair[0])
                 checked_all_leaves = False
                 break
@@ -47,13 +49,11 @@ def is_orchard(network):
         done = checked_all_leaves
     return False
 
+
 def is_stack_free(network):
     for node in network.nodes:
         if network.is_reticulation(node) and any(
-            [
-                network.is_reticulation(child)
-                for child in network.successors(node)
-            ]
+            [network.is_reticulation(child) for child in network.successors(node)]
         ):
             return False
     return True
@@ -97,15 +97,11 @@ def is_tree_based(network):
             return False
     return True
 
+
 def is_tree_child(network):
     for node in network.nodes:
         if network.is_leaf(node):
             continue
-        if all(
-            [
-                network.is_reticulation(child)
-                for child in network.successors(node)
-            ]
-        ):
+        if all([network.is_reticulation(child) for child in network.successors(node)]):
             return False
     return True

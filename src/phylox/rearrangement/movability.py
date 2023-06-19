@@ -13,7 +13,6 @@ from phylox.rearrangement.movetype import MoveType
 from phylox.exceptions import InvalidMoveException, InvalidMoveDefinitionException
 
 
-
 def check_valid(network, move):
     """
     Checks whether a move is valid.
@@ -48,29 +47,32 @@ def check_valid(network, move):
             raise InvalidMoveException("reattachment creates parallel edges")
     elif move.is_type(MoveType.VPLU):
         if move.start_node in network.nodes:
-            raise InvalidMoveException(
-                "Start node must not be in the network."
-            )
+            raise InvalidMoveException("Start node must not be in the network.")
         if move.end_node in network.nodes:
-            raise InvalidMoveException(
-                "End node must not be in the network."
-            )
-        if nx.has_path(network, move.end_edge[1], move.start_edge[0]) or move.start_edge == move.end_edge:
+            raise InvalidMoveException("End node must not be in the network.")
+        if (
+            nx.has_path(network, move.end_edge[1], move.start_edge[0])
+            or move.start_edge == move.end_edge
+        ):
             raise InvalidMoveException("end node is reachable from start node")
     elif move.is_type(MoveType.VMIN):
         parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
         child_0 = network.child(move.removed_edge[0], exclude=[move.removed_edge[1]])
         parent_1 = network.parent(move.removed_edge[1], exclude=[move.removed_edge[0]])
         child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
-        if parent_0==parent_1 and child_0==child_1:
+        if parent_0 == parent_1 and child_0 == child_1:
             raise InvalidMoveException("removal creates parallel edges")
-        if not (check_movable(network, move.removed_edge, move.removed_edge[0]) and check_movable(network, move.removed_edge, move.removed_edge[1])):
+        if not (
+            check_movable(network, move.removed_edge, move.removed_edge[0])
+            and check_movable(network, move.removed_edge, move.removed_edge[1])
+        ):
             raise InvalidMoveException("removal creates parallel edges")
         if network.out_degree(move.removed_edge[1]) == 0:
             raise InvalidMoveException("removes a leaf")
     else:
-        raise InvalidMoveException("Only rSPR and vertical moves are supported currently")
-
+        raise InvalidMoveException(
+            "Only rSPR and vertical moves are supported currently"
+        )
 
 
 # Checks whether an endpoint of an edge is movable.
@@ -97,7 +99,9 @@ def check_movable(network, moving_edge, moving_endpoint):
         # Moving endpoint is not part of the moving edge
         return False
     # Now check for triangles, by finding the other parent and child of the moving endpoint
-    parent_of_moving_endpoint = network.parent(moving_endpoint, exclude=[moving_edge[0]])
+    parent_of_moving_endpoint = network.parent(
+        moving_endpoint, exclude=[moving_edge[0]]
+    )
     child_of_moving_endpoint = network.child(moving_endpoint, exclude=[moving_edge[1]])
     # if there is an edge from the parent to the child, there is a triangle
     # Otherwise, it is a movable edge

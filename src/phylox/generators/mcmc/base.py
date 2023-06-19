@@ -19,25 +19,37 @@ def acceptance_probability(
     current_reticulation_number=None,
     symmetries=False,
 ):
-    current_reticulation_number = current_reticulation_number or network.reticulation_number
+    current_reticulation_number = (
+        current_reticulation_number or network.reticulation_number
+    )
     number_of_leaves = number_of_leaves or len(network.leaves)
     p = 0
     if move.move_type in [MoveType.TAIL, MoveType.HEAD]:
         p = 1
     if move.move_type == MoveType.VPLU:
-        no_edges_network = float(2 * number_of_leaves + 3 * current_reticulation_number - 1)
+        no_edges_network = float(
+            2 * number_of_leaves + 3 * current_reticulation_number - 1
+        )
         no_edges_network_after = no_edges_network + 3
         p = (
-            (move_type_probabilities[MoveType.VMIN] / move_type_probabilities[MoveType.VPLU])
+            (
+                move_type_probabilities[MoveType.VMIN]
+                / move_type_probabilities[MoveType.VPLU]
+            )
             * no_edges_network**2
             / (no_edges_network_after)
         )
     if move.move_type == MoveType.VMIN:
-        no_edges_network = float(2 * number_of_leaves + 3 * current_reticulation_number - 1)
+        no_edges_network = float(
+            2 * number_of_leaves + 3 * current_reticulation_number - 1
+        )
         no_edges_network_after = no_edges_network - 3
         if no_edges_network > 3:
             p = (
-                (move_type_probabilities[MoveType.VPLU] / move_type_probabilities[MoveType.VMIN])
+                (
+                    move_type_probabilities[MoveType.VPLU]
+                    / move_type_probabilities[MoveType.VMIN]
+                )
                 * no_edges_network
                 / (no_edges_network_after**2)
             )

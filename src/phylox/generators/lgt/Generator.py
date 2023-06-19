@@ -10,7 +10,6 @@
 # from networkx.drawing.nx_agraph import graphviz_layout
 
 
-
 # def last_node(net):
 #     return max(net.nodes())
 
@@ -21,15 +20,11 @@
 #     net.add_edge(leaf,l+2)
 
 
-
-
 # def lgt(net,leaf1,leaf2):
 #     net.add_edge(leaf1,leaf2,secondary=True)
 #     l = last_node(net)
 #     net.add_edge(leaf1,l+1)
 #     net.add_edge(leaf2,l+2)
-
-
 
 
 # def draw(net):
@@ -39,19 +34,13 @@
 #     plt.show()
 
 
-
-
 # def leaves(net):
 #     return [u for u in net.nodes() if net.out_degree(u)==0]
-
-
 
 
 # def non_trivial_blobs(net):
 #     blobs = list(nx.biconnected_components(nx.Graph(net)))
 #     return [bl for bl in blobs if len(bl) > 2]
-
-
 
 
 # def internal_blobs(net):
@@ -64,22 +53,18 @@
 #     return blobs
 
 
-
-
 # def compute_hash(net):
 #     mapping_blobs = {}
 #     blobs = internal_blobs(net)
 #     for blob in blobs:
 #         for node in blob:
 #             mapping_blobs[node] = blob
-    
+
 #     mapping = {}
 #     for l in leaves(net):
 #         parent = list(net.predecessors(l))[0]
 #         mapping[l] = mapping_blobs[parent]
 #     return mapping
-
-
 
 
 # def internal_and_external_pairs(net):
@@ -96,19 +81,13 @@
 #     return internal_pairs, external_pairs
 
 
-
-
 # def random_leaf(net):
 #     return random.choice(leaves(net))
-
-
 
 
 # def random_pair(net,wint,wext):
 #     int_pairs, ext_pairs = internal_and_external_pairs(net)
 #     return random.choices(int_pairs+ext_pairs, weights=[wint]*len(int_pairs)+[wext]*len(ext_pairs))[0]
-
-
 
 
 # def simulation_1(num_steps,prob_lgt,wint,wext):
@@ -127,7 +106,6 @@
 #     return net
 
 
-
 # def simulation_2(leaves_goal,prob_lgt,wint,wext):
 #     net = nx.DiGraph()
 #     net.add_edge(1,2)
@@ -144,8 +122,6 @@
 #             pair = random_pair(net,wint,wext)
 #             lgt(net,pair[0],pair[1])
 #     return net
-
-
 
 
 # def simulation_3(leaves_goal,retics_goal,wint,wext):
@@ -174,12 +150,9 @@
 #     return net
 
 
-
-
-
 # def reticulations(G):
 #     return [v for v in G.nodes() if G.in_degree(v)==2]
-    
+
 # def local_level(G,bicc):
 #     rets=list(set(reticulations(G)).intersection(bicc)) # reticulations present in the blob
 #     if len(rets)==0:
@@ -187,11 +160,7 @@
 #     else:
 #         bicc_edges=[e for e in G.edges() if ((e[0] in bicc)&(e[1]in bicc))]
 #         end_nodes=[e[1] for e in bicc_edges]
-#         return len([ret for ret in rets if ret in end_nodes]) 
-
-
-
-
+#         return len([ret for ret in rets if ret in end_nodes])
 
 
 # def OutputNetwork(network,out_type,leaves = None):
@@ -208,12 +177,12 @@
 #             for v in network.nodes:
 #                 if network.out_degree(v)==0:
 #                     leaves+=1
-         
-#         #relabel nodes 
+
+#         #relabel nodes
 #         labelDict           = dict()
 #         leaves_current      = 1
 #         internal_current    = leaves+1
-        
+
 #         for v in network.nodes:
 #             if network.out_degree(v)==0:
 #                 labelDict[v]=leaves_current
@@ -221,7 +190,7 @@
 #             else:
 #                 labelDict[v]=internal_current
 #                 internal_current+=1
-                
+
 #         #generate parent lists
 #         for i,v in enumerate(network.nodes):
 #             if i!=0:
@@ -232,9 +201,6 @@
 #                 parentList+=str(labelDict[p])+","
 #             output+=parentList[:-1]
 #     return output
-
-
-
 
 
 # ##################################
@@ -252,7 +218,7 @@
 # for out_type in ["el","pl"]:
 #     this_path = foldername+out_type
 #     if not os.path.exists(this_path):
-#         os.makedirs(this_path) 
+#         os.makedirs(this_path)
 
 # for (n, alpha, beta) in itertools.product(values_of_n, values_of_alpha, values_of_beta):
 #     print(alpha,beta)
@@ -262,10 +228,10 @@
 #             filename = foldername+out_type+"/"+str(alpha)+"_"+str(beta)+"_"+str(i)
 #             f=open(filename, 'w')
 #             f.write(OutputNetwork(resG,out_type))
-#             f.close()    
+#             f.close()
 # """
-        
-        
+
+
 # ##################################
 # ########   FIXED RETICS   ########
 # ##################################
@@ -285,7 +251,7 @@
 #     for out_type in ["el","pl"]:
 #         this_path = foldername(n)+out_type
 #         if not os.path.exists(this_path):
-#             os.makedirs(this_path) 
+#             os.makedirs(this_path)
 
 # for (n_k_and_alpha, beta) in itertools.product(values_of_n_k_and_alpha, values_of_beta):
 #     n_k,alpha=n_k_and_alpha
@@ -303,7 +269,7 @@
 #             filename = foldername(n)+out_type+"/"+str(k)+"_"+str(beta)+"_"+str(i)
 #             f=open(filename, 'w')
 #             f.write(OutputNetwork(resG,out_type))
-#             f.close()    
+#             f.close()
 
 
 # #Compare realistic data
@@ -316,11 +282,10 @@
 # foldername = "./Dataset_Realistic_Comparison/"
 
 
-
 # for out_type in ["el","pl"]:
 #     this_path = foldername+out_type
 #     if not os.path.exists(this_path):
-#         os.makedirs(this_path) 
+#         os.makedirs(this_path)
 
 # for (n_k_alpha, beta) in itertools.product(values_of_n_k_and_alpha, values_of_beta):
 #     n_k,alpha=n_k_alpha
@@ -338,13 +303,8 @@
 #             filename = foldername+out_type+"/"+str(n)+"_"+str(k)+"_"+str(beta)+"_"+str(i)
 #             f=open(filename, 'w')
 #             f.write(OutputNetwork(resG,out_type))
-#             f.close()    
+#             f.close()
 # """
-
-
-
-
-
 
 
 # ##################################

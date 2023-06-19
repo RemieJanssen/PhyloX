@@ -3,13 +3,14 @@ import unittest
 from phylox import DiNetwork, LABEL_ATTR
 from phylox.classes import *
 
+
 class TestClassBinary(unittest.TestCase):
     def test_is_binary(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
         )
         self.assertTrue(is_binary(network1))
-    
+
     def test_is_binary_false_tree_node(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (2, 5)],
@@ -18,7 +19,18 @@ class TestClassBinary(unittest.TestCase):
 
     def test_is_binary_false_retic(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (4, 5), (4, 6), (3, 7), (5, 7), (6, 7), (6, 8), (7, 9)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (4, 5),
+                (4, 6),
+                (3, 7),
+                (5, 7),
+                (6, 7),
+                (6, 8),
+                (7, 9),
+            ],
         )
         self.assertFalse(is_binary(network1))
 
@@ -28,6 +40,7 @@ class TestClassBinary(unittest.TestCase):
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6), (4, 7)],
         )
         self.assertFalse(is_binary(network1))
+
 
 class TestClassTreeChild(unittest.TestCase):
     def test_is_tree_child(self):
@@ -44,21 +57,42 @@ class TestClassTreeChild(unittest.TestCase):
 
     def test_is_tree_child_false_stack(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (4, 5),
+                (3, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertFalse(is_tree_child(network1))    
+        self.assertFalse(is_tree_child(network1))
 
     def test_is_tree_child_false_w_shape(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (3, 5),
+                (4, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertFalse(is_tree_child(network1))    
+        self.assertFalse(is_tree_child(network1))
 
     def test_is_tree_child_false_diamond(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 5), (5, 6)],
         )
         self.assertFalse(is_tree_child(network1))
+
 
 class TestClassOrchard(unittest.TestCase):
     def test_is_orchard_empty_network(self):
@@ -79,9 +113,20 @@ class TestClassOrchard(unittest.TestCase):
 
     def test_is_orchard_false(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 5), (4, 5), (3, 6), (4, 6), (5, 7), (6, 8)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 5),
+                (4, 5),
+                (3, 6),
+                (4, 6),
+                (5, 7),
+                (6, 8),
+            ],
         )
         self.assertFalse(is_orchard(network1))
+
 
 class TestClassStackFree(unittest.TestCase):
     def test_is_stack_free(self):
@@ -98,21 +143,42 @@ class TestClassStackFree(unittest.TestCase):
 
     def test_is_stack_free_false_stack(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (4, 5),
+                (3, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertFalse(is_stack_free(network1))    
+        self.assertFalse(is_stack_free(network1))
 
     def test_is_stack_free_w_shape(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (3, 5),
+                (4, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertTrue(is_stack_free(network1))    
+        self.assertTrue(is_stack_free(network1))
 
     def test_is_stack_free_false_diamond(self):
         network1 = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 5), (5, 6)],
         )
         self.assertFalse(is_stack_free(network1))
+
 
 class TestClassTreeBased(unittest.TestCase):
     def test_is_tree_based(self):
@@ -129,15 +195,35 @@ class TestClassTreeBased(unittest.TestCase):
 
     def test_is_tree_based_stack(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (4, 5), (3, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (4, 5),
+                (3, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertTrue(is_tree_based(network1))    
+        self.assertTrue(is_tree_based(network1))
 
     def test_is_tree_based_w_shape(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 8), (8, 5), (8, 9), (5, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 4),
+                (3, 5),
+                (4, 8),
+                (8, 5),
+                (8, 9),
+                (5, 6),
+            ],
         )
-        self.assertTrue(is_tree_based(network1))    
+        self.assertTrue(is_tree_based(network1))
 
     def test_is_tree_based_diamond(self):
         network1 = DiNetwork(
@@ -147,6 +233,17 @@ class TestClassTreeBased(unittest.TestCase):
 
     def test_is_tree_based_false(self):
         network1 = DiNetwork(
-            edges=[(1, 2), (2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 7), (6, 7), (7, 8), (2, 6)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (3, 4),
+                (3, 5),
+                (4, 5),
+                (4, 6),
+                (5, 7),
+                (6, 7),
+                (7, 8),
+                (2, 6),
+            ],
         )
         self.assertFalse(is_tree_based(network1))

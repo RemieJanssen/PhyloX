@@ -23,9 +23,9 @@
 # # Simulation functions
 # ############################################
 
-# # a_n is a normalizing constant defined in 
-# # Equation (2) of Aldous1996 (so the sum of 
-# # the values is equal to 1. It is not 
+# # a_n is a normalizing constant defined in
+# # Equation (2) of Aldous1996 (so the sum of
+# # the values is equal to 1. It is not
 # # computed here to save time.
 # def a_n(beta):
 # 	return 1
@@ -48,10 +48,10 @@
 # 	# Insert one node at each iteration.
 # 	while queue:
 # 		node       = queue.pop(0)
-# 		node.taxon = taxon_namespace.get_taxon("N" + str(len(tree.nodes())))		
+# 		node.taxon = taxon_namespace.get_taxon("N" + str(len(tree.nodes())))
 # 		n          = node.n
 # 		# Internal node. Splits again.
-# 		if (n > 1): 
+# 		if (n > 1):
 # 			# Compute the "probability" to split n in (i|n-1), where i=1,..,n-1
 # 			q_n   = computeProb(n,beta)
 # 			split = random.choices(population=list(range(1,n)), weights=q_n, k=1)[0]
@@ -131,7 +131,7 @@
 # 				append_write = 'a' # append if already exists
 # 			else:
 # 				append_write = 'w' # append if already exists
-			
+
 # 			with open(filepath_trees, append_write) as f:
 # 				for (infostr, treeStr) in all_trees:
 # 					if treeStr:
@@ -144,4 +144,3 @@
 # 					if treeStr:
 # 						f.write(infostr)
 # 				print("\t Saved: '" + str(filepath_pars) + "'")
-
