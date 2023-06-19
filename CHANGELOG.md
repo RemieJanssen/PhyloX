@@ -14,10 +14,8 @@ Types of changes:
 - Security in case of vulnerabilities.
 
 
-## [0.0.2] (Unreleased)
 
-
-## [0.0.1] - 2023-06-18
+## [0.0.1] - (Unreleased)
 
 ### Changed
 
@@ -32,10 +30,3 @@ Types of changes:
 - Automorphism count: count_automorphisms.
 - tests for DiNetwork, network classes, rearrangement moves, isomorphism checking, mcmc network generation.
 - configuration of pytest with --cov.
-
-
-
-# releases
-
-[unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.1.1...HEAD
-[0.0.1]: https://github.com/olivierlacan/keep-a-changelog/releases/tag/v0.0.1
