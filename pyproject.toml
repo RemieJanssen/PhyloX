@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
-    "networkx>=2.6",
-    "numpy>=1.21.6"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -19,6 +17,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "networkx>=2.6",
+  "numpy>=1.21.6"
 ]
 
 [tool.pytest.ini_options]
