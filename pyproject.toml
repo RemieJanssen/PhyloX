@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
-    "networkx>=3.1",
+    "networkx>=2.6",
     "numpy>=1.22.0"
 ]
 build-backend = "setuptools.build_meta"
