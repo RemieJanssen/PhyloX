@@ -66,7 +66,7 @@ def apply_move(network, move):
         return new_network
     elif move.move_type in [MoveType.NONE]:
         return network
-    raise InvalidMove("only tail or head moves are currently valid.")
+    raise InvalidMoveException("only tail or head moves are currently valid.")
 
 
 def apply_move_sequence(network, seq_moves):
