@@ -18,7 +18,12 @@ Types of changes:
 
 ### Added
 
-- release and version tag explanation.
+- Release and version tag explanation. (#3)
+- Automated tests. (#4)
+
+### Changed
+
+- Run black and isort. (#4)
 
 ## [0.0.1] - (2023-06-18)
 

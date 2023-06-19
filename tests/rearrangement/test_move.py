@@ -1,10 +1,12 @@
 import unittest
+
 import pytest
 
 from phylox import DiNetwork
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 from phylox.rearrangement.move import Move, apply_move, apply_move_sequence
 from phylox.rearrangement.movetype import MoveType
+
 
 class TestMoveClass(unittest.TestCase):
     def test_invalid_move_rspr(self):
@@ -130,7 +132,10 @@ class TestMoveClass(unittest.TestCase):
                 )
             except InvalidMoveDefinitionException:
                 continue
-            self.assertIn(m.move_type, [
-                MoveType.TAIL,
-            ])
+            self.assertIn(
+                m.move_type,
+                [
+                    MoveType.TAIL,
+                ],
+            )
             self.assertIn(m.moving_edge, network.edges)

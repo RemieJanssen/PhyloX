@@ -1,11 +1,13 @@
 import unittest
+
 import pytest
 
-from phylox.generators.mcmc import sample_mcmc_networks
 from phylox import DiNetwork
-from phylox.rearrangement.movetype import MoveType
-from phylox.isomorphism import is_isomorphic
 from phylox.classes.dinetwork import is_stack_free
+from phylox.generators.mcmc import sample_mcmc_networks
+from phylox.isomorphism import is_isomorphic
+from phylox.rearrangement.movetype import MoveType
+
 
 class TestMCMCSamples(unittest.TestCase):
     def test_sample_no_moves(self):
@@ -22,12 +24,11 @@ class TestMCMCSamples(unittest.TestCase):
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=1,
-            burn_in=0,            
+            burn_in=0,
         )
         self.assertEqual(len(samples), 1)
         self.assertEqual(len(samples[0].edges()), 4)
         self.assertTrue(is_isomorphic(network, samples[0]))
-
 
     def test_sample_horizontal(self):
         network = DiNetwork(
@@ -47,7 +48,6 @@ class TestMCMCSamples(unittest.TestCase):
         for sample in samples:
             self.assertEqual(len(sample.edges()), 4)
             self.assertTrue(is_isomorphic(network, sample))
-
 
     def test_sample_horizontal_add_root(self):
         network = DiNetwork(
@@ -103,7 +103,17 @@ class TestMCMCSamples(unittest.TestCase):
 
     def test_sample_horizontal_stack_free(self):
         network = DiNetwork(
-            edges=[(1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 7), (6, 8)],
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 5),
+                (3, 6),
+                (4, 5),
+                (4, 6),
+                (5, 7),
+                (6, 8),
+            ],
         )
         move_type_probabilities = {
             MoveType.TAIL: 0.5,

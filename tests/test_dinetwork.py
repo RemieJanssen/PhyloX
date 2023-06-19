@@ -1,6 +1,7 @@
 import unittest
 
-from phylox import DiNetwork, LABEL_ATTR
+from phylox import LABEL_ATTR, DiNetwork
+
 
 class TestDiNetwork(unittest.TestCase):
     def test_init(self):
@@ -19,7 +20,7 @@ class TestDiNetwork(unittest.TestCase):
         self.assertEqual(network.nodes[1][LABEL_ATTR], "a")
         self.assertEqual(network.nodes[2][LABEL_ATTR], "b")
         self.assertEqual(network.nodes[3][LABEL_ATTR], "c")
-        
+
     def test_leaves(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3)],
@@ -40,7 +41,7 @@ class TestDiNetwork(unittest.TestCase):
             labels=[(5, "a"), (6, "b")],
         )
         self.assertEqual(network.reticulation_number, 1)
-    
+
     def test_child(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
@@ -52,7 +53,7 @@ class TestDiNetwork(unittest.TestCase):
         self.assertIn(network.child(2, randomNodes=True), [3, 4])
         self.assertEqual(network.child(2, exclude=[3], randomNodes=True), 4)
         self.assertEqual(network.child(2, exclude=[3, 4], randomNodes=True), None)
-    
+
     def test_parent(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
@@ -76,7 +77,7 @@ class TestDiNetwork(unittest.TestCase):
         self.assertFalse(network.is_tree_node(4))
         self.assertFalse(network.is_tree_node(5))
         self.assertFalse(network.is_tree_node(6))
-    
+
     def test_is_reticulation(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],

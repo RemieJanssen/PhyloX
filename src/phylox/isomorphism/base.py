@@ -1,8 +1,10 @@
-import networkx as nx
-from phylox.dinetwork import LABEL_ATTR
 from copy import deepcopy
 
-ISOMETRY_LABEL_ATTR = 'isometry_label'
+import networkx as nx
+
+from phylox.dinetwork import LABEL_ATTR
+
+ISOMETRY_LABEL_ATTR = "isometry_label"
 ISOMETRY_LABEL_TAG = "isometry_label_tag_"
 AUTOMORPHISM_LABEL_TAG = "automorphism_label_tag_"
 
@@ -15,7 +17,9 @@ def same_isometry_labels(node1_attributes, node2_attributes):
     :param node2_attributes: the attributes of a node
     :return: True if the isometry label attribute ISOMETRY_LABEL_ATTR is the same, False otherwise.
     """
-    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(ISOMETRY_LABEL_ATTR)
+    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(
+        ISOMETRY_LABEL_ATTR
+    )
 
 
 # Checks whether the nodes with the given attributes have the same label
@@ -27,8 +31,9 @@ def same_isometry_labels_and_labels(node1_attributes, node2_attributes):
     :param node2_attributes: the attributes of a node
     :return: True if the isometry label attribute ISOMETRY_LABEL_ATTR is the same, False otherwise.
     """
-    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(ISOMETRY_LABEL_ATTR) and \
-           node1_attributes.get(LABEL_ATTR) == node2_attributes.get(LABEL_ATTR)
+    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(
+        ISOMETRY_LABEL_ATTR
+    ) and node1_attributes.get(LABEL_ATTR) == node2_attributes.get(LABEL_ATTR)
 
 
 # Checks whether two networks are labeled isomorpgic
@@ -57,8 +62,13 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     return nx.is_isomorphic(nw1, nw2, node_match=same_labels)
 
 
-
-def _count_automorphisms(network, ignore_labels=False, partial_isomorphism=None, nodes_available=None, nodes_to_do=None):
+def _count_automorphisms(
+    network,
+    ignore_labels=False,
+    partial_isomorphism=None,
+    nodes_available=None,
+    nodes_to_do=None,
+):
     """
     Determines the number of automorphisms of a network.
 
@@ -84,15 +94,17 @@ def _count_automorphisms(network, ignore_labels=False, partial_isomorphism=None,
         matches = 1
         for try_to_match_node in nodes_available:
             if is_isomorphic(
-                network, 
-                network, 
-                partial_isomorphism=partial_isomorphism+[(node_to_remove, try_to_match_node)],
-                ignore_labels=ignore_labels
+                network,
+                network,
+                partial_isomorphism=partial_isomorphism
+                + [(node_to_remove, try_to_match_node)],
+                ignore_labels=ignore_labels,
             ):
                 matches += 1
         number_of_automorphisms *= matches
         nodes_available.append(node_to_remove)
     return number_of_automorphisms
+
 
 def count_automorphisms(network, ignore_labels=False):
     """
@@ -102,9 +114,9 @@ def count_automorphisms(network, ignore_labels=False):
     :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.
     :return: the number of automorphisms of the network.
     """
-    partial_isomorphism = [(a,a) for a in network.nodes()]
+    partial_isomorphism = [(a, a) for a in network.nodes()]
     return _count_automorphisms(
-        network, 
-        ignore_labels=ignore_labels, 
+        network,
+        ignore_labels=ignore_labels,
         partial_isomorphism=partial_isomorphism,
     )

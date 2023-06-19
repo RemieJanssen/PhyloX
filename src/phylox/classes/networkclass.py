@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class DiNetworkClass(str, Enum):
     TC = "tree-child"
     TB = "tree-based"

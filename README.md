@@ -13,7 +13,13 @@ pip install phylox
 
 You can load the package methods with `import phylox` in python.
 
-## Release:
+## Development
+
+### Linting
+
+precommit is yet to be configured, for now, simply run black and isort.
+
+### Release
 
 release current version
 ```
