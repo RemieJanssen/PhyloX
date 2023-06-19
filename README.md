@@ -23,9 +23,10 @@ precommit is yet to be configured, for now, simply run black and isort.
 
 release current version
 ```
+git checkout main
+git tag [version number]
 git checkout release
 git merge master
-git tag [version number]
 python -m build
 python -m twine upload --repository pypi dist/*
 ```
