@@ -29,7 +29,7 @@ release current version
 git checkout main
 git tag [version number]
 git checkout release
-git merge master
+git merge main
 python -m build
 python -m twine upload --repository pypi dist/*
 ```
