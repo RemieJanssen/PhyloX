@@ -84,7 +84,7 @@ def is_endpoint_of_w_fence(network, node):
 
 def is_tree_based(network):
     if not is_binary(network):
-        raise CannotComputeError(
+        raise NotImplementedError(
             "tree-basedness cannot be computed for non-binary networks yet."
         )
 
