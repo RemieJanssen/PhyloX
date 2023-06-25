@@ -15,6 +15,10 @@ Types of changes:
 
 ## [0.0.3] - (Unreleased)
 
+### Added
+
+- Network properties methods: b2_balance, count_cherries_and_reticulated_cherries and blob_properties. (#11)
+
 
 ## [0.0.2] - (2023-06-19)
 
