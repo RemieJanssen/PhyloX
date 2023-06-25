@@ -4,6 +4,7 @@ import math
 
 from phylox import find_unused_node
 
+
 def count_reducible_pairs(network):
     """returns the number of reducible pairs in the network
     split up by number of cherries and number of reticulated cherries.
@@ -21,7 +22,7 @@ def count_reducible_pairs(network):
                 else:
                     cherries += [pair]
     return {
-        "cherries": len(cherries)/2,
+        "cherries": len(cherries) / 2,
         "reticulate_cherries": len(reticulate_cherries),
     }
 
