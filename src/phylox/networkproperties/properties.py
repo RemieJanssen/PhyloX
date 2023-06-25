@@ -1,8 +1,9 @@
-import networkx as nx
-from phylox.cherrypicking import is_second_in_reducible_pair
 import math
 
+import networkx as nx
+
 from phylox import find_unused_node
+from phylox.cherrypicking import is_second_in_reducible_pair
 
 
 def count_reducible_pairs(network):
