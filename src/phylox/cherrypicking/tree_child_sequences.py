@@ -4,8 +4,15 @@ import random
 import time
 
 import networkx as nx
-from phylox.cherrypicking import CHERRYTYPE, check_reducible_pair, reduce_pair, find_reducible_pairs_with_second, find_reticulated_cherry_with_first
+from phylox.cherrypicking import (
+    CHERRYTYPE,
+    check_reducible_pair,
+    reduce_pair,
+    find_reducible_pairs_with_second,
+    find_reticulated_cherry_with_first,
+)
 from phylox.classes.dinetwork import is_tree_child
+
 
 def find_tree_child_sequence(N):
     reducible_pairs = list()

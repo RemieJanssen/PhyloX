@@ -10,7 +10,7 @@ class CHERRYTYPE(Enum):
 
 def find_reducible_pairs_with_second(N, x):
     """
-    Finds a list of reducible pairs (cherries and reticulated cherries) in the 
+    Finds a list of reducible pairs (cherries and reticulated cherries) in the
     network N with leaf x as second element of the pair.
     """
     if not N.is_leaf(x):
@@ -56,6 +56,7 @@ def find_reticulated_cherry_with_first(N, x):
                 continue
             reticulated_cherries.append((x, ppc))
     return reticulated_cherries
+
 
 def is_second_in_reducible_pair(network, x):
     for node in network.predecessors(x):

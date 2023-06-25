@@ -11,17 +11,17 @@ class TestTreeChildContainment(unittest.TestCase):
         )
         result = tree_child_network_contains(network, network)
         self.assertTrue(result)
-    
+
     def test_simple_cherry_picking_unlabeled(self):
         network1 = DiNetwork(
-            edges=[(0, 1), (1, 2), (1, 3), (2, 3), (2,4), (3, 5)],
+            edges=[(0, 1), (1, 2), (1, 3), (2, 3), (2, 4), (3, 5)],
         )
         network2 = DiNetwork(
             edges=[(0, 1), (1, 4), (1, 5)],
         )
         result = tree_child_network_contains(network1, network2)
         self.assertTrue(result)
-        #repeat to check that networks are preserved
+        # repeat to check that networks are preserved
         result = tree_child_network_contains(network1, network2)
         self.assertTrue(result)
         result = tree_child_network_contains(network2, network1)
