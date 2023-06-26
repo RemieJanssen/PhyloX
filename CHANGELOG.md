@@ -21,7 +21,7 @@ Types of changes:
 
 ### Changed
 
-- Cleaned up generators: beta-splitting trees
+- Cleaned up generators: beta-splitting trees. (#14)
 
 ## [0.0.2] - (2023-06-19)
 
