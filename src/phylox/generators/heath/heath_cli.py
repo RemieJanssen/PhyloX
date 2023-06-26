@@ -126,7 +126,6 @@ def parse_args():
     parser.add_argument(
         "-s", "--simple", action="store_true", help="Enable simple output"
     )
-    parser.add_argument("-h", "--help", action="store_true", help="Show help message")
 
     args = parser.parse_args()
 
@@ -167,9 +166,11 @@ def parse_args():
         "update_shape": args.update_shape_parameter,
         "simple_output": args.simple,
     }
+    return params
 
 
 def main():
+    params = parse_args()
     # Find a network
     if params["taxa_limit"]:
         leaves = []
