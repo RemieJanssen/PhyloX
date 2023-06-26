@@ -19,6 +19,9 @@ Types of changes:
 
 - Network properties methods: b2_balance, count_cherries_and_reticulated_cherries and blob_properties. (#11)
 
+### Changed
+
+- Cleaned up generators: beta-splitting trees
 
 ## [0.0.2] - (2023-06-19)
 
