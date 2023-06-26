@@ -51,6 +51,11 @@ def blob_properties(network):
     return blob_properties
 
 
+def level(network):
+    """returns the level of the network"""
+    blobs = blob_properties(network)
+    return max([blob[1] for blob in blobs])
+
 def b2_balance(network, connect_roots=False):
     """returns the B_2 balance of the network"""
     balance = 0

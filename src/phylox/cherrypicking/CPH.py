@@ -875,8 +875,7 @@
 # ################################################################################
 
 
-# #A class for phylogenetic networks
-# class PhN:
+# class CherryPickingMixin:
 #     def __init__(self, seq = None, newick = None, best_tree_from_network = None, reduced_trees = None, heights = None):
 #         #the actual graph
 #         self.nw = nx.DiGraph()
