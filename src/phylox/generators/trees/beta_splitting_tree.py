@@ -32,18 +32,18 @@ def compute_split_probability(n,beta):
     return q_n
 
 # n: number of tips
-def simulate_beta_splitting(n, beta):
+def simulate_beta_splitting(n, beta, labels=None):
     # Initialize tree.
     tree = DiNetwork()
-    tree.add_node(n+1)
-    tree.node[n+1]['label'] = n
+    tree.add_edge(-1,n+1)
+    tree.nodes[n+1]['label'] = n
     last_internal_node       = n+1
     last_leaf_node           = 0
     queue                    = [n+1]
     # Insert one node at each iteration.
     while queue:
         node        = queue.pop()
-        n_node      = tree.node[node].get('label')
+        n_node      = tree.nodes[node].get('label')
         # Internal node. Splits again.
         if (n_node > 1):
             # Compute the "probability" to split n in (i|n-1), where i=1,..,n-1
@@ -56,7 +56,7 @@ def simulate_beta_splitting(n, beta):
                     last_leaf_node+=1
                 else:
                     tree.add_edge(node,last_internal_node+1)
-                    tree.node[last_internal_node+1]['label']=new_n
+                    tree.nodes[last_internal_node+1]['label']=new_n
                     queue.append(last_internal_node+1)
                     last_internal_node+=1
     # Return tree.
