@@ -18,7 +18,7 @@ Types of changes:
 ### Added
 
 - Network properties methods: b2_balance, count_cherries_and_reticulated_cherries and blob_properties. (#11)
-
+- Tree-child-sequence functions. (#12)
 
 ## [0.0.2] - (2023-06-19)
 
