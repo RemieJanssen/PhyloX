@@ -33,9 +33,10 @@ class TestBetaSplitting(unittest.TestCase):
 
 class TestWellKnown(unittest.TestCase):
     def test_balanced_tree(self):
-        tree = generate_balanced_tree(8)
-        self.assertEqual(len(tree.leaves), 8)
-        self.assertEqual(len(tree.edges), 2*8-1)
+        number_of_leaves = 8
+        tree = generate_balanced_tree(number_of_leaves)
+        self.assertEqual(len(tree.leaves), number_of_leaves)
+        self.assertEqual(len(tree.edges), 2*number_of_leaves-1)
 
     def test_caterpillar(self):
         number_of_leaves = 5
@@ -45,22 +46,28 @@ class TestWellKnown(unittest.TestCase):
 
 class TestAddEdges(unittest.TestCase):
     def test_add_edges_bottom(self):
-        tree = generate_balanced_tree(8)
-        network = network_from_tree(tree, 3, AddEdgeMethod.BOTTOM)
-        self.assertEqual(len(network.leaves), 8)
-        self.assertEqual(len(network.edges), 2*8+3*3-1)
+        number_of_leaves = 8
+        reticulations = 3
+        tree = generate_balanced_tree(number_of_leaves)
+        network = network_from_tree(tree, reticulations, AddEdgeMethod.BOTTOM)
+        self.assertEqual(len(network.leaves), number_of_leaves)
+        self.assertEqual(len(network.edges), 2*number_of_leaves+3*reticulations-1)
 
     def test_add_edges_uniform(self):
-        tree = generate_balanced_tree(8)
-        network = network_from_tree(tree, 3, AddEdgeMethod.UNIFORM)
-        self.assertEqual(len(network.leaves), 8)
-        self.assertEqual(len(network.edges), 2*8+3*3-1)
+        number_of_leaves = 8
+        reticulations = 3
+        tree = generate_balanced_tree(number_of_leaves)
+        network = network_from_tree(tree, reticulations, AddEdgeMethod.UNIFORM)
+        self.assertEqual(len(network.leaves), number_of_leaves)
+        self.assertEqual(len(network.edges), 2*number_of_leaves+3*reticulations-1)
     
     def test_add_edges_local(self):
-        tree = generate_balanced_tree(8)
-        network = network_from_tree(tree, 3, AddEdgeMethod.LOCAL)
-        self.assertEqual(len(network.leaves), 8)
-        self.assertEqual(len(network.edges), 2*8+3*3-1)
+        number_of_leaves = 8
+        reticulations = 3
+        tree = generate_balanced_tree(number_of_leaves)
+        network = network_from_tree(tree, reticulations, AddEdgeMethod.LOCAL)
+        self.assertEqual(len(network.leaves), number_of_leaves)
+        self.assertEqual(len(network.edges), 2*number_of_leaves+3*reticulations-1)
 
     def test_add_edges_non_existent(self):
         tree = generate_balanced_tree(8)
