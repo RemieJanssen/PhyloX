@@ -33,3 +33,6 @@ addopts = "--cov --cov-report term-missing"
 [project.urls]
 "Homepage" = "https://github.com/RemieJanssen/PhyloX"
 "Bug Tracker" = "https://github.com/RemieJanssen/PhyloX/issues"
+
+[project.scripts]
+phylox-generator-heath = "phylox.generators.heath.heath_cli:main"
