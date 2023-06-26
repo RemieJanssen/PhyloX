@@ -1,6 +1,6 @@
 # ############################################
 # #
-# # Adapted from BetasplittingModel.py
+# # Adapted from script provided by Pengyu Liu
 # # which contains the code for Beta-splitting model (Aldous1996)
 # # Written for python3
 # #
@@ -68,6 +68,20 @@
 # # MAIN: Simulate network
 # ############################################
 
+
+
+# def GenerateNetwork(tree,r,method):
+#     network = tree.copy()
+#     if method=="Horizontal":
+#         leaves = [x for x in tree.nodes() if tree.out_degree(x)==0]
+#     for i in range(r):
+#         if method==None:
+#             AddEdgeUniform(network)
+#         elif method=="Horizontal":
+#             AddEdgeHorizontal(network,leaves=leaves)
+#         else:
+#             AddEdgeLocal(network,stop_prob=method)
+#     return network
 
 # tree = simulateBetaSplitting(tree_size, beta)
 # network = GenerateNetwork(tree,retics,local)
