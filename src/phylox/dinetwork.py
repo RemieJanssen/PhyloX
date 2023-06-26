@@ -10,8 +10,10 @@ class DiNetwork(nx.DiGraph):
         edges = kwargs.get("edges", [])
         super().__init__(edges, *args, **kwargs)
         self.add_nodes_from(kwargs.get("nodes", []))
+        self.label_to_node_dict = {}
         for label in kwargs.get("labels", []):
             self.nodes[label[0]][LABEL_ATTR] = label[1]
+            self.label_to_node_dict[label[1]] = label[0]
 
     @classmethod
     def from_newick(cls, newick):

@@ -26,3 +26,17 @@ class TestTreeChildContainment(unittest.TestCase):
         self.assertTrue(result)
         result = tree_child_network_contains(network2, network1)
         self.assertFalse(result)
+
+    def test_simple_cherry_picking_labelled(self):
+        network1 = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3), (2, 3), (2, 4), (3, 5)],
+            labels=[[4,"a"], [5,"b"]]
+        )
+        network2 = DiNetwork(
+            edges=[(0, 1), (1, 2), (1, 3)],
+            labels=[[2,"a"], [3,"b"]]
+        )
+        result = tree_child_network_contains(network1, network2)
+        self.assertFalse(result)
+        result = tree_child_network_contains(network1, network2, labels=True)
+        self.assertTrue(result)        
