@@ -2,7 +2,7 @@ import math
 
 import networkx as nx
 
-from phylox import find_unused_node
+from phylox.base import find_unused_node
 from phylox.cherrypicking import is_second_in_reducible_pair
 
 

@@ -85,7 +85,7 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
         else:
             # Hybridize
             #  i.e.: pick two leaf nodes, merge those, and add a new leaf below this hybrid node.
-            merging = random.sample(leaves, 2)
+            merging = random.sample(sorted(leaves), 2)
             l0 = merging[0]
             l1 = merging[1]
             pl0 = -1

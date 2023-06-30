@@ -1,7 +1,8 @@
 import unittest
 
-from phylox import LABEL_ATTR, DiNetwork
+from phylox import DiNetwork
 from phylox.classes import *
+from phylox.constants import LABEL_ATTR
 
 
 class TestClassBinary(unittest.TestCase):

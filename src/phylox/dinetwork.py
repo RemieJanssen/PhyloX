@@ -2,10 +2,11 @@ import random
 
 import networkx as nx
 
-LABEL_ATTR = "label"
+from phylox.cherrypicking.base import CherryPickingMixin
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
 
-class DiNetwork(nx.DiGraph):
+class DiNetwork(nx.DiGraph, CherryPickingMixin):
     def __init__(self, *args, **kwargs):
         edges = kwargs.get("edges", [])
         super().__init__(edges, *args, **kwargs)
@@ -14,6 +15,11 @@ class DiNetwork(nx.DiGraph):
         for label in kwargs.get("labels", []):
             self.nodes[label[0]][LABEL_ATTR] = label[1]
             self.label_to_node_dict[label[1]] = label[0]
+
+    def _clear_cached(self):
+        for attr in ["_leaves", "_reticulations", "_roots", "_reticulation_number"]:
+            if hasattr(self, attr):
+                delattr(self, attr)
 
     @classmethod
     def from_newick(cls, newick):

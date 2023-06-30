@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import networkx as nx
 
-from phylox import LABEL_ATTR, DiNetwork
+from phylox import DiNetwork
 from phylox.cherrypicking import (
     CHERRYTYPE,
     check_reducible_pair,
@@ -15,6 +15,7 @@ from phylox.cherrypicking import (
     reduce_pair,
 )
 from phylox.classes.dinetwork import is_tree_child
+from phylox.constants import LABEL_ATTR
 
 
 def find_tree_child_sequence(network, labels=False):

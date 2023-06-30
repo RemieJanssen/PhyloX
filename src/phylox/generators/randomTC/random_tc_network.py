@@ -1,16 +1,12 @@
-import ast
-import os
 import random
-import re
-import time
 
-import matplotlib.pyplot as plt
+from phylox import DiNetwork
 
 ### For the tree child network containment paper by Murakami and Janssen
 ### This file contains functions to generate random tree-child (sub)networks
 
 
-def random_TC_sequence(leaves, retics):
+def random_tree_child_sequence(leaves, retics):
     """
     Returns a random tree-child sequence with a given number of leaves and reticulations
     :param leaves: number of leaves
@@ -59,7 +55,7 @@ def random_TC_sequence(leaves, retics):
     return seq
 
 
-def random_TC_subsequence(seq, r):
+def random_tree_child_subsequence(seq, r):
     """
     Returns a random tree-child subsequence with a given number of reticulations
     :param seq: a tree-child sequence
@@ -92,3 +88,22 @@ def random_TC_subsequence(seq, r):
         if i in indices:
             newSeq.append(pair)
     return newSeq
+
+
+def generate_network_random_tree_child_sequence(
+    leaves, reticulations, label_leaves=False
+):
+    """
+    Returns a random tree-child network with a given number of leaves and reticulations
+    :param leaves: number of leaves
+    :param reticulations: number of reticulations
+    :return: a random tree-child network
+    """
+    if leaves < 2 or reticulations < 0:
+        raise ValueError(
+            "Invalid number of leaves or reticulations, must be at least 2 and 0 respectively"
+        )
+    seq = random_tree_child_sequence(leaves, reticulations)
+    if not seq:
+        return False
+    return DiNetwork.from_cherry_picking_sequence(seq, label_leaves=label_leaves)
