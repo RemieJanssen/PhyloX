@@ -49,7 +49,7 @@ class TestLGTNetwork(unittest.TestCase):
             n=100,
             k=10,
             wint=1,
-            wext=.001,
+            wext=0.001,
         )
         self.assertEqual(len(network.leaves), 100)
         self.assertEqual(len(network.reticulations), 10)
@@ -58,7 +58,7 @@ class TestLGTNetwork(unittest.TestCase):
         network = generate_network_lgt(
             n=100,
             k=10,
-            wint=.001,
+            wint=0.001,
             wext=1,
         )
         self.assertEqual(len(network.leaves), 100)

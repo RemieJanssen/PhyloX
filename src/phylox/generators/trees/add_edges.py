@@ -79,24 +79,26 @@ def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=Non
         end_edge=edge2,
     )
 
+
 class AddEdgeMethod(Enum):
     UNIFORM = 1
     BOTTOM = 2
     LOCAL = 3
+
 
 def network_from_tree(tree, reticulations, method):
     """
     Returns a network with the given number of reticulations added to the given tree.
     """
 
-    if method==AddEdgeMethod.BOTTOM:
+    if method == AddEdgeMethod.BOTTOM:
         leaves = tree.leaves
 
-    if method==AddEdgeMethod.UNIFORM:
+    if method == AddEdgeMethod.UNIFORM:
         add_edge_method = random_vplu_move_uniform
-    elif method==AddEdgeMethod.BOTTOM:
+    elif method == AddEdgeMethod.BOTTOM:
         add_edge_method = random_vplu_move_at_bottom
-    elif method==AddEdgeMethod.LOCAL:
+    elif method == AddEdgeMethod.LOCAL:
         add_edge_method = random_vplu_move_local
     else:
         raise ValueError(f"Method {method} not implemented, use one of {AddEdgeMethod}")

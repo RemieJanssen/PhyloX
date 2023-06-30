@@ -30,7 +30,9 @@ class DiNetwork(nx.DiGraph):
         return self._leaves
 
     def _set_reticulations(self):
-        self._reticulations = set([node for node in self.nodes if self.is_reticulation(node)])
+        self._reticulations = set(
+            [node for node in self.nodes if self.is_reticulation(node)]
+        )
         return self._reticulations
 
     @property
