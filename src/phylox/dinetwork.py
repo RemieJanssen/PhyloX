@@ -19,11 +19,25 @@ class DiNetwork(nx.DiGraph):
     def from_newick(cls, newick):
         pass
 
+    def _set_leaves(self):
+        self._leaves = set([node for node in self.nodes if self.is_leaf(node)])
+        return self._leaves
+
     @property
     def leaves(self):
         if not hasattr(self, "_leaves"):
-            self._leaves = set([node for node in self.nodes if self.is_leaf(node)])
+            self._set_leaves()
         return self._leaves
+
+    def _set_reticulations(self):
+        self._reticulations = set([node for node in self.nodes if self.is_reticulation(node)])
+        return self._reticulations
+
+    @property
+    def reticulations(self):
+        if not hasattr(self, "_retculations"):
+            self._set_reticulations()
+        return self._reticulations
 
     def _set_roots(self):
         self._roots = set([node for node in self.nodes if self.is_root(node)])

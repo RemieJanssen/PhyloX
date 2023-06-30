@@ -22,7 +22,7 @@ Types of changes:
 
 ### Changed
 
-- Cleaned up generators: beta-splitting trees, add_edges, caterpillar, balanced tree. (#14)
+- Cleaned up generators: beta-splitting trees, add_edges, caterpillar, balanced tree, lgt. (#14)
 
 ## [0.0.2] - (2023-06-19)
 
