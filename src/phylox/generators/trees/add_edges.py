@@ -1,8 +1,11 @@
-import numpy as np
 import random
+from enum import Enum
+
+import numpy as np
+
 from phylox.rearrangement.move import Move, apply_move
 from phylox.rearrangement.movetype import MoveType
-from enum import Enum
+
 
 # Pick two edges uniformly at random and add an edge between these
 def random_vplu_move_at_bottom(network):

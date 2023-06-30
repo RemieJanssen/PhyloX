@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum
+
 from phylox import DiNetwork
 
 

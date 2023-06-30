@@ -1,10 +1,11 @@
-import numpy as np
-import math
-import scipy.stats
-import random
-import networkx as nx
-import sys
 import itertools
+import math
+import random
+import sys
+
+import networkx as nx
+import numpy as np
+import scipy.stats
 
 
 # For each choice of reticulation arcs, calculate the distance between all pairs of taxa

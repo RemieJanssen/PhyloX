@@ -2,18 +2,19 @@ import ast
 import itertools
 import random
 import time
+from copy import deepcopy
 
 import networkx as nx
+
+from phylox import LABEL_ATTR, DiNetwork
 from phylox.cherrypicking import (
     CHERRYTYPE,
     check_reducible_pair,
-    reduce_pair,
     find_reducible_pairs_with_second,
     find_reticulated_cherry_with_first,
+    reduce_pair,
 )
 from phylox.classes.dinetwork import is_tree_child
-from phylox import DiNetwork, LABEL_ATTR
-from copy import deepcopy
 
 
 def find_tree_child_sequence(network, labels=False):

@@ -1,5 +1,7 @@
-import numpy as np
 import random
+
+import numpy as np
+
 from phylox.rearrangement.move import Move
 from phylox.rearrangement.movetype import MoveType
 

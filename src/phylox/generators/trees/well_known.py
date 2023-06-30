@@ -1,8 +1,10 @@
 import math
 import random
-import numpy as np
-from phylox import DiNetwork
+
 import networkx as nx
+import numpy as np
+
+from phylox import DiNetwork
 
 
 def generate_balanced_tree(number_of_leaves):

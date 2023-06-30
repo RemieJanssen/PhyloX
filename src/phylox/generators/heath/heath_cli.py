@@ -1,15 +1,15 @@
-import numpy as np
-import math
-import scipy.stats
-import random
-import networkx as nx
-import sys
+import argparse
 import itertools
+import math
+import random
+import sys
+
+import networkx as nx
+import numpy as np
+import scipy.stats
 
 # from AddEdgesToTree import *
-from phylox.generators.heath.heath import generate_heath_network, RestrictToLeafSet
-import argparse
-import sys
+from phylox.generators.heath.heath import RestrictToLeafSet, generate_heath_network
 
 
 def parse_args():

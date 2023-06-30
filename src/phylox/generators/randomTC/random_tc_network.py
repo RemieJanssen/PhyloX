@@ -1,10 +1,10 @@
-import random
-import matplotlib.pyplot as plt
-import os
 import ast
+import os
+import random
 import re
 import time
 
+import matplotlib.pyplot as plt
 
 ### For the tree child network containment paper by Murakami and Janssen
 ### This file contains functions to generate random tree-child (sub)networks

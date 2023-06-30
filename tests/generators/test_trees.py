@@ -1,12 +1,13 @@
 import unittest
 
+from phylox.generators.trees.add_edges import AddEdgeMethod, network_from_tree
+
 # from phylox import DiNetwork
 from phylox.generators.trees.beta_splitting_tree import simulate_beta_splitting
 from phylox.generators.trees.well_known import (
     generate_balanced_tree,
     generate_caterpillar,
 )
-from phylox.generators.trees.add_edges import network_from_tree, AddEdgeMethod
 
 
 class TestBetaSplitting(unittest.TestCase):

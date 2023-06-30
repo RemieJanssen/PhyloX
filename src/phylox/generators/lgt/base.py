@@ -5,10 +5,12 @@
 #
 # Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
 
-import networkx as nx
-from phylox import DiNetwork
 import random
+
+import networkx as nx
 import numpy as np
+
+from phylox import DiNetwork
 
 
 def last_node(net):

@@ -40,4 +40,3 @@ python -m twine upload --repository pypi dist/*
 ```
 set new version number in master branch
  - pyproject.toml
-

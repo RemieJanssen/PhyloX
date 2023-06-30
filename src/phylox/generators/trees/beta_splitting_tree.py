@@ -7,10 +7,11 @@
 ############################################
 
 import random
+
 import numpy as np
-from phylox import DiNetwork
 from scipy.special import loggamma
 
+from phylox import DiNetwork
 
 ############################################
 # Simulation functions
