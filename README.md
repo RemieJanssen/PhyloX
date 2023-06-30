@@ -2,6 +2,11 @@
 
 PhyloX is a python package with tools for constructing, manipulating, and analyzing phylogenetic networks.
 
+## Use of NetworkX
+The implementation of PhyloX is based on NetworkX (NetworkX is distributed with the [3-clause BSD license](https://networkx.org/documentation/stable/index.html#license)):
+
+> Aric A. Hagberg, Daniel A. Schult and Pieter J. Swart, “Exploring network structure, dynamics, and function using NetworkX”, in Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15, Aug 2008
+
 ## Install
 
 Install as pypi package phylox:
@@ -35,3 +40,4 @@ python -m twine upload --repository pypi dist/*
 ```
 set new version number in master branch
  - pyproject.toml
+
