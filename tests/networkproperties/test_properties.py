@@ -62,6 +62,8 @@ class TestBlobProperties(unittest.TestCase):
         )
         result = blob_properties(network)
         self.assertEqual(result, [(7, 3)])
+        network_level = level(network)
+        self.assertEqual(network_level, 3)
 
     def test_two_blobs(self):
         network = DiNetwork(
@@ -81,6 +83,8 @@ class TestBlobProperties(unittest.TestCase):
         )
         result = blob_properties(network)
         self.assertEqual(result, [(3, 1), (3, 1)])
+        network_level = level(network)
+        self.assertEqual(network_level, 1)
 
 
 class TestB2Balance(unittest.TestCase):

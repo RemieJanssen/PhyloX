@@ -2,7 +2,7 @@ import math
 
 import networkx as nx
 
-from phylox import find_unused_node
+from phylox.base import find_unused_node
 from phylox.cherrypicking import is_second_in_reducible_pair
 
 
@@ -49,6 +49,12 @@ def blob_properties(network):
             blob_level = retics
             blob_properties += [(blob_size, blob_level)]
     return blob_properties
+
+
+def level(network):
+    """returns the level of the network"""
+    blobs = blob_properties(network)
+    return max([blob[1] for blob in blobs])
 
 
 def b2_balance(network, connect_roots=False):

@@ -19,6 +19,11 @@ Types of changes:
 
 - Network properties methods: b2_balance, count_cherries_and_reticulated_cherries and blob_properties. (#11)
 - Tree-child-sequence functions. (#12)
+- Usage of NetworkX referenced in README. (#14)
+
+### Changed
+
+- Cleaned up generators: beta-splitting trees, add_edges, caterpillar, balanced tree, lgt, zods, random tree-child sequence. (#14)
 
 ## [0.0.2] - (2023-06-19)
 

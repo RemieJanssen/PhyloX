@@ -1,6 +1,7 @@
 import unittest
 
-from phylox import LABEL_ATTR, DiNetwork
+from phylox import DiNetwork
+from phylox.constants import LABEL_ATTR
 from phylox.isomorphism import count_automorphisms, is_isomorphic
 
 
