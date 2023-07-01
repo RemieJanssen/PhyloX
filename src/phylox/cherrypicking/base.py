@@ -272,6 +272,36 @@ def get_indices_of_reducing_pairs(sequence, network):
                 return indices
     return False
 
+def add_roots_to_sequence(sequence, reduced_trees_per_pair):
+    """
+    Modifies a cherry-picking sequence so that it represents a network with exactly one root.
+    A sequence may be such that reconstructing a network from the sequence results in multiple roots
+    This function adds some pairs to the sequence so that the network has a single root.
+    args:
+        sequence: the sequence to modify
+        reduced_trees_per_pair: the sets of trees reduced by each pair in the sequence
+    returns:
+        the new sequence, and also the sets of trees reduced by each pair in the sequence, modified so that the new pairs are also represented (they reduce no trees)
+    """
+    leaves_encountered = set()
+    roots = set()
+    #The roots can be found by going back through the sequence and finding pairs where the second element has not been encountered in the sequence yet
+    for pair in reversed(sequence):
+        if pair[1] not in leaves_encountered:
+            roots.add(pair[1])
+        leaves_encountered.add(pair[0])
+        leaves_encountered.add(pair[1])
+    i=0
+    roots = list(roots)
+    #Now add some pairs to make sure each second element is already part of some pair in the sequence read backwards, except for the last pair in the sequence
+    for i in range(len(roots)-1):
+       sequence.append((roots[i],roots[i+1]))
+       #none of the trees are reduced by the new pairs.
+       reduced_trees_per_pair.append(set())
+       i+=1
+    return sequence, reduced_trees_per_pair
+
+
 class CherryPickingMixin:
     @classmethod
     def from_cherry_picking_sequence(cls, sequence, heights=None, label_leaves=True):

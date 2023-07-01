@@ -11,32 +11,8 @@ from phylox.cherrypicking import (
     find_reticulated_cherry_with_first,
     reduce_pair,
     get_indices_of_reducing_pairs
+    add_roots_to_sequence,
 )
-
-
-
-#Modifies a cherry-picking sequence so that it represents a network with exactly one root.
-#A sequence may be such that reconstructing a network from the sequence results in multiple roots
-#This function adds some pairs to the sequence so that the network has a single root.
-#returns the new sequence, and also modifies the sets of trees reduced by each pair in the sequence, so that the new pairs are also represented (they reduce no trees)
-def Sequence_add_roots(seq, red_trees):
-    leaves_encountered = set()
-    roots = set()
-    #The roots can be found by going back through the sequence and finding pairs where the second element has not been encountered in the sequence yet
-    for pair in reversed(seq):
-        if pair[1] not in leaves_encountered:
-            roots.add(pair[1])
-        leaves_encountered.add(pair[0])
-        leaves_encountered.add(pair[1])
-    i=0
-    roots = list(roots)
-    #Now add some pairs to make sure each second element is already part of some pair in the sequence read backwards, except for the last pair in the sequence
-    for i in range(len(roots)-1):
-       seq.append((roots[i],roots[i+1]))
-       #none of the trees are reduced by the new pairs.
-       red_trees.append(set())
-       i+=1
-    return seq, red_trees
 
 
 ################################################################################
@@ -51,7 +27,7 @@ def Sequence_add_roots(seq, red_trees):
 
 
 #Methods for sets of phylogenetic trees
-class Input_Set:
+class HybridizationProblemTreeSet:
     def __init__(self, newick_strings = []):
         #The dictionary of trees
         self.trees = dict()
@@ -92,7 +68,7 @@ class Input_Set:
 
     #Make a deepcopy of an instance
     def __deepcopy__(self, memodict={}):
-        copy_inputs = Input_Set()
+        copy_inputs = HybridizationProblemTreeSet()
         copy_inputs.trees = deepcopy(self.trees,memodict)
         copy_inputs.labels = deepcopy(self.labels,memodict)
         copy_inputs.labels_reversed = deepcopy(self.labels_reversed,memodict)
@@ -133,7 +109,7 @@ class Input_Set:
                 new, reduced_trees = self.Improve_Sequence(new, reduced_trees, progress = progress)
                 print("new length = "+str(len(new)))
             print("adding roots")
-            new,reduced_trees = Sequence_add_roots(new,reduced_trees)
+            new,reduced_trees = add_roots_to_sequence(new,reduced_trees)
             if lengths:
                 for i in range(len(new)-len(seq_heights)):
                     seq_heights+=[seq_heights[-1]]
