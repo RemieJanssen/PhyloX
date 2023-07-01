@@ -250,6 +250,27 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
     network._clear_cached()
     return network
 
+# TODO: make work wit cps with labels instead of node indices
+def get_indices_of_reducing_pairs(sequence, network):
+    """
+    Checks which pairs of a sequence actually reduce a given network
+    for a given cherry-picking sequence `sequence' reduces a given tree `tree'
+    input:
+        sequence: a list of pairs of leaves
+        network: a network
+    output:
+        if the network is reduced by the sequence, returns the list of all indices,
+        otherwise returns False
+    """
+    network_copy = deepcopy(network)
+    indices = []
+    for i, pair in enumerate(sequence):
+        network_copy, cherry_type = reduce_pair(network_copy, *pair)
+        if cherry_type == CHERRYTYPE.NONE:
+            indices +=[i]
+            if len(network_copy.nw.edges)<=1:
+                return indices
+    return False
 
 class CherryPickingMixin:
     @classmethod
@@ -263,6 +284,4 @@ class CherryPickingMixin:
                 network, *pair, height=height, inplace=True, nodes_by_label=label_leaves
             )
         network._clear_cached()
-        print(sequence)
-        print(network.edges)
         return network
