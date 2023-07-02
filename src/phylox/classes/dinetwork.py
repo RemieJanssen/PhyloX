@@ -107,3 +107,24 @@ def is_tree_child(network):
         if all([network.is_reticulation(child) for child in network.successors(node)]):
             return False
     return True
+
+
+def is_leaf_labeled_single_root_network(network):
+    """
+    Checks if the network is a leaf-labeled network with a single root.
+
+    :return: a boolean value.
+    """
+    rootFound = False
+    for v in network.nodes:
+        if network.in_degree(v) == 0:
+            if rootFound:
+                return False
+            rootFound = True
+        if network.out_degree(v) == 0 and not LABEL_ATTR in network.nodes[v]:
+            return False
+        if network.out_degree(v) == 1 and network.in_degree(v) == 1:
+            return False
+        if network.out_degree(v) > 1 and network.in_degree(v) > 1:
+            return False
+    return True

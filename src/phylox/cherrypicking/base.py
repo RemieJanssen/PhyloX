@@ -11,6 +11,15 @@ class CHERRYTYPE(Enum):
     NONE = 0
 
 
+def find_all_reducible_pairs(network):
+    reducible_pairs = set()
+    for l in self.leaves:
+        reducible_pairs = reducible_pairs.union(
+            find_reducible_pairs_with_second(network, l)
+        )
+    return reducible_pairs
+
+
 def find_reducible_pairs_with_second(N, x):
     """
     Finds a list of reducible pairs (cherries and reticulated cherries) in the
@@ -31,9 +40,9 @@ def find_reducible_pairs_with_second(N, x):
         if sibling_out_degree == 0:
             reducible_pairs.append((sibling, x))
         if sibling_out_degree == 1:
-            for sibling_child in N.successors(sibling):
-                if N.out_degree(sibling_child) == 0:
-                    reducible_pairs.append((sibling_child, x))
+            sibling_child = N.child(sibling)
+            if N.out_degree(sibling_child) == 0:
+                reducible_pairs.append((sibling_child, x))
     return reducible_pairs
 
 
@@ -59,6 +68,32 @@ def find_reticulated_cherry_with_first(N, x):
                 continue
             reticulated_cherries.append((x, ppc))
     return reticulated_cherries
+
+
+def find_cherries_with_first(network, x):
+    """
+    Finds a set of cherries in the network N with leaf x as first element of
+    the pair.
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network to find cherries in.
+    x : str or int
+        The leaf to find cherries with.
+
+    Returns
+    -------
+    set
+        A set of cherries in the network with leaf x as first element of the
+        pair.
+    """
+    cherries = set()
+    parent = network.parent(x)
+    for sibling in network.successors(parent):
+        if sibling in network.leaves and sibling != x:
+            cherries.add((x, sibling))
+    return cherries
 
 
 def is_second_in_reducible_pair(network, x):
@@ -250,6 +285,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
     network._clear_cached()
     return network
 
+
 # TODO: make work wit cps with labels instead of node indices
 def get_indices_of_reducing_pairs(sequence, network):
     """
@@ -267,10 +303,11 @@ def get_indices_of_reducing_pairs(sequence, network):
     for i, pair in enumerate(sequence):
         network_copy, cherry_type = reduce_pair(network_copy, *pair)
         if cherry_type == CHERRYTYPE.NONE:
-            indices +=[i]
-            if len(network_copy.nw.edges)<=1:
+            indices += [i]
+            if len(network_copy.nw.edges) <= 1:
                 return indices
     return False
+
 
 def add_roots_to_sequence(sequence, reduced_trees_per_pair):
     """
@@ -285,21 +322,77 @@ def add_roots_to_sequence(sequence, reduced_trees_per_pair):
     """
     leaves_encountered = set()
     roots = set()
-    #The roots can be found by going back through the sequence and finding pairs where the second element has not been encountered in the sequence yet
+    # The roots can be found by going back through the sequence and finding pairs where the second element has not been encountered in the sequence yet
     for pair in reversed(sequence):
         if pair[1] not in leaves_encountered:
             roots.add(pair[1])
         leaves_encountered.add(pair[0])
         leaves_encountered.add(pair[1])
-    i=0
+    i = 0
     roots = list(roots)
-    #Now add some pairs to make sure each second element is already part of some pair in the sequence read backwards, except for the last pair in the sequence
-    for i in range(len(roots)-1):
-       sequence.append((roots[i],roots[i+1]))
-       #none of the trees are reduced by the new pairs.
-       reduced_trees_per_pair.append(set())
-       i+=1
+    # Now add some pairs to make sure each second element is already part of some pair in the sequence read backwards, except for the last pair in the sequence
+    for i in range(len(roots) - 1):
+        sequence.append((roots[i], roots[i + 1]))
+        # none of the trees are reduced by the new pairs.
+        reduced_trees_per_pair.append(set())
+        i += 1
     return sequence, reduced_trees_per_pair
+
+
+def has_cherry(network, x, y):
+    """
+    Checks whether the pair (x,y) forms a cherry in the network
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network in which we want to check whether (x,y) is a cherry
+    x : string
+        The first element of the pair
+    y : string
+        The second element of the pair
+
+    Returns
+    -------
+    bool
+        True if (x,y) is a cherry in the network, False otherwise
+    """
+    if (not x in network.leaves) or (not y in network.leaves):
+        return False
+    px = network.parent(x)
+    py = network.parent(y)
+    return px == py
+
+
+def cherry_height(network, x, y):
+    """
+    Returns the height of (x,y) if it is a cherry:
+        i.e.: length(p,x)+length(p,y)/2
+    Returns false otherwise
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network in which we want to check the height of cherry (x,y)
+    x : string
+        The first element of the pair
+    y : string
+        The second element of the pair
+
+    Returns
+    -------
+    float
+        The height of the cherry (x,y) if it is a cherry, False otherwise
+    """
+
+    if (not x in network.leaves) or (not y in network.leaves):
+        return False
+    px = network.parent(x)
+    py = network.parent(y)
+    if px != py:
+        raise ValueError("x and y are not in the same cherry")
+    height = [float(network[px][x]["length"]), float(network[py][y]["length"])]
+    return height
 
 
 class CherryPickingMixin:
