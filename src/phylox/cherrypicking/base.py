@@ -58,7 +58,7 @@ def find_reducible_pairs_with_first(N, x):
     if N.is_tree_node(parent):
         return find_cherries_with_first(N, x)
     if N.is_reticulation(parent):
-        return find_reticulated_cherries_with_first(N, x)
+        return find_reticulated_cherry_with_first(N, x)
     else:
         return []
 
@@ -337,7 +337,7 @@ def get_indices_of_reducing_pairs(sequence, network):
         network_copy, cherry_type = reduce_pair(network_copy, *pair)
         if cherry_type == CHERRYTYPE.NONE:
             indices += [i]
-            if len(network_copy.nw.edges) <= 1:
+            if len(network_copy.edges) <= 1:
                 return indices
     return False
 

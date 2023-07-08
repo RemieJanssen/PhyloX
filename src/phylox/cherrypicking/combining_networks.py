@@ -414,7 +414,7 @@ class HybridizationProblem:
                     reduced_trees_for_pair += [i]
                     t.leaves.remove(pair[0])
                 else:
-                    if len(t.nw.edges()) <= 1:
+                    if len(t.edges()) <= 1:
                         del self.trees[i]
         return set(reduced_trees_for_pair)
 
@@ -505,7 +505,7 @@ class HybridizationProblem:
                     pairs = pairs_in_t
                 # Else, the candidate pairs must also be in t, so take intersection
                 else:
-                    pairs = pairs & pairs_in_t
+                    pairs = pairs & set(pairs_in_t)
                 # If we do not have any candidate pairs after checking a tree with l as leaf, we stop.
                 if not pairs:
                     break
