@@ -50,7 +50,7 @@ class HybridizationProblem:
             else:
                 network = n
             self.trees[len(self.trees)] = network
-            self.labels = network.labels
+            self.labels.update(network.labels)
             self.distances = self.distances and all(
                 [LENGTH_ATTR in edge for edge in network.edges]
             )
@@ -158,15 +158,18 @@ class HybridizationProblem:
         CPS = []
         reduced_trees = []
         candidate_leaves = deepcopy(self.leaves)
-        while copy_of_inputs.trees:
+        i = 1
+        while copy_of_inputs.trees and i < 10:
             if progress:
                 print("Sequence has length: " + str(len(CPS)))
                 print(str(len(copy_of_inputs.trees)) + " trees left.\n")
                 print("Reducing trivial pairs")
                 # First reduce trivial cherries
+            print(candidate_leaves)
             new_seq, new_red_trees = copy_of_inputs.Reduce_Trivial_Pairs(
                 candidate_leaves
             )
+            print(new_seq, new_red_trees)
             if progress:
                 print("done")
             CPS += new_seq
@@ -183,6 +186,11 @@ class HybridizationProblem:
             reduced_by_random_cherry = copy_of_inputs.Reduce_Pair_In_All(random_cherry)
             reduced_trees += [reduced_by_random_cherry]
             candidate_leaves = set(random_cherry)
+            i += 1
+            print(candidate_leaves)
+            print(copy_of_inputs.trees)
+            print([t.edges for i, t in copy_of_inputs.trees.items()])
+            assert False
         return CPS, reduced_trees
 
     # Version of the code that uses more memory: stores all reducible pairs.
