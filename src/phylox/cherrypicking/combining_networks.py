@@ -18,13 +18,16 @@ from phylox.cherrypicking import (
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
+# prefix for harmonized node names
+HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"  
+
+
+
 class HybridizationProblem:
     def __init__(self, list_of_networks=None, newick_strings=True):
         # The dictionary of trees
         self.trees = dict()
         # the set of leaf labels of the trees
-        self.labels = dict()
-        self.labels_reversed = dict()
         self.leaves = set()
 
         # the current best sequence we have found for this set of trees
@@ -50,26 +53,32 @@ class HybridizationProblem:
             else:
                 network = n
             self.trees[len(self.trees)] = network
-            self.labels.update(network.labels)
             self.distances = self.distances and all(
                 [LENGTH_ATTR in edge for edge in network.edges]
             )
-        self.leaves = list(self.labels)
 
-        # make a reverse dictionary for the leaf labels, to look up the label of a given node
-        for l, i in self.labels.items():
-            self.labels_reversed[i] = l
+        # check that the labels are unique in each tree 
+        # and that all leaves have a label
+        # also set the leaves of the problem
+        for i, tree in self.trees.items():
+            rename_dict = dict()
+            leaf_labels = set()
+            for l in tree.leaves:
+                leaf_label = tree.nodes[l][LABEL_ATTR]
+                if leaf_label in leaf_labels:
+                    raise ValueError(
+                        "The label {} is not unique in tree {}".format(
+                            leaf_label, i
+                        )
+                    )
+                rename_dict[l] = HARMONIZE_NODES_BY_LABEL_PREFIX + leaf_label
+                leaf_labels.add(leaf_label)
+            self.leaves.update([HARMONIZE_NODES_BY_LABEL_PREFIX + l for l in leaf_labels])
+            nx.relabel_nodes(tree, rename_dict, copy=False)
+            tree._clear_cached()
+        print("leaves: " + str(self.leaves))
+        print([t.edges for t in self.trees.values()])
 
-    # Make a deepcopy of an instance
-    def __deepcopy__(self, memodict={}):
-        copy_inputs = HybridizationProblem()
-        copy_inputs.trees = deepcopy(self.trees, memodict)
-        copy_inputs.labels = deepcopy(self.labels, memodict)
-        copy_inputs.labels_reversed = deepcopy(self.labels_reversed, memodict)
-        copy_inputs.leaves = deepcopy(self.leaves, memodict)
-        #        copy_inputs.best_seq = deepcopy(self.best_seq)
-        #        copy_inputs.best_red_trees = deepcopy(self.best_red_trees)
-        return copy_inputs
 
     # Find new cherry-picking sequences for the trees and update the best found
     def CPSBound(
@@ -118,31 +127,21 @@ class HybridizationProblem:
                 if lengths:
                     heights_best = seq_heights
             print("best sequence has length " + str(len(best)))
-            self.CPS_Compute_Reps += 1
             if time_limit and time.time() - starting_time > time_limit:
                 break
-        self.CPS_Compute_Time += time.time() - starting_time
         new_seq = best
         if lengths:
             if not self.best_seq_with_lengths or len(new_seq) < len(
                 self.best_seq_with_lengths
             ):
-                converted_new_seq = []
-                for pair in new_seq:
-                    converted_new_seq += [
-                        (self.labels_reversed[pair[0]], self.labels_reversed[pair[1]])
-                    ]
+                converted_new_seq = new_seq
                 self.best_seq_with_lengths = converted_new_seq
                 self.best_seq_with_lengths_red_trees = red_trees_best
                 self.best_seq_with_lengths_heights = heights_best
             return self.best_seq_with_lengths
         else:
             if not self.best_seq or len(new_seq) < len(self.best_seq):
-                converted_new_seq = []
-                for pair in new_seq:
-                    converted_new_seq += [
-                        (self.labels_reversed[pair[0]], self.labels_reversed[pair[1]])
-                    ]
+                converted_new_seq = new_seq
                 self.best_seq = converted_new_seq
                 self.best_red_trees = red_trees_best
             return self.best_seq
@@ -181,6 +180,9 @@ class HybridizationProblem:
                 list(copy_of_inputs.trees.items())
             )
             list_of_cherries = find_all_reducible_pairs(random_tree)
+            if len(list_of_cherries) == 0:
+                print("no cherries left")
+                break
             random_cherry = random.choice(list(list_of_cherries))
             CPS += [random_cherry]
             reduced_by_random_cherry = copy_of_inputs.Reduce_Pair_In_All(random_cherry)
@@ -190,7 +192,6 @@ class HybridizationProblem:
             print(candidate_leaves)
             print(copy_of_inputs.trees)
             print([t.edges for i, t in copy_of_inputs.trees.items()])
-            assert False
         return CPS, reduced_trees
 
     # Version of the code that uses more memory: stores all reducible pairs.
@@ -406,11 +407,13 @@ class HybridizationProblem:
         for i in trees_to_reduce:
             if i in self.trees:
                 t = self.trees[i]
-                t, cherry_type = reduce_pair(t, *pair) 
+                t, cherry_type = reduce_pair(t, *pair, inplace=True) 
                 if cherry_type == CHERRYTYPE.NONE:
                     reduced_trees_for_pair += [i]
                     if len(t.nw.edges()) <= 1:
                         del self.trees[i]
+                if cherry_type == CHERRYTYPE.CHERRY:
+                    t.leaves.remove(pair[0])
         return set(reduced_trees_for_pair)
 
     # reduces the trivial pairs in the current set of trees
@@ -424,6 +427,7 @@ class HybridizationProblem:
         while candidate_leaves:
             l = candidate_leaves.pop()
             new_pairs = list(self.Trivial_Pair_With(l))
+            print(new_pairs)
             if new_pairs:
                 seq += new_pairs
                 for p in new_pairs:

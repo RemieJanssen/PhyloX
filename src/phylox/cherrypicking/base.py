@@ -140,9 +140,12 @@ def is_second_in_reducible_pair(network, x):
     return False
 
 
-def reduce_pair(network, x, y, inplace=False):
+def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
     if not inplace:
         network = deepcopy(network)
+    if nodes_by_label:
+        x = network.labels[x][0]
+        y = network.labels[y][0]
 
     cherry_type = check_reducible_pair(network, x, y)
     if cherry_type == CHERRYTYPE.CHERRY:

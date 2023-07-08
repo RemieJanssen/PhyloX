@@ -8,8 +8,9 @@ class TestHybridizationProblem(unittest.TestCase):
     def test_one_tree(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4)],
+            labels=[(3, "A"), (4, "B")],
         )
         problem = HybridizationProblem([network], newick_strings=False)
-        result = problem.CPSBound()
+        result = problem.CPSBound(progress=True)
         print(result)
         self.assertEqual(len(result), 1)
