@@ -408,12 +408,14 @@ class HybridizationProblem:
             if i in self.trees:
                 t = self.trees[i]
                 t, cherry_type = reduce_pair(t, *pair, inplace=True) 
-                if cherry_type == CHERRYTYPE.NONE:
+                if cherry_type == CHERRYTYPE.RETICULATEDCHERRY:
                     reduced_trees_for_pair += [i]
+                elif cherry_type == CHERRYTYPE.CHERRY:
+                    reduced_trees_for_pair += [i]
+                    t.leaves.remove(pair[0])
+                else:
                     if len(t.nw.edges()) <= 1:
                         del self.trees[i]
-                if cherry_type == CHERRYTYPE.CHERRY:
-                    t.leaves.remove(pair[0])
         return set(reduced_trees_for_pair)
 
     # reduces the trivial pairs in the current set of trees
