@@ -129,20 +129,18 @@ class HybridizationProblem:
             print("best sequence has length " + str(len(best)))
             if time_limit and time.time() - starting_time > time_limit:
                 break
-        new_seq = best
+        new_seq = [(x[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :], y[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :]) for (x, y) in best]
         if lengths:
             if not self.best_seq_with_lengths or len(new_seq) < len(
                 self.best_seq_with_lengths
             ):
-                converted_new_seq = new_seq
-                self.best_seq_with_lengths = converted_new_seq
+                self.best_seq_with_lengths = new_seq
                 self.best_seq_with_lengths_red_trees = red_trees_best
                 self.best_seq_with_lengths_heights = heights_best
             return self.best_seq_with_lengths
         else:
             if not self.best_seq or len(new_seq) < len(self.best_seq):
-                converted_new_seq = new_seq
-                self.best_seq = converted_new_seq
+                self.best_seq = new_seq
                 self.best_red_trees = red_trees_best
             return self.best_seq
 

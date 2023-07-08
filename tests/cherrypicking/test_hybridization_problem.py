@@ -2,7 +2,7 @@ import unittest
 
 from phylox import DiNetwork
 from phylox.cherrypicking.combining_networks import HybridizationProblem
-
+from phylox.cherrypicking.tree_child_sequences import check_cherry_picking_sequence
 
 class TestHybridizationProblem(unittest.TestCase):
     def test_one_tree(self):
@@ -116,3 +116,43 @@ class TestHybridizationProblem(unittest.TestCase):
         result = problem.CPSBound(progress=True)
         print(result)
         self.assertEqual(len(result), 3)
+
+    def test_multiple_large_networks_same_labels(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,9), (6,10)],
+            labels=[(7, "A"), (8, "B"), (9, "C"), (10, "D")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,8), (6,10), (8,9), (9,11), (9,12)],
+            labels=[(10, "A"), (7, "B"), (11, "C"), (12, "D")],
+        )
+        network3 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,8), (6,10), (8,9), (9,11), (9,12)],
+            labels=[(10, "A"), (11, "B"), (12, "C"), (7, "D")],
+        )
+        networks = [network1, network2, network3]
+        problem = HybridizationProblem(networks, newick_strings=False)
+        result = problem.CPSBound(progress=True)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
+        
+
+
+    def test_multiple_large_networks_different_labels(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,9), (6,10)],
+            labels=[(7, "A"), (8, "B"), (9, "C"), (10, "D")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,8), (6,10), (8,9), (9,11), (9,12)],
+            labels=[(10, "F"), (7, "B"), (11, "C"), (12, "E")],
+        )
+        network3 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,7), (5,8), (6,8), (6,10), (8,9), (9,11), (9,12)],
+            labels=[(10, "A"), (11, "E"), (12, "G"), (7, "F")],
+        )
+        networks = [network1, network2, network3]
+        problem = HybridizationProblem(networks, newick_strings=False)
+        result = problem.CPSBound(progress=True)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
