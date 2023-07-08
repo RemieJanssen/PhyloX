@@ -17,7 +17,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
             self.label_to_node_dict[label[1]] = label[0]
 
     def _clear_cached(self):
-        for attr in ["_leaves", "_reticulations", "_roots", "_reticulation_number"]:
+        for attr in ["_leaves", "_reticulations", "_roots", "_reticulation_number, _labels"]:
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -64,6 +64,22 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
                 [max(self.in_degree(node) - 1, 0) for node in self.nodes]
             )
         return self._reticulation_number
+
+    def _set_labels(self):
+        self._labels = {}
+        for node in self.nodes:
+            if LABEL_ATTR in self.nodes[node]:
+                label = self.nodes[node][LABEL_ATTR]
+                if label not in self._labels:
+                    self._labels[label] = []
+                self._labels[self.nodes[node][LABEL_ATTR]] += [node]
+        return self._labels
+
+    @property
+    def labels(self):
+        if not hasattr(self, "_labels"):
+            self._set_labels()
+        return self._labels
 
     def child(self, node, exclude=[], randomNodes=False):
         """

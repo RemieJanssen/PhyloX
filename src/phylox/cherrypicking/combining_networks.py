@@ -1,5 +1,6 @@
 import networkx as nx
 import random
+import time
 from copy import deepcopy
 import numpy as np
 
@@ -9,14 +10,16 @@ from phylox.cherrypicking import (
     check_reducible_pair,
     find_reducible_pairs_with_second,
     find_reticulated_cherry_with_first,
+    find_reducible_pairs_with_first,
+    find_all_reducible_pairs,
     reduce_pair,
     get_indices_of_reducing_pairs,
     add_roots_to_sequence,
 )
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
-
-class HybridizationProblemTreeSet:
-    def __init__(self, list_of_networks, newick_strings=True):
+class HybridizationProblem:
+    def __init__(self, list_of_networks=None, newick_strings=True):
         # The dictionary of trees
         self.trees = dict()
         # the set of leaf labels of the trees
@@ -40,13 +43,14 @@ class HybridizationProblemTreeSet:
         self.distances = True
 
         # read the input trees in 'newick_strings'
+        list_of_networks = list_of_networks or []
         for n in list_of_networks:
             if newick_strings:
                 network = DiNetwork(newick=n)
             else:
                 network = n
             self.trees[len(self.trees)] = network
-            self.labels, network.labels
+            self.labels = network.labels
             self.distances = self.distances and all(
                 [LENGTH_ATTR in edge for edge in network.edges]
             )
@@ -58,7 +62,7 @@ class HybridizationProblemTreeSet:
 
     # Make a deepcopy of an instance
     def __deepcopy__(self, memodict={}):
-        copy_inputs = HybridizationProblemTreeSet()
+        copy_inputs = HybridizationProblem()
         copy_inputs.trees = deepcopy(self.trees, memodict)
         copy_inputs.labels = deepcopy(self.labels, memodict)
         copy_inputs.labels_reversed = deepcopy(self.labels_reversed, memodict)
@@ -173,7 +177,7 @@ class HybridizationProblemTreeSet:
             random_index, random_tree = random.choice(
                 list(copy_of_inputs.trees.items())
             )
-            list_of_cherries = random_tree.Find_All_Reducible_Pairs()
+            list_of_cherries = find_all_reducible_pairs(random_tree)
             random_cherry = random.choice(list(list_of_cherries))
             CPS += [random_cherry]
             reduced_by_random_cherry = copy_of_inputs.Reduce_Pair_In_All(random_cherry)
@@ -224,7 +228,7 @@ class HybridizationProblemTreeSet:
             random_index, random_tree = random.choice(
                 list(copy_of_inputs.trees.items())
             )
-            list_of_cherries = random_tree.Find_All_Reducible_Pairs()
+            list_of_cherries = find_all_reducible_pairs(random_tree)
             random_cherry = random.choice(list(list_of_cherries))
 
             # OR: (Get a random reducible pair from all pairs)
@@ -352,7 +356,7 @@ class HybridizationProblemTreeSet:
     def Find_All_Pairs(self):
         reducible_pairs = dict()
         for i, t in self.trees.items():
-            red_pairs_t = t.Find_All_Reducible_Pairs()
+            red_pairs_t = find_all_reducible_pairs(t)
             for pair in red_pairs_t:
                 if pair in reducible_pairs:
                     reducible_pairs[pair].add(i)
@@ -372,7 +376,7 @@ class HybridizationProblemTreeSet:
         for index in new_red_trees:
             if index in self.trees:
                 t = self.trees[index]
-                red_pairs_t = t.Find_All_Reducible_Pairs()
+                red_pairs_t = find_all_reducible_pairs(t)
                 for pair in red_pairs_t:
                     if pair in reducible_pairs:
                         reducible_pairs[pair].add(index)
@@ -394,7 +398,8 @@ class HybridizationProblemTreeSet:
         for i in trees_to_reduce:
             if i in self.trees:
                 t = self.trees[i]
-                if t.reduce_pair(*pair):
+                t, cherry_type = reduce_pair(t, *pair) 
+                if cherry_type == CHERRYTYPE.NONE:
                     reduced_trees_for_pair += [i]
                     if len(t.nw.edges()) <= 1:
                         del self.trees[i]
@@ -480,7 +485,7 @@ class HybridizationProblemTreeSet:
             # If the leaf occurs in t
             if l in t.leaves:
                 # Compute reducible pairs of t with the leaf as first coordinate
-                pairs_in_t = t.Find_Pairs_With_First(l)
+                pairs_in_t = find_reducible_pairs_with_first(t, l)
                 # If we did not have a set of candidate pairs yet, use pairs_in_t
                 if not pairs:
                     pairs = pairs_in_t

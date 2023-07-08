@@ -13,7 +13,7 @@ class CHERRYTYPE(Enum):
 
 def find_all_reducible_pairs(network):
     reducible_pairs = set()
-    for l in self.leaves:
+    for l in network.leaves:
         reducible_pairs = reducible_pairs.union(
             find_reducible_pairs_with_second(network, l)
         )
@@ -45,11 +45,41 @@ def find_reducible_pairs_with_second(N, x):
                 reducible_pairs.append((sibling_child, x))
     return reducible_pairs
 
+def find_reducible_pairs_with_first(N, x):
+    """
+    Finds a list of reducible pairs (cherries and reticulated cherries) in the
+    network N with leaf x as first element of the pair.
+    """
+    if not N.is_leaf(x):
+        raise ValueError("x must be a leaf of N")
+
+    parent = N.parent(x)
+
+    if N.is_tree_node(parent):
+        return find_cherries_with_first(N, x)
+    if N.is_reticulation(parent):
+        return find_reticulated_cherries_with_first(N, x)
+    else:
+        return []
+
 
 def find_reticulated_cherry_with_first(N, x):
     """
     Finds a list of reticulated cherries in the network N with leaf x as first
     element of the pair.
+
+    Parameters
+    ----------
+    N : phylox.DiNetwork
+        The network to find reticulated cherries in.
+    x : str or int
+        The leaf to find reticulated cherries with.
+
+    Returns
+    -------
+    list
+        A list of reticulated cherries in the network with leaf x as first
+        element of the pair.
     """
 
     if not N.is_leaf(x):
