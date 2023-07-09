@@ -77,8 +77,6 @@ class HybridizationProblem:
             self.leaves.update([HARMONIZE_NODES_BY_LABEL_PREFIX + l for l in leaf_labels])
             nx.relabel_nodes(tree, rename_dict, copy=False)
             tree._clear_cached()
-        print("leaves: " + str(self.leaves))
-        print([t.edges for t in self.trees.values()])
 
 
     # Find new cherry-picking sequences for the trees and update the best found
@@ -175,19 +173,13 @@ class HybridizationProblem:
                 list(copy_of_inputs.trees.items())
             )
             list_of_cherries = find_all_reducible_pairs(random_tree)
-            # TODO: incorrect, this only checks if there are cherries in ONE OF THE TREES
-            if len(list_of_cherries) == 0:
-                print("no cherries left")
-                break
             random_cherry = random.choice(list(list_of_cherries))
             CPS += [random_cherry]
+
             reduced_by_random_cherry = copy_of_inputs.Reduce_Pair_In_All(random_cherry)
             reduced_trees += [reduced_by_random_cherry]
             candidate_leaves = set(random_cherry)
             i += 1
-            print(candidate_leaves)
-            print(copy_of_inputs.trees)
-            print([t.edges for i, t in copy_of_inputs.trees.items()])
         return CPS, reduced_trees
 
     # Version of the code that uses more memory: stores all reducible pairs.
@@ -425,7 +417,6 @@ class HybridizationProblem:
         while candidate_leaves:
             l = candidate_leaves.pop()
             new_pairs = list(self.Trivial_Pair_With(l))
-            print(new_pairs)
             if new_pairs:
                 seq += new_pairs
                 for p in new_pairs:
@@ -446,7 +437,6 @@ class HybridizationProblem:
             l = candidate_leaves.pop()
             new_pairs = list(self.Trivial_Pair_With(l))
             if new_pairs:
-                #                print("found a trivial pair")
                 seq += new_pairs
                 for p in new_pairs:
                     red_trees_p = self.Reduce_Pair_In_All(
@@ -472,7 +462,6 @@ class HybridizationProblem:
             l = candidate_leaves.pop()
             new_pairs = list(self.Trivial_Pair_With(l))
             if new_pairs:
-                #                print("found a trivial pair")
                 seq += new_pairs
                 for p in new_pairs:
                     height_p = self.Height_Pair(p, reducible_pairs[p])
