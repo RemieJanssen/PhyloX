@@ -155,4 +155,5 @@ class TestHybridizationProblem(unittest.TestCase):
         problem = HybridizationProblem(networks, newick_strings=False)
         result = problem.CPSBound(progress=True)
         for network in networks:
+            print(network.edges(data=True))
             self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))

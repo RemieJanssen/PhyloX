@@ -44,7 +44,7 @@ def find_tree_child_sequence(network, labels=False):
 def check_cherry_picking_sequence(N, cherry_picking_sequence, labels=False):
     if labels:
         cherry_picking_sequence = [
-            (N.label_to_node_dict[x], N.label_to_node_dict[y])
+            (N.label_to_node_dict.get(x, None), N.label_to_node_dict.get(y, None))
             for x, y in cherry_picking_sequence
         ]
     for pair in cherry_picking_sequence:
