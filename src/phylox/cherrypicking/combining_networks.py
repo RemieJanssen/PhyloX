@@ -1,27 +1,27 @@
-import networkx as nx
 import random
 import time
 from copy import deepcopy
+
+import networkx as nx
 import numpy as np
 
 from phylox import DiNetwork
 from phylox.cherrypicking import (
     CHERRYTYPE,
+    add_roots_to_sequence,
     check_reducible_pair,
+    cherry_height,
+    find_all_reducible_pairs,
+    find_reducible_pairs_with_first,
     find_reducible_pairs_with_second,
     find_reticulated_cherry_with_first,
-    find_reducible_pairs_with_first,
-    find_all_reducible_pairs,
-    reduce_pair,
     get_indices_of_reducing_pairs,
-    add_roots_to_sequence,
-    cherry_height,
+    reduce_pair,
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
 # prefix for harmonized node names
-HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"  
-
+HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
 
 
 class HybridizationProblem:
@@ -58,7 +58,7 @@ class HybridizationProblem:
                 [LENGTH_ATTR in edge[2] for edge in network.edges(data=True)]
             )
 
-        # check that the labels are unique in each tree 
+        # check that the labels are unique in each tree
         # and that all leaves have a label
         # also set the leaves of the problem
         for i, tree in self.trees.items():
@@ -68,16 +68,15 @@ class HybridizationProblem:
                 leaf_label = tree.nodes[l][LABEL_ATTR]
                 if leaf_label in leaf_labels:
                     raise ValueError(
-                        "The label {} is not unique in tree {}".format(
-                            leaf_label, i
-                        )
+                        "The label {} is not unique in tree {}".format(leaf_label, i)
                     )
                 rename_dict[l] = HARMONIZE_NODES_BY_LABEL_PREFIX + leaf_label
                 leaf_labels.add(leaf_label)
-            self.leaves.update([HARMONIZE_NODES_BY_LABEL_PREFIX + l for l in leaf_labels])
+            self.leaves.update(
+                [HARMONIZE_NODES_BY_LABEL_PREFIX + l for l in leaf_labels]
+            )
             nx.relabel_nodes(tree, rename_dict, copy=False)
             tree._clear_cached()
-
 
     # Find new cherry-picking sequences for the trees and update the best found
     def CPSBound(
@@ -128,7 +127,13 @@ class HybridizationProblem:
             print("best sequence has length " + str(len(best)))
             if time_limit and time.time() - starting_time > time_limit:
                 break
-        new_seq = [(x[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :], y[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :]) for (x, y) in best]
+        new_seq = [
+            (
+                x[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :],
+                y[len(HARMONIZE_NODES_BY_LABEL_PREFIX) :],
+            )
+            for (x, y) in best
+        ]
         if lengths:
             if not self.best_seq_with_lengths or len(new_seq) < len(
                 self.best_seq_with_lengths
@@ -398,7 +403,7 @@ class HybridizationProblem:
         for i in trees_to_reduce:
             if i in self.trees:
                 t = self.trees[i]
-                t, cherry_type = reduce_pair(t, *pair, inplace=True) 
+                t, cherry_type = reduce_pair(t, *pair, inplace=True)
                 if cherry_type == CHERRYTYPE.RETICULATEDCHERRY:
                     reduced_trees_for_pair += [i]
                 elif cherry_type == CHERRYTYPE.CHERRY:

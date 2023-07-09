@@ -45,6 +45,7 @@ def find_reducible_pairs_with_second(N, x):
                 reducible_pairs.append((sibling_child, x))
     return reducible_pairs
 
+
 def find_reducible_pairs_with_first(N, x):
     """
     Finds a list of reducible pairs (cherries and reticulated cherries) in the
@@ -184,6 +185,7 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
         suppress_node(network, px)
         suppress_node(network, py)
     return network, cherry_type
+
 
 def check_reducible_pair(network, x, y):
     if network.has_node(x):

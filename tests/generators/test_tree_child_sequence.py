@@ -1,12 +1,12 @@
 import unittest
 
+from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
 from phylox.generators.randomTC import (
     generate_network_random_tree_child_sequence,
     random_tree_child_sequence,
     random_tree_child_subsequence,
 )
-from phylox import DiNetwork
 
 
 class TestRandomTC(unittest.TestCase):

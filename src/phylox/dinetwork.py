@@ -15,9 +15,13 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
         for label_tuple in self.label_tuples:
             self.add_node(label_tuple[0], label=label_tuple[1])
 
-
     def _clear_cached(self):
-        for attr in ["_leaves", "_reticulations", "_roots", "_reticulation_number, _labels, _label_to_node_dict"]:
+        for attr in [
+            "_leaves",
+            "_reticulations",
+            "_roots",
+            "_reticulation_number, _labels, _label_to_node_dict",
+        ]:
             if hasattr(self, attr):
                 delattr(self, attr)
 

@@ -1,5 +1,6 @@
 from phylox.constants import LENGTH_ATTR
 
+
 def find_unused_node(network, exclude=[]):
     """
     Find an unused node in the network.

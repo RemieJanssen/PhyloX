@@ -1,15 +1,17 @@
-import networkx as nx
-import random
-import matplotlib.pyplot as plt
-import os
 import ast
+import os
+import random
 import re
 import sys
 import time
 from copy import deepcopy
 
-memodict = {}
+import networkx as nx
 import numpy as np
+
+import matplotlib.pyplot as plt
+
+memodict = {}
 
 
 ################################################################################
