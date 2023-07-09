@@ -166,9 +166,6 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
         The type of the reducible pair.
     """
 
-    print("reduce_pair", x, y)
-    print(network.edges(data=True))
-
     if not inplace:
         network = deepcopy(network)
     if nodes_by_label:
@@ -186,8 +183,6 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
         network.remove_edge(py, px)
         suppress_node(network, px)
         suppress_node(network, py)
-    print(network.edges(data=True))
-
     return network, cherry_type
 
 def check_reducible_pair(network, x, y):
@@ -336,7 +331,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
     return network
 
 
-# TODO: make work wit cps with labels instead of node indices
+# TODO: make work with cps with labels instead of node indices
 def get_indices_of_reducing_pairs(sequence, network):
     """
     Checks which pairs of a sequence actually reduce a given network
@@ -345,17 +340,17 @@ def get_indices_of_reducing_pairs(sequence, network):
         sequence: a list of pairs of leaves
         network: a network
     output:
-        if the network is reduced by the sequence, returns the list of all indices,
+        if the network is reduced by the sequence, returns the list of all indices of pairs that reduce the network
         otherwise returns False
     """
     network_copy = deepcopy(network)
     indices = []
     for i, pair in enumerate(sequence):
         network_copy, cherry_type = reduce_pair(network_copy, *pair)
-        if cherry_type == CHERRYTYPE.NONE:
+        if cherry_type != CHERRYTYPE.NONE:
             indices += [i]
-            if len(network_copy.edges) <= 1:
-                return indices
+        if len(network_copy.edges) <= 1:
+            return indices
     return False
 
 

@@ -107,11 +107,13 @@ class HybridizationProblem:
             else:
                 new, reduced_trees = Heuristic(progress=progress)
                 print("found sequence of length: " + str(len(new)))
+                print(new)
                 print("improving sequence")
                 new, reduced_trees = self.Improve_Sequence(
                     new, reduced_trees, progress=progress
                 )
                 print("new length = " + str(len(new)))
+                print(new)
             print("adding roots")
             new, reduced_trees = add_roots_to_sequence(new, reduced_trees)
             if lengths:
@@ -508,7 +510,8 @@ class HybridizationProblem:
             for j in relevant_tree_indices:
                 # Check if the shorter sequence reduces the trees, and if so, record which pairs reduced a cherry in which tree
                 new_relevant_pairs_for_trees[j] = get_indices_of_reducing_pairs(
-                    seq[:i] + seq[i + 1 :], self.trees[j]
+                    seq[:i] + seq[i + 1 :],
+                    self.trees[j],
                 )
                 if not new_relevant_pairs_for_trees[j]:
                     redundant = False

@@ -15,6 +15,7 @@ class TestHybridizationProblem(unittest.TestCase):
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         self.assertEqual(len(result), 1)
+        self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
 
     def test_multiple_missing_lengths(self):
         network1 = DiNetwork(
@@ -42,10 +43,13 @@ class TestHybridizationProblem(unittest.TestCase):
             edges=[(1, 2, {LENGTH_ATTR: 1.5}), (2, 3, {LENGTH_ATTR: 1.2}), (2, 4, {LENGTH_ATTR: 0.8})],
             labels=[(3, "A"), (4, "B")],
         )
-        problem = HybridizationProblem([network1, network2], newick_strings=False)
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         self.assertEqual(len(result), 1)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
 
     def test_two_trees_different_but_trivial(self):
         network1 = DiNetwork(
@@ -56,12 +60,15 @@ class TestHybridizationProblem(unittest.TestCase):
             edges=[(1, 2, {LENGTH_ATTR: 1.0}), (2, 3, {LENGTH_ATTR: 1.0}), (2, 4, {LENGTH_ATTR: 1.0})],
             labels=[(3, "C"), (4, "D")],
         )
-        problem = HybridizationProblem([network1, network2], newick_strings=False)
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         # resulting sequence should reduce both, but also be a valid sequence
         # hence, it also adds a root.
         self.assertEqual(len(result), 3)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
 
     def test_one_network(self):
         network = DiNetwork(
@@ -72,6 +79,7 @@ class TestHybridizationProblem(unittest.TestCase):
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         self.assertEqual(len(result), 2)
+        self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
 
     def test_two_networks_trivial(self):
         network1 = DiNetwork(
@@ -82,10 +90,14 @@ class TestHybridizationProblem(unittest.TestCase):
             edges=[(1, 2, {LENGTH_ATTR: 0.8}), (2, 3, {LENGTH_ATTR: 1.0}), (2, 4, {LENGTH_ATTR: 1.4}), (3,4, {LENGTH_ATTR: 1.1}), (3,5, {LENGTH_ATTR: 1.0}), (4,6, {LENGTH_ATTR: 1.6})],
             labels=[(5, "A"), (6, "B")],
         )
-        problem = HybridizationProblem([network1, network2], newick_strings=False)
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         self.assertEqual(len(result), 2)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
+
 
     def test_two_networks_nontrivial(self):
         network1 = DiNetwork(
@@ -96,7 +108,10 @@ class TestHybridizationProblem(unittest.TestCase):
             edges=[(1, 2, {LENGTH_ATTR: 0.8}), (2, 3, {LENGTH_ATTR: 1.0}), (2, 4, {LENGTH_ATTR: 1.4}), (3,4, {LENGTH_ATTR: 1.1}), (3,5, {LENGTH_ATTR: 1.0}), (4,6, {LENGTH_ATTR: 1.6})],
             labels=[(5, "B"), (6, "A")],
         )
-        problem = HybridizationProblem([network1, network2], newick_strings=False)
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
         result = problem.CPSBound(lengths=True, progress=True)
         print(result)
         self.assertEqual(len(result), 3)
+        for network in networks:
+            self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
