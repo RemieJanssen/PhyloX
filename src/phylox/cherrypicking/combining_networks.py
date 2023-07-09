@@ -278,6 +278,8 @@ class HybridizationProblem:
         if progress:
             print("found all reducible pairs")
         while copy_of_inputs.trees:
+            for network in copy_of_inputs.trees.values():
+                print(network.edges(data=True))
             if progress:
                 print("Sequence has length: " + str(len(CPS)))
                 print(str(len(copy_of_inputs.trees)) + " trees left.\n")
@@ -363,10 +365,9 @@ class HybridizationProblem:
         for i, t in self.trees.items():
             red_pairs_t = find_all_reducible_pairs(t)
             for pair in red_pairs_t:
-                if pair in reducible_pairs:
-                    reducible_pairs[pair].add(i)
-                else:
-                    reducible_pairs[pair] = set([i])
+                if pair not in reducible_pairs:
+                    reducible_pairs[pair] = set()
+                reducible_pairs[pair].add(i)
         return reducible_pairs
 
     # Returns the updated dictionary of reducible pairs in all trees after a reduction (with the trees they reduce as values)

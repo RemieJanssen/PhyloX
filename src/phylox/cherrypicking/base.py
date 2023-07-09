@@ -1,7 +1,7 @@
 from copy import deepcopy
 from enum import Enum
 
-from phylox.base import find_unused_node
+from phylox.base import find_unused_node, suppress_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
 
@@ -141,6 +141,34 @@ def is_second_in_reducible_pair(network, x):
 
 
 def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
+    """
+    Reduces the reducible pair (x,y) in the network.
+    Note: Cache of network properties is not updated.
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network to reduce the reducible pair in.
+    x : str or int
+        The first element of the reducible pair.
+    y : str or int
+        The second element of the reducible pair.
+    inplace : bool
+        If True, the network is modified in place.
+    nodes_by_label : bool
+        If True, the nodes x and y are interpreted as labels.
+
+    Returns
+    -------
+    phylox.DiNetwork
+        The network with the reducible pair reduced.
+    CHERRYTYPE
+        The type of the reducible pair.
+    """
+
+    print("reduce_pair", x, y)
+    print(network.edges(data=True))
+
     if not inplace:
         network = deepcopy(network)
     if nodes_by_label:
@@ -151,27 +179,16 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
     if cherry_type == CHERRYTYPE.CHERRY:
         px = network.parent(x)
         network.remove_node(x)
-        if network.out_degree(px) == 1:
-            ppx = network.parent(px)
-            network.remove_node(px)
-            network.add_edge(ppx, y)
+        suppress_node(network, px)
     if cherry_type == CHERRYTYPE.RETICULATEDCHERRY:
         px = network.parent(x)
         py = network.parent(y)
         network.remove_edge(py, px)
-        if network.in_degree(px) == 1:
-            ppx = network.parent(px)
-            network.add_edge(ppx, x)
-            network.remove_node(px)
-        if network.out_degree(py) == 1:
-            ppy = network.parent(py)
-            network.add_edge(ppy, y)
-            network.remove_node(py)
-    if inplace:
-        # TODO empty cache for network properties?
-        pass
-    return network, cherry_type
+        suppress_node(network, px)
+        suppress_node(network, py)
+    print(network.edges(data=True))
 
+    return network, cherry_type
 
 def check_reducible_pair(network, x, y):
     if network.has_node(x):
@@ -417,15 +434,23 @@ def cherry_height(network, x, y):
     float
         The height of the cherry (x,y) if it is a cherry, False otherwise
     """
+    print("cherry_height")
+    print(network.edges(data=True))
 
     if (not x in network.leaves) or (not y in network.leaves):
         return False
     px = network.parent(x)
     py = network.parent(y)
-    if px != py:
-        raise ValueError("x and y are not in the same cherry")
-    height = [float(network[px][x]["length"]), float(network[py][y]["length"])]
-    return height
+    if px == py:
+        height = [network[px][x][LENGTH_ATTR], network[py][y][LENGTH_ATTR]]
+        return height
+    if (py, px) in network.edges:
+        height = [
+            network[px][x][LENGTH_ATTR] + network[py][px][LENGTH_ATTR],
+            network[py][y][LENGTH_ATTR],
+        ]
+        return height
+    raise ValueError("x and y are not in the same cherry")
 
 
 class CherryPickingMixin:
@@ -434,8 +459,6 @@ class CherryPickingMixin:
         network = cls()
         heights = heights or [[1, 1]] * len(sequence)
         for pair, height in zip(reversed(sequence), reversed(heights)):
-            print("edges", network.edges(data=True))
-            print("nodes", network.nodes(data=True))
             add_pair(
                 network, *pair, height=height, inplace=True, nodes_by_label=label_leaves
             )
