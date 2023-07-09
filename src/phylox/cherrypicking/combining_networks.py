@@ -162,11 +162,9 @@ class HybridizationProblem:
                 print(str(len(copy_of_inputs.trees)) + " trees left.\n")
                 print("Reducing trivial pairs")
                 # First reduce trivial cherries
-            print(candidate_leaves)
             new_seq, new_red_trees = copy_of_inputs.Reduce_Trivial_Pairs(
                 candidate_leaves
             )
-            print(new_seq, new_red_trees)
             if progress:
                 print("done")
             CPS += new_seq
@@ -178,6 +176,7 @@ class HybridizationProblem:
                 list(copy_of_inputs.trees.items())
             )
             list_of_cherries = find_all_reducible_pairs(random_tree)
+            # TODO: incorrect, this only checks if there are cherries in ONE OF THE TREES
             if len(list_of_cherries) == 0:
                 print("no cherries left")
                 break
@@ -411,9 +410,8 @@ class HybridizationProblem:
                 elif cherry_type == CHERRYTYPE.CHERRY:
                     reduced_trees_for_pair += [i]
                     t.leaves.remove(pair[0])
-                else:
-                    if len(t.edges()) <= 1:
-                        del self.trees[i]
+                if len(t.edges()) <= 1:
+                    del self.trees[i]
         return set(reduced_trees_for_pair)
 
     # reduces the trivial pairs in the current set of trees
@@ -497,7 +495,7 @@ class HybridizationProblem:
             # If the leaf occurs in t
             if l in t.leaves:
                 # Compute reducible pairs of t with the leaf as first coordinate
-                pairs_in_t = find_reducible_pairs_with_first(t, l)
+                pairs_in_t = set(find_reducible_pairs_with_first(t, l))
                 # If we did not have a set of candidate pairs yet, use pairs_in_t
                 if not pairs:
                     pairs = pairs_in_t
