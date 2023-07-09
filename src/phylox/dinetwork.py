@@ -11,13 +11,17 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
         edges = kwargs.get("edges", [])
         super().__init__(edges, *args, **kwargs)
         self.add_nodes_from(kwargs.get("nodes", []))
-        self.label_to_node_dict = {}
-        for label in kwargs.get("labels", []):
-            self.nodes[label[0]][LABEL_ATTR] = label[1]
-            self.label_to_node_dict[label[1]] = label[0]
+        self.label_tuples = kwargs.get("labels", [])
+        for label_tuple in self.label_tuples:
+            self.add_node(label_tuple[0], label=label_tuple[1])
 
     def _clear_cached(self):
-        for attr in ["_leaves", "_reticulations", "_roots", "_reticulation_number"]:
+        for attr in [
+            "_leaves",
+            "_reticulations",
+            "_roots",
+            "_reticulation_number, _labels, _label_to_node_dict",
+        ]:
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -28,6 +32,19 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
     def _set_leaves(self):
         self._leaves = set([node for node in self.nodes if self.is_leaf(node)])
         return self._leaves
+
+    def _set_label_to_node_dict(self):
+        self._label_to_node_dict = {}
+        for node in self.nodes:
+            if LABEL_ATTR in self.nodes[node]:
+                self._label_to_node_dict[self.nodes[node][LABEL_ATTR]] = node
+        return self._label_to_node_dict
+
+    @property
+    def label_to_node_dict(self):
+        if not hasattr(self, "_label_to_node_dict"):
+            self._set_label_to_node_dict()
+        return self._label_to_node_dict
 
     @property
     def leaves(self):
@@ -64,6 +81,22 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
                 [max(self.in_degree(node) - 1, 0) for node in self.nodes]
             )
         return self._reticulation_number
+
+    def _set_labels(self):
+        self._labels = {}
+        for node in self.nodes:
+            if LABEL_ATTR in self.nodes[node]:
+                label = self.nodes[node][LABEL_ATTR]
+                if label not in self._labels:
+                    self._labels[label] = []
+                self._labels[self.nodes[node][LABEL_ATTR]] += [node]
+        return self._labels
+
+    @property
+    def labels(self):
+        if not hasattr(self, "_labels"):
+            self._set_labels()
+        return self._labels
 
     def child(self, node, exclude=[], randomNodes=False):
         """

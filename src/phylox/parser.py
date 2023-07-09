@@ -196,3 +196,86 @@
 #     """
 #     for node, value in label_dict.items():
 #         network.node[node]['label'] = value
+
+
+################################################################################
+################################################################################
+################################################################################
+########                                                           #############
+########                     AAE CutTree CLASS                     #############
+########                                                           #############
+################################################################################
+################################################################################
+################################################################################
+
+
+# #A class that represents a network as a tree where hybrid edges have been cut at the hybrid nodes.
+# #Used as an intermediate to find the Newick string of a network.
+# class CutTree:
+#     def __init__(self, network = None, current_node = None, leaf_labels= dict()):
+#          self.hybrid_nodes = dict()
+#          self.no_of_hybrids = 0
+#          self.root = None
+#          self.nw = deepcopy(network)
+#          self.current_node = current_node
+#          self.leaf_labels = leaf_labels
+#          if not self.current_node:
+#              self.current_node = 2*len(self.nw)
+#          if network:
+#              self.Find_Root()
+#              network_nodes = list(self.nw.nodes)
+#              for node in network_nodes:
+#                  if self.nw.in_degree(node)>1:
+#                      self.no_of_hybrids+=1
+#                      enumerated_parents = list(enumerate(self.nw.predecessors(node)))
+#                      for i,parent in enumerated_parents:
+#                          if i==0:
+#                              self.hybrid_nodes[node]=self.no_of_hybrids
+#                          else:
+#                              self.nw.add_edges_from([(parent,self.current_node,self.nw[parent][node])])
+#                              self.nw.remove_edge(parent,node)
+#                              self.hybrid_nodes[self.current_node] = self.no_of_hybrids
+#                              self.current_node+=1
+# #             self.CheckLabelSet()
+
+#     #Returns the root node of the tree
+#     def Find_Root(self):
+#         for node in self.nw.nodes:
+#             if self.nw.in_degree(node)==0:
+#                 self.root = node
+#                 return node
+
+#     #Returns a newick string for the tree
+#     def Newick(self,probabilities = False):
+#         return self.Newick_Recursive(self.root,probabilities = probabilities)+";"
+
+#     #Returns the newick string for the subtree with given root
+#     #does not append the; at the end, for the full newick string of the tree, use Newick()
+#     # auxiliary function for finding the newick string for the tree
+#     def Newick_Recursive(self,root,probabilities = False):
+#         if self.nw.out_degree(root)==0:
+#             if root in self.hybrid_nodes:
+#                 return "#H"+str(self.hybrid_nodes[root])
+#             elif root in self.leaf_labels:
+#                 return self.leaf_labels[root]
+#             return str(root)
+#         Newick = ""
+#         for v in self.nw.successors(root):
+#             Newick+= self.Newick_Recursive(v,probabilities)+":"+str(self.nw[root][v]['length'])
+#             if probabilities and v in self.hybrid_nodes:
+#                 Newick+="::"+str(self.nw[root][v]['prob'])
+#             Newick+= ","
+#         Newick = "("+Newick[:-1]+")"
+#         if root in self.hybrid_nodes:
+#             Newick += "#H"+str(self.hybrid_nodes[root])
+#         return Newick
+
+#     '''
+#     def CheckLabelSet(self):
+#         for v in self.nw.nodes:
+#             if self.nw.out_degree(v)==0:
+#                 if v not in self.leaf_labels and v not in self.hybrid_nodes:
+#                     print("non-labelled leaf!")
+#                     return False
+#         return True
+#     '''

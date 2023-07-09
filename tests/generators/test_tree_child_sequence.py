@@ -1,7 +1,12 @@
 import unittest
 
+from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
-from phylox.generators.randomTC import generate_network_random_tree_child_sequence
+from phylox.generators.randomTC import (
+    generate_network_random_tree_child_sequence,
+    random_tree_child_sequence,
+    random_tree_child_subsequence,
+)
 
 
 class TestRandomTC(unittest.TestCase):
@@ -58,3 +63,21 @@ class TestRandomTC(unittest.TestCase):
         self.assertEqual(network.reticulation_number, reticulations)
         for node in network.leaves:
             self.assertIsNotNone(network.nodes[node].get(LABEL_ATTR))
+
+    def test_subsequence(self):
+        leaves = 10
+        reticulations = 5
+        sequence = random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+        )
+        network = DiNetwork.from_cherry_picking_sequence(sequence)
+        self.assertEqual(len(network.leaves), leaves)
+        self.assertEqual(len(network.roots), 1)
+        self.assertEqual(network.reticulation_number, reticulations)
+        subsequence_reticulations = 3
+        subsequence = random_tree_child_subsequence(sequence, subsequence_reticulations)
+        subnetwork = DiNetwork.from_cherry_picking_sequence(subsequence)
+        self.assertEqual(len(subnetwork.leaves), leaves)
+        self.assertEqual(len(subnetwork.roots), 1)
+        self.assertEqual(subnetwork.reticulation_number, subsequence_reticulations)

@@ -20,6 +20,7 @@ Types of changes:
 - Network properties methods: b2_balance, count_cherries_and_reticulated_cherries and blob_properties. (#11)
 - Tree-child-sequence functions. (#12)
 - Usage of NetworkX referenced in README. (#14)
+- Cherry picking hybridization workflow works again, including tests. (#15)
 
 ### Changed
 

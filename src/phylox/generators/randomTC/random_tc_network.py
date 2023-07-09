@@ -6,18 +6,18 @@ from phylox import DiNetwork
 ### This file contains functions to generate random tree-child (sub)networks
 
 
-def random_tree_child_sequence(leaves, retics):
+def random_tree_child_sequence(leaves, reticulations):
     """
     Returns a random tree-child sequence with a given number of leaves and reticulations
     :param leaves: number of leaves
-    :param retics: number of reticulations
+    :param reticulations: number of reticulations
     :return: a random tree-child sequence
     """
     current_leaves = set([1, 2])
     seq = [(2, 1)]
     not_forbidden = set([2])
     leaves_left = leaves - 2
-    retics_left = retics
+    retics_left = reticulations
 
     # Continue until we added enough leaves and reticulations
     while leaves_left > 0 or retics_left > 0:
@@ -26,8 +26,8 @@ def random_tree_child_sequence(leaves, retics):
         if len(not_forbidden) > 0 and leaves_left > 0 and retics_left > 0:
             if (
                 random.randint(0, leaves_left + retics_left - 1) < retics_left
-            ):  # probability of retic depends on number of retics left to add
-                #           if random.randint(0 , 1)<1:                                        #probability of retics and leaves are the same if both are an option
+            ):  # probability of retic depends on number of reticulations left to add
+                # if random.randint(0 , 1)<1:   #probability of reticulations and leaves are the same if both are an option
                 type_added = "R"
         elif len(not_forbidden) > 0 and retics_left > 0:
             type_added = "R"
