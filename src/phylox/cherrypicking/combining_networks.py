@@ -15,6 +15,7 @@ from phylox.cherrypicking import (
     reduce_pair,
     get_indices_of_reducing_pairs,
     add_roots_to_sequence,
+    cherry_height,
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
@@ -54,7 +55,7 @@ class HybridizationProblem:
                 network = n
             self.trees[len(self.trees)] = network
             self.distances = self.distances and all(
-                [LENGTH_ATTR in edge for edge in network.edges]
+                [LENGTH_ATTR in edge[2] for edge in network.edges(data=True)]
             )
 
         # check that the labels are unique in each tree 
@@ -91,9 +92,7 @@ class HybridizationProblem:
             Heuristic = self.CPHeuristicStorePairs
         if lengths:
             if not self.distances:
-                print("not all trees have branch lengths!")
-                sys.exit()
-                return []
+                raise ValueError("not all trees have branch lengths!")
             print("Picking the lowest cherry")
             Heuristic = self.CPHeuristicLengths
             heights_best = []
@@ -352,7 +351,7 @@ class HybridizationProblem:
     def Height_Pair(self, pair, trees):
         height_pair = [0, 0]
         for t in trees:
-            height_in_t = self.trees[t].Height_Of_Cherry(*pair)
+            height_in_t = cherry_height(self.trees[t], *pair)
             height_pair[0] += height_in_t[0]
             height_pair[1] += height_in_t[1]
         return [height_pair[0] / float(len(trees)), height_pair[1] / float(len(trees))]
@@ -374,7 +373,7 @@ class HybridizationProblem:
     # we only need to update for the trees that got reduced: 'new_red_treed'
     def Update_Reducible_Pairs(self, reducible_pairs, new_red_trees):
         # Remove trees to update from all pairs
-        for pair, trees in reducible_pairs.items():
+        for pair, trees in list(reducible_pairs.items()):
             trees.difference_update(new_red_trees)
             if len(trees) == 0:
                 del reducible_pairs[pair]
