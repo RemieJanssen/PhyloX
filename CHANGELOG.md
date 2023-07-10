@@ -21,6 +21,7 @@ Types of changes:
 - Tree-child-sequence functions. (#12)
 - Usage of NetworkX referenced in README. (#14)
 - Cherry picking hybridization workflow works again, including tests. (#15)
+- Documentation using sphinx. (#18)
 
 ### Changed
 
