@@ -7,6 +7,15 @@ from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
 
 class DiNetwork(nx.DiGraph, CherryPickingMixin):
+    """
+    A class for representing a directed phylogenetic network.
+    Inherits from networkx.DiGraph.
+
+    :param edges: a list of edges of the network.
+    :param nodes: a list of nodes of the network.
+    :param labels: a list of tuples of the form (node, label) where node is a node of the network and label is a label of the node.
+    :param kwargs: additional keyword arguments.
+    """
     def __init__(self, *args, **kwargs):
         edges = kwargs.get("edges", [])
         super().__init__(edges, *args, **kwargs)
