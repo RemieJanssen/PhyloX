@@ -41,8 +41,8 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     """
     Determines whether two networks are labeled isomorphic.
 
-    :param network1: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute `label'.
-    :param network2: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute `label'.
+    :param network1: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
+    :param network2: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
     :return: True if the networks are labeled isomorphic, False otherwise.
     """
     nw1 = deepcopy(network1)
@@ -72,13 +72,12 @@ def _count_automorphisms(
     """
     Determines the number of automorphisms of a network.
 
-    :param network: a phylogenetic network, i.e., a DAG with leaf labels.
+    :param network: a phylox.DiNetwork phylogenetic network, i.e., a DAG with leaf labels.
     :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.
     :param partial_isomorphism: a partial isomorphism between the network and itself.
     :param nodes_available: the nodes that are available to be matched.
     :param nodes_to_do: the nodes that still need to be matched.
     :return: the number of automorphisms of the network.
-
     """
     nodes_available = nodes_available or []
     nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
@@ -113,6 +112,18 @@ def count_automorphisms(network, ignore_labels=False):
     :param network: a phylogenetic network, i.e., a DAG with leaf labels.
     :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.
     :return: the number of automorphisms of the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.isomorphism.base import count_automorphisms
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0), (0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
+    ...     labels=[(3, "A"), (4, "B"), (5, "C"), (6, "C")],
+    ... )
+    >>> count_automorphisms(network, ignore_labels=True)
+    8
+    >>> count_automorphisms(network, ignore_labels=False)
+    2
     """
     partial_isomorphism = [(a, a) for a in network.nodes()]
     return _count_automorphisms(

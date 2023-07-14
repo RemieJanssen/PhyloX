@@ -28,7 +28,7 @@ dependencies = [
 pythonpath = [
   ".", "src",
 ]
-addopts = "--cov --cov-report term-missing"
+addopts = "--cov --cov-report term-missing --doctest-modules"
 
 [project.urls]
 "Homepage" = "https://github.com/RemieJanssen/PhyloX"
