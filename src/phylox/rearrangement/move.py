@@ -307,8 +307,13 @@ class Move(object):
         )
         movetype = move_type_probabilities_keys[movetype_index]
         if movetype in [MoveType.TAIL, MoveType.HEAD]:
-            moving_edge = edges[np.random.choice(num_edges)]
-            target = edges[np.random.choice(num_edges)]
+            moving_edge_index = np.random.choice(num_edges)
+            target_index = np.random.choice(num_edges-1)
+            if target_index >= moving_edge_index:
+                target_index += 1
+                target_index %= num_edges
+            moving_edge = edges[moving_edge_index]
+            target = edges[target_index]
             moving_endpoint_index = 0 if movetype == MoveType.TAIL else 1
             moving_endpoint = moving_edge[moving_endpoint_index]
             origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)
