@@ -137,6 +137,7 @@ class Move(object):
     :param move_type: the type of move (phylox.rearrangement.movetype.MoveType).
     :param kwargs: the parameters of the move, depending on the move type.
     """
+
     def __init__(self, *args, **kwargs):
         try:
             self.move_type = kwargs["move_type"]
@@ -216,6 +217,30 @@ class Move(object):
             raise InvalidMoveDefinitionException("Invalid move type.")
 
     def is_type(self, move_type):
+        """
+        Checks if the move is of a given type.
+
+        :param move_type: the move type to check (phylox.rearrangement.movetype.MoveType).
+        :return: True if the move is of the given type, False otherwise.
+
+        :example:
+        >>> from phylox.rearrangement.move import Move
+        >>> move = Move(
+        ...     move_type=MoveType.TAIL,
+        ...     origin=(2,5),
+        ...     moving_edge=(1,3),
+        ...     target=(2,4),
+        ... )
+        >>> move.is_type(MoveType.TAIL)
+        True
+        >>> move.is_type(MoveType.RSPR)
+        True
+        >>> move.is_type(MoveType.HEAD)
+        False
+        >>> move.is_type(MoveType.VERT)
+        False
+        """
+
         if self.move_type == MoveType.ALL:
             return True
         if (
