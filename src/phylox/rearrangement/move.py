@@ -270,6 +270,33 @@ class Move(object):
             MoveType.VMIN: 0.1,
         },
     ):
+        """
+        Generates a random move for the given network.
+        The move may not be valid.
+
+        :param network: a phylogenetic network (phylox.DiNetwork).
+        :param available_tree_nodes: a list of available tree nodes to use for the move.
+        :param available_reticulations: a list of available reticulations to use for the move.
+        :param move_type_probabilities: a dictionary of move type probabilities.
+        :return: a random move (phylox.rearrangement.move.Move).
+
+        :example:
+        >>> from phylox import DiNetwork
+        >>> from phylox.rearrangement.move import Move
+        >>> network = DiNetwork(
+        ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+        ... )
+        >>> move = Move.random_move(
+        ...     network,
+        ...     move_type_probabilities={
+        ...         MoveType.TAIL: 0.5,
+        ...         MoveType.HEAD: 0.5,
+        ...     },
+        ... )
+        >>> move.is_type(MoveType.RSPR)
+        True
+        """
+
         available_tree_nodes = available_tree_nodes or []
         available_reticulations = available_reticulations or []
         edges = list(network.edges())
