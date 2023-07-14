@@ -1,5 +1,6 @@
-from phylox.constants import LENGTH_ATTR
+from phylox.constants import LENGTH_ATTR, LABEL_ATTR
 
+from copy import deepcopy
 
 def find_unused_node(network, exclude=[]):
     """
@@ -16,6 +17,17 @@ def find_unused_node(network, exclude=[]):
     -------
     int
         The unused node.
+
+    Examples
+    --------
+    >>> import networkx as nx
+    >>> import phylox
+    >>> network = nx.DiGraph()
+    >>> network.add_edges_from([(0, 1), (1, 2), (2, 3)])
+    >>> phylox.find_unused_node(network)
+    -1
+    >>> phylox.find_unused_node(network, exclude=[-1])
+    -2
     """
 
     new_node = -1
@@ -41,6 +53,16 @@ def suppress_node(network, node):
     -------
     bool
         True if the node was suppressed, False otherwise.
+
+    Examples
+    --------
+    >>> from phylox import DiNetwork
+    >>> network = DiNetwork()
+    >>> network.add_edges_from([(0, 1, {'length': 1}), (1, 2, {'length': 1})])
+    >>> suppress_node(network, 1)
+    True
+    >>> network.edges(data=True)
+    OutEdgeDataView([(0, 2, {'length': 2})])
     """
     if not (network.out_degree(node) == 1 and network.in_degree(node) == 1):
         return False
@@ -70,6 +92,20 @@ def remove_unlabeled_leaves(network, inplace=True):
     -------
     phylox.DiNetwork
         The network with unlabeled leaves removed.
+
+    Examples
+    --------
+    >>> from phylox import DiNetwork
+    >>> from phylox.constants import LABEL_ATTR
+    >>> network = DiNetwork(
+    ...     edges=[(0, 1), (1, 2), (1, 3), (3, 4), (3, 5)],
+    ...     labels=[(2, 'a'), (4, 'b')],
+    ... )
+    >>> network = remove_unlabeled_leaves(network)
+    >>> network.edges()
+    OutEdgeView([(0, 1), (1, 2), (1, 4)])
+    >>> network.nodes(data=True)
+    NodeDataView({0: {}, 1: {}, 2: {'label': 'a'}, 4: {'label': 'b'}})
     """
     if not inplace:
         network = deepcopy(network)
