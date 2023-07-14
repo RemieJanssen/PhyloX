@@ -241,7 +241,7 @@ class Move(object):
         False
         """
 
-        if self.move_type == MoveType.ALL:
+        if move_type == MoveType.ALL:
             return True
         if (
             self.move_type == MoveType.NONE
