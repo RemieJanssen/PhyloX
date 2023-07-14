@@ -6,12 +6,12 @@
 Welcome to PhyloX's documentation!
 ==================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
 
-   dinetwork
-
+   phylox
 
 
 Indices and tables
