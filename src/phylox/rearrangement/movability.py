@@ -18,8 +18,24 @@ def check_valid(network, move):
     """
     Checks whether a move is valid.
 
-    :param move: a move of type Move
+    :param move: a rearrangement move (see phylox.rearrangement.movetype.Move)
     :return: void
+    :exception: InvalidMoveException if the move is not valid
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import Move
+    >>> from phylox.rearrangement.movability import check_valid
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+    ... )
+    >>> move = Move(
+    ...     move_type=MoveType.HEAD,
+    ...     origin=(2, 5),
+    ...     moving_edge=(1, 3),
+    ...     target=(2, 4),
+    ... )
+    >>> check_valid(network, move)
     """
     if move.move_type == MoveType.NONE:
         return
@@ -85,6 +101,19 @@ def check_movable(network, moving_edge, moving_endpoint):
     :param moving_edge: an edge in the network.
     :param moving_endpoint: a node, specifically, an endpoint of the moving_edge.
     :return: True if the endpoint of the edge is movable in the network, False otherwise.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movability import check_movable
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+    ... )
+    >>> check_movable(network, (1, 3), 3)
+    True
+    >>> check_movable(network, (1, 3), 1)
+    True
+    >>> check_movable(network, (3, 5), 3)
+    False
     """
     if moving_endpoint == moving_edge[0]:
         # Tail move

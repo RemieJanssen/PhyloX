@@ -18,6 +18,15 @@ pip install phylox
 
 You can load the package methods with `import phylox` in python.
 
+## Documentation
+
+Documentation is in the docs folder, and is created uses sphinx.
+to build the documentation, go to the docs folder and do:
+```
+make html
+```
+the docs will be in `docs/build/html`.
+
 ## Development
 
 ### Linting
