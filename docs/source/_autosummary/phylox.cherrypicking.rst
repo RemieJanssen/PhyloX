@@ -32,6 +32,5 @@ phylox.cherrypicking
    phylox.cherrypicking.base
    phylox.cherrypicking.best_subnetwork
    phylox.cherrypicking.combining_networks
-   phylox.cherrypicking.combining_networks_backup
    phylox.cherrypicking.tree_child_sequences
 

@@ -15,7 +15,6 @@ phylox.classes.dinetwork
       :toctree:
    
       is_binary
-      _is_endpoint_of_w_fence
       is_leaf_labeled_single_root_network
       is_orchard
       is_stack_free
