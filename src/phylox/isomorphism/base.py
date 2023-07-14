@@ -9,7 +9,7 @@ ISOMETRY_LABEL_TAG = "isometry_label_tag_"
 AUTOMORPHISM_LABEL_TAG = "automorphism_label_tag_"
 
 # Checks whether the nodes with the given attributes have the same label
-def same_isometry_labels(node1_attributes, node2_attributes):
+def _same_isometry_labels(node1_attributes, node2_attributes):
     """
     Checks whether two nodes have the same label
 
@@ -23,7 +23,7 @@ def same_isometry_labels(node1_attributes, node2_attributes):
 
 
 # Checks whether the nodes with the given attributes have the same label
-def same_isometry_labels_and_labels(node1_attributes, node2_attributes):
+def _same_isometry_labels_and_labels(node1_attributes, node2_attributes):
     """
     Checks whether two nodes have the same label
 
@@ -44,13 +44,31 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     :param network1: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
     :param network2: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
     :return: True if the networks are labeled isomorphic, False otherwise.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.isomorphism.base import is_isomorphic
+    >>> network1 = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+    ...     labels=[(4, "A"), (5, "B")],
+    ... )
+    >>> network2 = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,5),(3,6)],
+    ...     labels=[(5, "B"), (6, "A")],
+    ... )    
+    >>> is_isomorphic(network1, network2, ignore_labels=True)
+    True
+    >>> is_isomorphic(network1, network2, ignore_labels=False)
+    False
+    >>> is_isomorphic(network1, network2, partial_isomorphism=[(4,6)], ignore_labels=True)
+    False
     """
     nw1 = deepcopy(network1)
     nw2 = deepcopy(network2)
 
-    same_labels = same_isometry_labels_and_labels
+    same_labels = _same_isometry_labels_and_labels
     if ignore_labels:
-        same_labels = same_isometry_labels
+        same_labels = _same_isometry_labels
 
     partial_isomorphism = partial_isomorphism or []
     for i, corr in enumerate(partial_isomorphism):
@@ -81,9 +99,9 @@ def _count_automorphisms(
     """
     nodes_available = nodes_available or []
     nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
-    same_labels = same_isometry_labels_and_labels
+    same_labels = _same_isometry_labels_and_labels
     if ignore_labels:
-        same_labels = same_isometry_labels
+        same_labels = _same_isometry_labels
 
     number_of_automorphisms = 1
     while nodes_to_do:

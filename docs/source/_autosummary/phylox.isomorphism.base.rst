@@ -16,8 +16,8 @@ phylox.isomorphism.base
    
       count_automorphisms
       is_isomorphic
-      same_isometry_labels
-      same_isometry_labels_and_labels
+      _same_isometry_labels
+      _same_isometry_labels_and_labels
    
    
 
