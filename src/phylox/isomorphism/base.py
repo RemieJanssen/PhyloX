@@ -55,7 +55,7 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     >>> network2 = DiNetwork(
     ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,5),(3,6)],
     ...     labels=[(5, "B"), (6, "A")],
-    ... )    
+    ... )
     >>> is_isomorphic(network1, network2, ignore_labels=True)
     True
     >>> is_isomorphic(network1, network2, ignore_labels=False)

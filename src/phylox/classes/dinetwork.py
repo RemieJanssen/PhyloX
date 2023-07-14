@@ -5,6 +5,7 @@ import networkx as nx
 from phylox.cherrypicking import CHERRYTYPE, is_second_in_reducible_pair, reduce_pair
 from phylox.constants import LABEL_ATTR
 
+
 def is_binary(network):
     """
     Checks if the network is binary.
@@ -27,7 +28,6 @@ def is_binary(network):
     >>> is_binary(network)
     False
     """
-
 
     binary_node_types = [
         [0, 1],  # root
@@ -150,7 +150,7 @@ def _is_endpoint_of_w_fence(network, node):
 def is_tree_based(network):
     """
     Checks if the network is tree-based.
-    
+
     :param network: a phylogenetic network phylox.DiNetwork.
     :return: true if the network is tree-based, false otherwise.
 
@@ -208,7 +208,7 @@ def is_tree_child(network):
     >>> is_tree_child(network)
     False
     """
-        
+
     for node in network.nodes:
         if network.is_leaf(node):
             continue

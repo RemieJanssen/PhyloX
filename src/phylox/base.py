@@ -1,6 +1,7 @@
-from phylox.constants import LENGTH_ATTR, LABEL_ATTR
-
 from copy import deepcopy
+
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR
+
 
 def find_unused_node(network, exclude=[]):
     """

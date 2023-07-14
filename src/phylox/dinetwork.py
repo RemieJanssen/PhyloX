@@ -16,6 +16,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
     :param labels: a list of tuples of the form (node, label) where node is a node of the network and label is a label of the node.
     :param kwargs: additional keyword arguments.
     """
+
     def __init__(self, *args, **kwargs):
         edges = kwargs.get("edges", [])
         super().__init__(edges, *args, **kwargs)
@@ -53,7 +54,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
     def _set_leaves(self):
         """
         Sets the set of leaves of the network as a cached property.
-                
+
         :return: the set of leaves of the network.
         """
         self._leaves = set([node for node in self.nodes if self.is_leaf(node)])
