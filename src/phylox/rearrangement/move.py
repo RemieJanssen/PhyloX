@@ -13,6 +13,27 @@ def apply_move(network, move):
     """
     Apply a move to the network, not in place.
     returns True if successful, and False otherwise.
+
+    :param network: a phylogenetic network (phylox.DiNetwork).
+    :param move: a move (phylox.rearrangement.move.Move) to apply to the network.
+    :return: a new phylogenetic network (phylox.DiNetwork) with the move applied.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import apply_move, Move
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+    ... )
+    >>> move = Move(
+    ...     move_type=MoveType.HEAD,
+    ...     origin=(2,5),
+    ...     moving_edge=(1,3),
+    ...     target=(2,4),
+    ... )
+    >>> new_network = apply_move(network, move)
+    >>> edges = set(new_network.edges())
+    >>> edges == {(0, 1), (1, 2), (1, 3), (2, 3), (3, 4), (2, 5)}
+    True
     """
     check_valid(network, move)
     new_network = deepcopy(network)
@@ -70,12 +91,52 @@ def apply_move(network, move):
 
 
 def apply_move_sequence(network, seq_moves):
+    """
+    Apply a sequence of moves to the network, not in place.
+    returns the resulting network.
+
+    :param network: a phylogenetic network (phylox.DiNetwork).
+    :param seq_moves: a sequence of moves (list of phylox.rearrangement.move.Move) to apply to the network.
+    :return: a new phylogenetic network (phylox.DiNetwork) with the moves applied.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import apply_move_sequence, Move
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,4),(2,5),(3,6),(3,7)],
+    ... )
+    >>> seq_moves = [
+    ...     Move(
+    ...         move_type=MoveType.TAIL,
+    ...         moving_edge=(3,6),
+    ...         target=(0,1),
+    ...         origin=(1,7),
+    ...     ),
+    ...     Move(
+    ...         move_type=MoveType.VPLU,
+    ...         start_edge=(1,2),
+    ...         end_edge=(1,7),
+    ...         network=network,
+    ...     ),
+    ... ]
+    >>> new_network = apply_move_sequence(network, seq_moves)
+    >>> edges = set(new_network.edges())
+    >>> edges == {(0, 3), (3, 1), (1, -1), (-1, 2), (1, -2), (-2, 7), (2, 4), (2, 5), (3, 6), (-1, -2)}
+    True
+    """
+
     for move in seq_moves:
         network = apply_move(network, move)
     return network
 
 
 class Move(object):
+    """
+    A move is a rearrangement operation on a phylogenetic network.
+
+    :param move_type: the type of move (phylox.rearrangement.movetype.MoveType).
+    :param kwargs: the parameters of the move, depending on the move type.
+    """
     def __init__(self, *args, **kwargs):
         try:
             self.move_type = kwargs["move_type"]
