@@ -25,6 +25,13 @@ HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
 
 
 class HybridizationProblem:
+    """
+    A class to represent a hybridization problem.
+    I.e. a set of phylogenetic networks that need to be combined into a single phylogenetic network.
+
+    :param list_of_networks: a list of phylogenetic networks, each given as a phylox.DiNetwork.
+    :param newick_strings: if True, the input trees are given as newick strings, otherwise as phylox.DiNetworks.
+    """
     def __init__(self, list_of_networks=None, newick_strings=True):
         # The dictionary of trees
         self.trees = dict()

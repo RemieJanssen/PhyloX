@@ -12,6 +12,23 @@ class CHERRYTYPE(Enum):
 
 
 def find_all_reducible_pairs(network):
+    """
+    Finds all reducible pairs (cherries and reticulated cherries) in the
+    network.
+
+    :param network: a phylogenetic network.
+    :return: a set of reducible pairs (cherries and reticulated cherries) in the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import find_all_reducible_pairs
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0),(0,1),(1,2),(1,3),(2,3),(2,4),(3,5),(0,6),(6,7),(6,8)],
+    ... )
+    >>> reducible_pairs = find_all_reducible_pairs(network)
+    >>> reducible_pairs == {(7,8),(8,7),(5,4)}
+    True
+    """
     reducible_pairs = set()
     for l in network.leaves:
         reducible_pairs = reducible_pairs.union(
