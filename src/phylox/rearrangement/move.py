@@ -308,7 +308,7 @@ class Move(object):
         movetype = move_type_probabilities_keys[movetype_index]
         if movetype in [MoveType.TAIL, MoveType.HEAD]:
             moving_edge_index = np.random.choice(num_edges)
-            target_index = np.random.choice(num_edges-1)
+            target_index = np.random.choice(num_edges - 1)
             if target_index >= moving_edge_index:
                 target_index += 1
                 target_index %= num_edges

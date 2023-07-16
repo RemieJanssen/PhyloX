@@ -1,3 +1,10 @@
+"""
+A module for checking isomorphism between phylogenetic networks and counting automorphisms of phylogenetic networks.
+
+Currently mostly uses the networkx isomorphism checker, extended with some specifics for phylogenetic networks 
+such as labels and partial isomorphisms.
+"""
+
 from copy import deepcopy
 
 import networkx as nx
@@ -89,6 +96,10 @@ def _count_automorphisms(
 ):
     """
     Determines the number of automorphisms of a network.
+
+    An implementation of the algorithm described in
+    "A note on the graph isomorphism counting problem" by
+    Rudolf Matheson in 1979.
 
     :param network: a phylox.DiNetwork phylogenetic network, i.e., a DAG with leaf labels.
     :param ignore_labels: if True, the automorphisms are counted without considering the labels of the nodes.

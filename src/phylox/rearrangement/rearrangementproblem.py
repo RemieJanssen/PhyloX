@@ -44,7 +44,7 @@ class RearrangementProblem(object):
     def check_solution(self, seq_moves, isomorphism=None):
         """
         Checks if a sequence of moves solves the rearrangement problem.
-        
+
         :param seq_moves: a sequence of moves phylox.rearrangement.move.Move.
         :param isomorphism: a partial isomorphism between the networks.
         :return: true if the sequence of moves solves the rearrangement problem, false otherwise.

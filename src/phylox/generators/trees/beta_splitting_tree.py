@@ -1,10 +1,10 @@
-############################################
-#
-#  Adapted from script provided by Pengyu Liu
-# which contains the code for Beta-splitting model (Aldous1996)
-# Written for python3
-#
-############################################
+"""
+Adapted from script provided by (a colleage of) Pengyu Liu
+which contains the code for Beta-splitting model (Aldous1996)
+
+The beta-splitting model is a model for generating random binary trees.
+The model is parameterized by a parameter beta > 0 which determines the shape of the tree.
+"""
 
 import random
 

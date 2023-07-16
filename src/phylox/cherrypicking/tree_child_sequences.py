@@ -1,3 +1,9 @@
+"""
+Functions for finding tree child sequences in a network.
+
+Based on "Linear Time Algorithm for Tree-Child network Containment" by Remie Janssen and Yukihiro Murakami (2020)
+"""
+
 import ast
 import itertools
 import random

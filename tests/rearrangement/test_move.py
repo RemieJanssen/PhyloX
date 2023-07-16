@@ -74,7 +74,6 @@ class TestMoveClass(unittest.TestCase):
         )
         assert m.is_type(MoveType.ALL)
 
-
     def test_make_move_vplu(self):
         m = Move(
             move_type=MoveType.VPLU,

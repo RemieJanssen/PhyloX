@@ -1,3 +1,12 @@
+"""
+A module for generating (random) phylogenetic networks.
+
+This implements the algorithm from the paper:
+Zhang, C., Ogilvie, H.A., Drummond, A.J., Stadler, T.: Bayesian inference of species networks from multilocus
+sequence data. Molecular biology and evolution 35(2), 504–517 (2018)
+
+"""
+
 import random
 
 import numpy as np

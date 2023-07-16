@@ -1,9 +1,13 @@
-# By Joan Carles Pons, Celine Scornavacca, Gabriel Cardona
-# With their paper: Generation of Level- k LGT Networks
-# PMID: 30703035 DOI: 10.1109/TCBB.2019.2895344
-# original README in this folder as README_Pons_et_al.md
-#
-# Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
+"""
+A module for generating (random) LGT phylogenetic networks.
+
+By Joan Carles Pons, Celine Scornavacca, Gabriel Cardona
+With their paper: Generation of Level- k LGT Networks
+PMID: 30703035 DOI: 10.1109/TCBB.2019.2895344
+original README in this folder as README_Pons_et_al.md
+
+Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
+"""
 
 import random
 
