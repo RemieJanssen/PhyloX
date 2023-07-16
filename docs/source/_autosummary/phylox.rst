@@ -36,6 +36,7 @@
    phylox.exceptions
    phylox.generators
    phylox.isomorphism
+   phylox.networkproperties
    phylox.parser
    phylox.rearrangement
 
