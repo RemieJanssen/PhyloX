@@ -12,6 +12,12 @@ def random_tree_child_sequence(leaves, reticulations):
     :param leaves: number of leaves
     :param reticulations: number of reticulations
     :return: a random tree-child sequence
+
+    :example:
+    >>> from phylox.generators.randomTC.random_tc_network import random_tree_child_sequence
+    >>> seq = random_tree_child_sequence(5, 2)
+    >>> len(seq)
+    6
     """
     current_leaves = set([1, 2])
     seq = [(2, 1)]
@@ -59,8 +65,15 @@ def random_tree_child_subsequence(seq, r):
     """
     Returns a random tree-child subsequence with a given number of reticulations
     :param seq: a tree-child sequence
-    :param r: number of reticulations
+    :param r: number of reticulations in the subsequence
     :return: a random tree-child subsequence
+
+    :example:
+    >>> from phylox.generators.randomTC.random_tc_network import random_tree_child_subsequence
+    >>> seq = [(4,1), (4, 1), (3, 1), (2, 1), (2, 1), (2,1)]
+    >>> newSeq = random_tree_child_subsequence(seq, 1)
+    >>> len(newSeq)
+    4
     """
     # First `uniformly at random' choose one pair per leaf, with that leaf as first element
     leaves = dict()
@@ -98,6 +111,14 @@ def generate_network_random_tree_child_sequence(
     :param leaves: number of leaves
     :param reticulations: number of reticulations
     :return: a random tree-child network
+
+    :example:
+    >>> from phylox.generators.randomTC.random_tc_network import generate_network_random_tree_child_sequence
+    >>> network = generate_network_random_tree_child_sequence(5, 2)
+    >>> len(network.leaves)
+    5
+    >>> network.reticulation_number
+    2
     """
     if leaves < 2 or reticulations < 0:
         raise ValueError(

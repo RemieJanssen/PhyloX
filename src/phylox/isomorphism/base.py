@@ -11,9 +11,12 @@ import networkx as nx
 
 from phylox.constants import LABEL_ATTR
 
+#: The node attribute used to store the isometry label of a node.
 ISOMETRY_LABEL_ATTR = "isometry_label"
-ISOMETRY_LABEL_TAG = "isometry_label_tag_"
-AUTOMORPHISM_LABEL_TAG = "automorphism_label_tag_"
+#: The prefix used for isometry labels.
+ISOMETRY_LABEL_PREFIX = "isometry_label_prefix_"
+#: The prefix used for automorphism labels.
+AUTOMORPHISM_LABEL_PREFIX = "automorphism_label_prefix_"
 
 # Checks whether the nodes with the given attributes have the same label
 def _same_isometry_labels(node1_attributes, node2_attributes):
@@ -81,8 +84,8 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     for i, corr in enumerate(partial_isomorphism):
         if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]]):
             return False
-        nw1.nodes[corr[0]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_TAG}{i}"
-        nw2.nodes[corr[1]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_TAG}{i}"
+        nw1.nodes[corr[0]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_PREFIX}{i}"
+        nw2.nodes[corr[1]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_PREFIX}{i}"
 
     return nx.is_isomorphic(nw1, nw2, node_match=same_labels)
 

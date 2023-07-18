@@ -21,6 +21,18 @@ def acceptance_probability(
     current_reticulation_number=None,
     symmetries=False,
 ):
+    """
+    Computes the acceptance probability of a move.
+
+    :param network: the network before the move.
+    :param result_network: the network after the move.
+    :param move: the move.
+    :param move_type_probabilities: the move type probabilities.
+    :param number_of_leaves: the number of leaves in the network.
+    :param current_reticulation_number: the current number of reticulations in the network.
+    :param symmetries: whether to correct for symmetries.
+    :return: the acceptance probability of the move.
+    """
     current_reticulation_number = (
         current_reticulation_number or network.reticulation_number
     )

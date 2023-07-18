@@ -227,7 +227,6 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
     :param nodes_by_label: if true, the nodes are indexed by their label, otherwise by their index
     :return: the network with the pair added
     """
-    print("add pair", x, y, height)
     if not inplace:
         network = deepcopy(network)
 
