@@ -81,7 +81,48 @@ def sample_mcmc_networks(
     burn_in=1000,
     number_of_samples=1,
     add_root_if_necessary=False,
-):
+):  
+    """
+    Samples phylogenetic networks using a Markov-Chain Monte Carlo method.
+
+    :param starting_network: the phylox.DiNetwork used as the starting point of the Markov chain.
+    :param move_type_probabilities: a dictionary mapping MoveTypes to probabilities.
+    :param restriction_map: a boolean function that takes a phylox.DiNetwork as input.
+    :param correct_symmetries: whether to correct for symmetries in the acceptance probability, set to True for uniform distribution.
+    :param burn_in: the number of steps (including rejected proposals) between each sample.
+    :param number_of_samples: the number of networks to sample.
+    :param add_root_if_necessary: whether to add a root edge to each root if it has out-degree > 1.
+
+    :return: a list of phylox.DiNetwork objects.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
+    >>> from phylox.generators.mcmc import sample_mcmc_networks
+    >>> starting_network = DiNetwork(
+    ...     edges = ((0,1), (0,2), (1,2), (1,3), (2,4), (4,5), (4,6)),
+    ...     labels = ((3, "A"), (5, "B"), (6, "C")),
+    ... )
+    >>> move_type_probabilities = {
+    ...     MoveType.TAIL: 0.8,
+    ...     MoveType.VPLU: 0.1,
+    ...     MoveType.VMIN: 0.1,
+    ... }
+    >>> restriction_map = (lambda nw: nw.reticulation_number < 2)
+    >>> sampled_networks = sample_mcmc_networks(
+    ...     starting_network,
+    ...     move_type_probabilities,
+    ...     restriction_map=restriction_map,
+    ...     correct_symmetries=False,
+    ...     burn_in=100,
+    ...     number_of_samples=50,
+    ...     add_root_if_necessary=False,
+    ... )
+    >>> all([network.reticulation_number<2 for network in sampled_networks])
+    True
+    >>> all([len(network.leaves)==3 for network in sampled_networks])
+    True
+    """
     network = starting_network.copy()
     current_reticulation_number = network.reticulation_number
     number_of_leaves = len(network.leaves)
@@ -122,6 +163,7 @@ def sample_mcmc_networks(
             ):
                 non_moves += 1
                 continue
+            # only apply the move if the restrinction_map returns True
             if not (restriction_map is None or restriction_map(result_network)):
                 non_moves += 1
                 continue
