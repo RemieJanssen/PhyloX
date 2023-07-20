@@ -100,13 +100,13 @@ def sample_mcmc_networks(
     >>> from phylox.rearrangement.movetype import MoveType
     >>> from phylox.generators.mcmc import sample_mcmc_networks
     >>> starting_network = DiNetwork(
-    ...     edges = ((0,1), (0,2), (1,2), (1,3), (2,4), (4,5), (4,6)),
-    ...     labels = ((3, "A"), (5, "B"), (6, "C")),
+    ...     edges = ((0,1), (0,2), (1,2), (1,3), (2,4)),
+    ...     labels = ((3, "A"), (4, "B")),
     ... )
     >>> move_type_probabilities = {
-    ...     MoveType.TAIL: 0.8,
-    ...     MoveType.VPLU: 0.1,
-    ...     MoveType.VMIN: 0.1,
+    ...     MoveType.TAIL: 0.2,
+    ...     MoveType.VPLU: 0.4,
+    ...     MoveType.VMIN: 0.4,
     ... }
     >>> restriction_map = (lambda nw: nw.reticulation_number < 2)
     >>> sampled_networks = sample_mcmc_networks(
@@ -120,7 +120,7 @@ def sample_mcmc_networks(
     ... )
     >>> all([network.reticulation_number<2 for network in sampled_networks])
     True
-    >>> all([len(network.leaves)==3 for network in sampled_networks])
+    >>> all([len(network.leaves)==2 for network in sampled_networks])
     True
     """
     network = starting_network.copy()
