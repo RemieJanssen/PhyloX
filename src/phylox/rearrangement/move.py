@@ -68,7 +68,8 @@ def apply_move(network, move):
                 (move.start_node, move.end_node),
             ]
         )
-        new_network._reticulation_number += 1
+        if hasattr(new_network, "_reticulation_number"):
+            new_network._reticulation_number += 1
         return new_network
     elif move.move_type in [MoveType.VMIN]:
         parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
@@ -86,7 +87,8 @@ def apply_move(network, move):
         )
         new_network.remove_nodes_from(move.removed_edge)
         new_network.add_edges_from([(parent_0, child_0), (parent_1, child_1)])
-        new_network._reticulation_number -= 1
+        if hasattr(new_network, "_reticulation_number"):
+            new_network._reticulation_number -= 1
         return new_network
     elif move.move_type in [MoveType.NONE]:
         return network

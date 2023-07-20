@@ -17,6 +17,7 @@ def random_vplu_move_at_bottom(network):
 
     :example:
     >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
     >>> from phylox.generators.trees.well_known import generate_balanced_tree
     >>> from phylox.generators.trees.add_edges import random_vplu_move_at_bottom
     >>> tree = generate_balanced_tree(8)
@@ -49,6 +50,7 @@ def random_vplu_move_uniform(network):
 
     :example:
     >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
     >>> from phylox.generators.trees.well_known import generate_balanced_tree
     >>> from phylox.generators.trees.add_edges import random_vplu_move_uniform
     >>> tree = generate_balanced_tree(8)
@@ -79,6 +81,7 @@ def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=Non
 
     :example:
     >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
     >>> from phylox.generators.trees.well_known import generate_balanced_tree
     >>> from phylox.generators.trees.add_edges import random_vplu_move_local
     >>> tree = generate_balanced_tree(8)
@@ -139,6 +142,7 @@ def network_from_tree(tree, reticulations, method):
 
     :example:
     >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
     >>> from phylox.generators.trees.well_known import generate_balanced_tree
     >>> from phylox.generators.trees.add_edges import network_from_tree, AddEdgeMethod
     >>> tree = generate_balanced_tree(8)
