@@ -26,7 +26,9 @@ from phylox.constants import LABEL_ATTR
 
 def find_tree_child_sequence(network, labels=False):
     """
-    Find a tree child sequence for a network.
+    Find a tree child sequence for a network. If the network is orchard but not tree-child,
+    this function may produce a cherry-picking sequence that reduces the network to a single edge,
+    but that is not a tree-child sequence.
 
     :param network: The network to find a tree child sequence for.
     :type network: phylox.DiNetwork
@@ -34,26 +36,52 @@ def find_tree_child_sequence(network, labels=False):
     :type labels: bool
     :return: The tree child sequence.
     :rtype: list
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> N = DiNetwork(
+    ...     edges=[(-1, 0), (0, 1), (0, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 5), (4, 6)],
+    ...     labels=[(5, "A"), (6, "B")],
+    ... )
+    >>> try:
+    ...     find_tree_child_sequence(N, labels=True)
+    ... except ValueError:
+    ...     exception_raised = True
+    >>> exception_raised
+    True
+
+    >>> N = DiNetwork(
+    ...     edges=[(-1, 0), (0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+    ...     labels=[(5, "A"), (6, "B")],
+    ... )
+    >>> TC_sequence = find_tree_child_sequence(N, labels=True)
+    >>> TC_sequence == [("B", "A"), ("B", "A"), ("B", "A")] or TC_sequence == [("A", "B"), ("B", "A"), ("B", "A")]
+    True
     """    
     N = deepcopy(network)
-    reducible_pairs = list()
+    reducible_pairs = set()
     for x in N.leaves:
-        reducible_pairs.extend(find_reducible_pairs_with_second(N, x))
+        reducible_pairs |= set(find_reducible_pairs_with_second(N, x))
     tree_child_sequence = list()
     while reducible_pairs:
         pair = reducible_pairs.pop()
         cherry_type = check_reducible_pair(N, *pair)
-        if not cherry_type == CHERRYTYPE.NONE:
-            N, _ = reduce_pair(N, *pair)
+        N, cherry_type = reduce_pair(N, *pair)
+        if cherry_type != CHERRYTYPE.NONE:
+            reducible_pairs.discard(pair)
+            if cherry_type == CHERRYTYPE.CHERRY:
+                reducible_pairs.discard((pair[1], pair[0]))
             tree_child_sequence.append(pair)
-            reducible_pairs.extend(find_reducible_pairs_with_second(N, pair[1]))
-            reducible_pairs.extend(find_reticulated_cherry_with_first(N, pair[1]))
+            reducible_pairs |= set(find_reducible_pairs_with_second(N, pair[1]))
+            reducible_pairs |= set(find_reticulated_cherry_with_first(N, pair[1]))
     if labels:
         tree_child_sequence = [
             (network.nodes[x][LABEL_ATTR], network.nodes[y][LABEL_ATTR])
             for x, y in tree_child_sequence
         ]
-    return tree_child_sequence
+    if N.size() == 1:
+        return tree_child_sequence
+    raise ValueError("N could not be reduced to a single edge")
 
 
 def check_cherry_picking_sequence(N, cherry_picking_sequence, labels=False):
