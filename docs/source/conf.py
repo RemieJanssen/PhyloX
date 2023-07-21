@@ -44,6 +44,7 @@ autosummary_mock_imports = [
     "scipy",
     "matplotlib",
     "pandas",
+    "enum",
 ]
 
 
