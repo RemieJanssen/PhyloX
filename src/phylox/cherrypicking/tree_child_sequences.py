@@ -59,21 +59,18 @@ def find_tree_child_sequence(network, labels=False):
     True
     """    
     N = deepcopy(network)
-    reducible_pairs = set()
+    reducible_pairs = []
     for x in N.leaves:
-        reducible_pairs |= set(find_reducible_pairs_with_second(N, x))
+        reducible_pairs.extend(find_reducible_pairs_with_second(N, x))
     tree_child_sequence = list()
     while reducible_pairs:
         pair = reducible_pairs.pop()
         cherry_type = check_reducible_pair(N, *pair)
         N, cherry_type = reduce_pair(N, *pair)
         if cherry_type != CHERRYTYPE.NONE:
-            reducible_pairs.discard(pair)
-            if cherry_type == CHERRYTYPE.CHERRY:
-                reducible_pairs.discard((pair[1], pair[0]))
             tree_child_sequence.append(pair)
-            reducible_pairs |= set(find_reducible_pairs_with_second(N, pair[1]))
-            reducible_pairs |= set(find_reticulated_cherry_with_first(N, pair[1]))
+            reducible_pairs.extend(find_reducible_pairs_with_second(N, pair[1]))
+            reducible_pairs.extend(find_reticulated_cherry_with_first(N, pair[1]))
     if labels:
         tree_child_sequence = [
             (network.nodes[x][LABEL_ATTR], network.nodes[y][LABEL_ATTR])
