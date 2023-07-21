@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from phylox.base import find_unused_node
+from phylox.base import find_unused_node, suppress_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 from phylox.rearrangement.invertsequence import from_edge
 from phylox.rearrangement.movability import check_valid
@@ -13,6 +13,27 @@ def apply_move(network, move):
     """
     Apply a move to the network, not in place.
     returns True if successful, and False otherwise.
+
+    :param network: a phylogenetic network (phylox.DiNetwork).
+    :param move: a move (phylox.rearrangement.move.Move) to apply to the network.
+    :return: a new phylogenetic network (phylox.DiNetwork) with the move applied.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import apply_move, Move
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+    ... )
+    >>> move = Move(
+    ...     move_type=MoveType.HEAD,
+    ...     origin=(2,5),
+    ...     moving_edge=(1,3),
+    ...     target=(2,4),
+    ... )
+    >>> new_network = apply_move(network, move)
+    >>> edges = set(new_network.edges())
+    >>> edges == {(0, 1), (1, 2), (1, 3), (2, 3), (3, 4), (2, 5)}
+    True
     """
     check_valid(network, move)
     new_network = deepcopy(network)
@@ -47,22 +68,15 @@ def apply_move(network, move):
                 (move.start_node, move.end_node),
             ]
         )
+        if hasattr(new_network, "_reticulation_number"):
+            new_network._reticulation_number += 1
         return new_network
     elif move.move_type in [MoveType.VMIN]:
-        parent_0 = network.parent(move.removed_edge[0], exclude=[move.removed_edge[1]])
-        child_0 = network.child(move.removed_edge[0], exclude=[move.removed_edge[1]])
-        parent_1 = network.parent(move.removed_edge[1], exclude=[move.removed_edge[0]])
-        child_1 = network.child(move.removed_edge[1], exclude=[move.removed_edge[0]])
-        new_network.remove_edges_from(
-            [
-                (parent_0, move.removed_edge[0]),
-                (move.removed_edge[0], child_0),
-                (parent_1, move.removed_edge[1]),
-                (move.removed_edge[1], child_1),
-                move.removed_edge,
-            ]
-        )
-        new_network.add_edges_from([(parent_0, child_0), (parent_1, child_1)])
+        new_network.remove_edge(*move.removed_edge)
+        suppress_node(new_network, move.removed_edge[0])
+        suppress_node(new_network, move.removed_edge[1])
+        if hasattr(new_network, "_reticulation_number"):
+            new_network._reticulation_number -= 1
         return new_network
     elif move.move_type in [MoveType.NONE]:
         return network
@@ -70,12 +84,53 @@ def apply_move(network, move):
 
 
 def apply_move_sequence(network, seq_moves):
+    """
+    Apply a sequence of moves to the network, not in place.
+    returns the resulting network.
+
+    :param network: a phylogenetic network (phylox.DiNetwork).
+    :param seq_moves: a sequence of moves (list of phylox.rearrangement.move.Move) to apply to the network.
+    :return: a new phylogenetic network (phylox.DiNetwork) with the moves applied.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import apply_move_sequence, Move
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,4),(2,5),(3,6),(3,7)],
+    ... )
+    >>> seq_moves = [
+    ...     Move(
+    ...         move_type=MoveType.TAIL,
+    ...         moving_edge=(3,6),
+    ...         target=(0,1),
+    ...         origin=(1,7),
+    ...     ),
+    ...     Move(
+    ...         move_type=MoveType.VPLU,
+    ...         start_edge=(1,2),
+    ...         end_edge=(1,7),
+    ...         network=network,
+    ...     ),
+    ... ]
+    >>> new_network = apply_move_sequence(network, seq_moves)
+    >>> edges = set(new_network.edges())
+    >>> edges == {(0, 3), (3, 1), (1, -1), (-1, 2), (1, -2), (-2, 7), (2, 4), (2, 5), (3, 6), (-1, -2)}
+    True
+    """
+
     for move in seq_moves:
         network = apply_move(network, move)
     return network
 
 
 class Move(object):
+    """
+    A move is a rearrangement operation on a phylogenetic network.
+
+    :param move_type: the type of move (phylox.rearrangement.movetype.MoveType).
+    :param kwargs: the parameters of the move, depending on the move type.
+    """
+
     def __init__(self, *args, **kwargs):
         try:
             self.move_type = kwargs["move_type"]
@@ -155,7 +210,31 @@ class Move(object):
             raise InvalidMoveDefinitionException("Invalid move type.")
 
     def is_type(self, move_type):
-        if self.move_type == MoveType.ALL:
+        """
+        Checks if the move is of a given type.
+
+        :param move_type: the move type to check (phylox.rearrangement.movetype.MoveType).
+        :return: True if the move is of the given type, False otherwise.
+
+        :example:
+        >>> from phylox.rearrangement.move import Move
+        >>> move = Move(
+        ...     move_type=MoveType.TAIL,
+        ...     origin=(2,5),
+        ...     moving_edge=(1,3),
+        ...     target=(2,4),
+        ... )
+        >>> move.is_type(MoveType.TAIL)
+        True
+        >>> move.is_type(MoveType.RSPR)
+        True
+        >>> move.is_type(MoveType.HEAD)
+        False
+        >>> move.is_type(MoveType.VERT)
+        False
+        """
+
+        if move_type == MoveType.ALL:
             return True
         if (
             self.move_type == MoveType.NONE
@@ -184,6 +263,33 @@ class Move(object):
             MoveType.VMIN: 0.1,
         },
     ):
+        """
+        Generates a random move for the given network.
+        The move may not be valid.
+
+        :param network: a phylogenetic network (phylox.DiNetwork).
+        :param available_tree_nodes: a list of available tree nodes to use for the move.
+        :param available_reticulations: a list of available reticulations to use for the move.
+        :param move_type_probabilities: a dictionary of move type probabilities.
+        :return: a random move (phylox.rearrangement.move.Move).
+
+        :example:
+        >>> from phylox import DiNetwork
+        >>> from phylox.rearrangement.move import Move
+        >>> network = DiNetwork(
+        ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+        ... )
+        >>> move = Move.random_move(
+        ...     network,
+        ...     move_type_probabilities={
+        ...         MoveType.TAIL: 0.5,
+        ...         MoveType.HEAD: 0.5,
+        ...     },
+        ... )
+        >>> move.is_type(MoveType.RSPR)
+        True
+        """
+
         available_tree_nodes = available_tree_nodes or []
         available_reticulations = available_reticulations or []
         edges = list(network.edges())
@@ -194,8 +300,13 @@ class Move(object):
         )
         movetype = move_type_probabilities_keys[movetype_index]
         if movetype in [MoveType.TAIL, MoveType.HEAD]:
-            moving_edge = edges[np.random.choice(num_edges)]
-            target = edges[np.random.choice(num_edges)]
+            moving_edge_index = np.random.choice(num_edges)
+            target_index = np.random.choice(num_edges - 1)
+            if target_index >= moving_edge_index:
+                target_index += 1
+                target_index %= num_edges
+            moving_edge = edges[moving_edge_index]
+            target = edges[target_index]
             moving_endpoint_index = 0 if movetype == MoveType.TAIL else 1
             moving_endpoint = moving_edge[moving_endpoint_index]
             origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)

@@ -8,6 +8,15 @@ def from_edge(network, moving_edge, moving_endpoint):
     :param moving_edge: an edge of the network.
     :param moving_endpoint: a node of the network, which must be an endpoint of the edge.
     :return: a pair of nodes (p,c) where p and c are a parent and child of the moving_endpoint such that they are both not part of the moving_edge.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.invertsequence import from_edge
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3)],
+    ... )
+    >>> from_edge(network, (1,2), 1)
+    (0, 3)
     """
     other_parent = network.parent(moving_endpoint, exclude=moving_edge)
     other_child = network.child(moving_endpoint, exclude=moving_edge)

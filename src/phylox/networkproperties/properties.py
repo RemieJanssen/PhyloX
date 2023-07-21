@@ -7,8 +7,23 @@ from phylox.cherrypicking import is_second_in_reducible_pair
 
 
 def count_reducible_pairs(network):
-    """returns the number of reducible pairs in the network
+    """
+    finds the number of reducible pairs in the network
     split up by number of cherries and number of reticulated cherries.
+
+    :param network: a phylogenetic network.
+    :return: a dictionary with the number of reducible pairs in the network
+        keys are "cherries" and "reticulate_cherries"
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.properties import count_reducible_pairs
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0),(0,1),(1,2),(1,3),(2,3),(2,4),(3,5),(0,6),(6,7),(6,8)],
+    ... )
+    >>> counts = count_reducible_pairs(network)
+    >>> counts["cherries"] == 1 and counts["reticulate_cherries"] == 1
+    True
     """
     cherries = []
     reticulate_cherries = []
@@ -29,10 +44,28 @@ def count_reducible_pairs(network):
 
 
 def blob_properties(network):
-    """returns a list of all blobs of the network and their properties.
+    """finds a list of all blobs of the network and their properties.
     Each blob is a pair (blob_size, blob_level) where blob_size is the
     number of nodes in the blob and blob_level is the number of
     reticulations in the blob.
+
+    :param network: a phylogenetic network.
+    :return: a list of pairs (blob_size, blob_level)
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.properties import blob_properties
+    >>> network = DiNetwork(
+    ...     edges=[(1,2),(2,3),(2,4),(3,4),(3,5),(4,6),(6,7),(6,8),(7,8),(7,9),(8,10)],
+    ... )
+    >>> blob_properties(network)
+    [(3, 1), (3, 1)]
+
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,4),(3,5),(2,5),(3,4),(4,6),(5,7)],
+    ... )
+    >>> blob_properties(network)
+    [(5, 2)]
     """
     blob_properties = []
     # For each biconnected component
@@ -52,13 +85,48 @@ def blob_properties(network):
 
 
 def level(network):
-    """returns the level of the network"""
+    """
+    returns the level of the network
+
+    :param network: a phylogenetic network.
+    :return: the level of the network
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.properties import level
+    >>> network = DiNetwork(
+    ...     edges=[(1,2),(2,3),(2,4),(3,4),(3,5),(4,6),(6,7),(6,8),(7,8),(7,9),(8,10)],
+    ... )
+    >>> level(network)
+    1
+
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3),(2,4),(3,5),(2,5),(3,4),(4,6),(5,7)],
+    ... )
+    >>> level(network)
+    2
+    """
+
     blobs = blob_properties(network)
     return max([blob[1] for blob in blobs])
 
 
 def b2_balance(network, connect_roots=False):
-    """returns the B_2 balance of the network"""
+    """returns the B_2 balance of the network
+
+    :param network: a phylogenetic network.
+    :param connect_roots: if True, connects all roots to a new root.
+    :return: the B_2 balance of the network
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.properties import b2_balance
+    >>> network = DiNetwork(
+    ...     edges=[(0, 1), (1, 2), (1, 3), (2, 4), (2, 5), (3, 6), (3, 7)],
+    ... )
+    >>> b2_balance(network) == 2
+    True
+    """
     balance = 0
 
     # Initiate probabilities

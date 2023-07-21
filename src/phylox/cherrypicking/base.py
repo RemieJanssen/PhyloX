@@ -12,6 +12,23 @@ class CHERRYTYPE(Enum):
 
 
 def find_all_reducible_pairs(network):
+    """
+    Finds all reducible pairs (cherries and reticulated cherries) in the
+    network.
+
+    :param network: a phylogenetic network.
+    :return: a set of reducible pairs (cherries and reticulated cherries) in the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import find_all_reducible_pairs
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0),(0,1),(1,2),(1,3),(2,3),(2,4),(3,5),(0,6),(6,7),(6,8)],
+    ... )
+    >>> reducible_pairs = find_all_reducible_pairs(network)
+    >>> reducible_pairs == {(7,8),(8,7),(5,4)}
+    True
+    """
     reducible_pairs = set()
     for l in network.leaves:
         reducible_pairs = reducible_pairs.union(
@@ -24,6 +41,19 @@ def find_reducible_pairs_with_second(N, x):
     """
     Finds a list of reducible pairs (cherries and reticulated cherries) in the
     network N with leaf x as second element of the pair.
+
+    :param N: a phylogenetic network.
+    :param x: a leaf of the network N.
+    :return: a list of reducible pairs (cherries and reticulated cherries) in the network N with leaf x as second element of the pair.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import find_reducible_pairs_with_second
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0), (0,1), (0,2), (1,2), (1,3), (2,4)],
+    ... )
+    >>> find_reducible_pairs_with_second(network, 3)
+    [(4, 3)]
     """
     if not N.is_leaf(x):
         raise ValueError("x must be a leaf of N")
@@ -50,6 +80,19 @@ def find_reducible_pairs_with_first(N, x):
     """
     Finds a list of reducible pairs (cherries and reticulated cherries) in the
     network N with leaf x as first element of the pair.
+
+    :param N: a phylogenetic network.
+    :param x: a leaf of the network N.
+    :return: a list of reducible pairs (cherries and reticulated cherries) in the network N with leaf x as first element of the pair.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import find_reducible_pairs_with_first
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0), (0,1), (0,2), (1,2), (1,3), (2,4)],
+    ... )
+    >>> find_reducible_pairs_with_first(network, 4)
+    [(4, 3)]
     """
     if not N.is_leaf(x):
         raise ValueError("x must be a leaf of N")
@@ -165,6 +208,24 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
         The network with the reducible pair reduced.
     CHERRYTYPE
         The type of the reducible pair.
+
+    Raises
+    ------
+    ValueError
+        If x or y are not in the network.
+
+    Examples
+    --------
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import reduce_pair, CHERRYTYPE
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0), (0,1), (0,2), (1,2), (1,3), (2,4)],
+    ... )
+    >>> network, cherry_type = reduce_pair(network, 4, 3)
+    >>> cherry_type == CHERRYTYPE.RETICULATEDCHERRY
+    True
+    >>> set(network.edges) == {(-1, 0), (0, 3), (0, 4)}
+    True
     """
 
     if not inplace:
@@ -188,15 +249,34 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
 
 
 def check_reducible_pair(network, x, y):
-    if network.has_node(x):
-        if network.has_node(y):
-            for px in network.predecessors(x):
-                for py in network.predecessors(y):
-                    if px == py:
-                        return CHERRYTYPE.CHERRY
-                    if network.out_degree(px) == 1:
-                        if px in network.successors(py):
-                            return CHERRYTYPE.RETICULATEDCHERRY
+    """
+    Checks whether the pair (x,y) is a reducible pair in the network.
+
+    :param network: a phylogenetic network.
+    :param x: a leaf of the network.
+    :param y: a leaf of the network.
+    :return: the type of reducible pair (x,y) in the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.cherrypicking.base import check_reducible_pair, CHERRYTYPE
+    >>> network = DiNetwork(
+    ...     edges=[(-1,0), (0,1), (0,2), (1,2), (1,3), (2,4)],
+    ... )
+    >>> check_reducible_pair(network, 4, 3) == CHERRYTYPE.RETICULATEDCHERRY
+    True
+    """
+    if not network.has_node(x):
+        return CHERRYTYPE.NONE
+    if not network.has_node(y):
+        return CHERRYTYPE.NONE
+    px = network.parent(x)
+    py = network.parent(y)
+    if px == py:
+        return CHERRYTYPE.CHERRY
+    if network.out_degree(px) == 1:
+        if px in network.successors(py):
+            return CHERRYTYPE.RETICULATEDCHERRY
     return CHERRYTYPE.NONE
 
 
@@ -210,7 +290,6 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
     :param nodes_by_label: if true, the nodes are indexed by their label, otherwise by their index
     :return: the network with the pair added
     """
-    print("add pair", x, y, height)
     if not inplace:
         network = deepcopy(network)
 

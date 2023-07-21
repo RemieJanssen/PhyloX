@@ -1,3 +1,17 @@
+"""
+This module contains the code to generate phylogenetic networks using the
+Heath model as it was called in the paper:
+"Comparing the topology of phylogenetic network generators"
+by Remie Janssen and Pengy Liu (2021).
+
+This heath model is an extention of the model by Heath et al for generating trees:
+"Taxon sampling affects inferences of macro-evolutionary processes from phylogenetic trees" by
+Heath TA, Zwickl DJ, Kim J, Hillis DM (2008).
+
+The main difference is that hybridization and HGT events are allowed, the rates of these events are
+handled similarly to the speciation and extinction rates in the original model.
+"""
+
 import itertools
 import math
 import random

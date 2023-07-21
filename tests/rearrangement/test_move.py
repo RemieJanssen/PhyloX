@@ -68,6 +68,12 @@ class TestMoveClass(unittest.TestCase):
         )
         assert m.move_type == MoveType.NONE
 
+    def test_move_type_all(self):
+        m = Move(
+            move_type=MoveType.NONE,
+        )
+        assert m.is_type(MoveType.ALL)
+
     def test_make_move_vplu(self):
         m = Move(
             move_type=MoveType.VPLU,

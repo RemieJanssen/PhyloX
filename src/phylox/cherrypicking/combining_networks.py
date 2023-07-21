@@ -25,6 +25,14 @@ HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
 
 
 class HybridizationProblem:
+    """
+    A class to represent a hybridization problem.
+    I.e. a set of phylogenetic networks that need to be combined into a single phylogenetic network.
+
+    :param list_of_networks: a list of phylogenetic networks, each given as a phylox.DiNetwork.
+    :param newick_strings: if True, the input trees are given as newick strings, otherwise as phylox.DiNetworks.
+    """
+
     def __init__(self, list_of_networks=None, newick_strings=True):
         # The dictionary of trees
         self.trees = dict()
@@ -82,15 +90,52 @@ class HybridizationProblem:
     def CPSBound(
         self, repeats=1, progress=False, track=False, lengths=False, time_limit=None
     ):
+        """
+        Finds a cherry-picking sequence for the input networks, and updates the best sequence found so far.
+
+        The method simply keeps picking (random) cherries until all networks are reduced to a single leaf.
+        If lengths is True, the method picks the lowest cherry in each step (CPHeuristicLenths).
+        If track is True, the method keeps track of the reducible pairs in each step, and reduces the most common pair (CPHeuristicStorePairs).
+        Otherwise, the method simply picks a random cherry in each step (CPHeuristic).
+
+
+        :param repeats: the number of times to run the algorithm.
+        :param progress: if True, print progress information.
+        :param track: if True, keep track of reducible pairs and reduce the most common pair.
+        :param lengths: if True, pick the lowest cherry in each step.
+        :param time_limit: if given, the algorithm stops after this many seconds.
+        :return: the best sequence found so far.
+
+        :example:
+        >>> from phylox import DiNetwork
+        >>> from phylox.cherrypicking.combining_networks import HybridizationProblem
+        >>> network1 = DiNetwork(
+        ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+        ...     labels=[(4, "A"), (5, "B")],
+        ... )
+        >>> network2 = DiNetwork(
+        ...     edges=[(0,1),(1,2),(1,3),(2,3),(2,4),(3,5)],
+        ...     labels=[(4, "A"), (5, "B")],
+        ... )
+        >>> problem = HybridizationProblem(
+        ...     list_of_networks=[network1, network2],
+        ...     newick_strings=False,
+        ... )
+        >>> sequence = problem.CPSBound()
+        >>> sequence == [('B', 'A'), ('B', 'A')] or sequence == [('B', 'A'), ('A', 'B')]
+        True
+        """
         # Set the specific heuristic that we use, based on the user input and whether the trees have lengths
         Heuristic = self.CPHeuristic
         if track and not lengths:
-            print("Tracking reducible cherries")
+            if progress:
+                print("Tracking reducible cherries")
             Heuristic = self.CPHeuristicStorePairs
         if lengths:
             if not self.distances:
                 raise ValueError("not all trees have branch lengths!")
-            print("Picking the lowest cherry")
+            if progress:
+                print("Picking the lowest cherry")
             Heuristic = self.CPHeuristicLengths
             heights_best = []
         # Initialize the recorded best sequences and corresponding data
@@ -99,32 +144,37 @@ class HybridizationProblem:
         starting_time = time.time()
         # Try as many times as required by the integer 'repeats'
         for i in range(repeats):
-            print(i + 1)
             if lengths:
                 new, reduced_trees, seq_heights = Heuristic(progress=progress)
-                print("found sequence of length: " + str(len(new)))
+                if progress:
+                    print("found sequence of length: " + str(len(new)))
             else:
                 new, reduced_trees = Heuristic(progress=progress)
-                print("found sequence of length: " + str(len(new)))
-                print(new)
-                print("improving sequence")
+                if progress:
+                    print("found sequence of length: " + str(len(new)))
+                    print(new)
+                    print("improving sequence")
                 new, reduced_trees = self.Improve_Sequence(
                     new, reduced_trees, progress=progress
                 )
-                print("new length = " + str(len(new)))
-                print(new)
-            print("adding roots")
+                if progress:
+                    print("new length = " + str(len(new)))
+                    print(new)
+            if progress:
+                print("adding roots")
             new, reduced_trees = add_roots_to_sequence(new, reduced_trees)
             if lengths:
                 for i in range(len(new) - len(seq_heights)):
                     seq_heights += [seq_heights[-1]]
-            print("final length = " + str(len(new)))
+            if progress:
+                print("final length = " + str(len(new)))
             if best == None or len(new) < len(best):
                 best = new
                 red_trees_best = reduced_trees
                 if lengths:
                     heights_best = seq_heights
-            print("best sequence has length " + str(len(best)))
+            if progress:
+                print("best sequence has length " + str(len(best)))
             if time_limit and time.time() - starting_time > time_limit:
                 break
         new_seq = [
@@ -277,8 +327,6 @@ class HybridizationProblem:
         if progress:
             print("found all reducible pairs")
         while copy_of_inputs.trees:
-            for network in copy_of_inputs.trees.values():
-                print(network.edges(data=True))
             if progress:
                 print("Sequence has length: " + str(len(CPS)))
                 print(str(len(copy_of_inputs.trees)) + " trees left.\n")
@@ -336,8 +384,10 @@ class HybridizationProblem:
             candidate_leaves = set(lowest_cherry)
         return CPS, reduced_trees, heights_seq
 
-    # Returns an updated dictionary of heights of the reducible pairs
     def Update_Heights(self, current_heights, reducible_pairs):
+        """
+        Returns an updated dictionary of heights of the reducible pairs
+        """
         for pair, trees in reducible_pairs.items():
             # updating is only necessary when the set of trees for that pair is changed or the reducible pair was not reducible before.
             if not pair in current_heights or not current_heights[pair][1] == len(
@@ -347,9 +397,11 @@ class HybridizationProblem:
                 current_heights[pair] = (height_pair, len(trees))
         return current_heights
 
-    # Returns the average height of a pair in a set of trees
-    # The pair must be reducible in each tree in 'trees'
     def Height_Pair(self, pair, trees):
+        """
+        Returns the average height of a pair in a set of trees
+        The pair must be reducible in each tree in 'trees'
+        """
         height_pair = [0, 0]
         for t in trees:
             height_in_t = cherry_height(self.trees[t], *pair)
@@ -357,9 +409,11 @@ class HybridizationProblem:
             height_pair[1] += height_in_t[1]
         return [height_pair[0] / float(len(trees)), height_pair[1] / float(len(trees))]
 
-    # Finds the set of reducible pairs in all trees
-    # Returns a dictionary with reducible pairs as keys, and the trees they reduce as values.
     def Find_All_Pairs(self):
+        """
+        Finds the set of reducible pairs in all trees
+        Returns a dictionary with reducible pairs as keys, and the trees they reduce as values.
+        """
         reducible_pairs = dict()
         for i, t in self.trees.items():
             red_pairs_t = find_all_reducible_pairs(t)
@@ -369,9 +423,11 @@ class HybridizationProblem:
                 reducible_pairs[pair].add(i)
         return reducible_pairs
 
-    # Returns the updated dictionary of reducible pairs in all trees after a reduction (with the trees they reduce as values)
-    # we only need to update for the trees that got reduced: 'new_red_treed'
     def Update_Reducible_Pairs(self, reducible_pairs, new_red_trees):
+        """
+        Returns the updated dictionary of reducible pairs in all trees after a reduction (with the trees they reduce as values)
+        we only need to update for the trees that got reduced: 'new_red_treed'
+        """
         # Remove trees to update from all pairs
         for pair, trees in list(reducible_pairs.items()):
             trees.difference_update(new_red_trees)
@@ -389,16 +445,22 @@ class HybridizationProblem:
                         reducible_pairs[pair] = set([index])
         return reducible_pairs
 
-    # reduces the given pair in all trees
-    # Returns the set of trees thet were reduced
-    # CHANGES THE SET OF TREES, ONLY PERFORM IN A COPY OF THE CLASS INSTANCE
     def Reduce_Pair_In_All(self, pair, reducible_pairs=dict()):
+        """
+        Reduces the given pair in all networks in the problem.
+        Returns the set of networks that were reduced.
+
+        :note: This method changes the set of networks in the problem, so it should only be called in a copy of the problem.
+
+        :param pair: a pair of leaves.
+        :param reducible_pairs: a dictionary of reducible pairs and the networks in which they are reducible, as returned by Find_All_Pairs.
+        """
+
         reduced_trees_for_pair = []
         if pair in reducible_pairs:
             trees_to_reduce = reducible_pairs[pair]
         else:
-            if reducible_pairs:
-                print("pair not found, trying all trees")
+            # pair not found, trying all trees
             trees_to_reduce = deepcopy(self.trees)
         for i in trees_to_reduce:
             if i in self.trees:
@@ -413,12 +475,15 @@ class HybridizationProblem:
                     del self.trees[i]
         return set(reduced_trees_for_pair)
 
-    # reduces the trivial pairs in the current set of trees
-    # runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs
-    # this set must be given; after a reduction of the pair (a,b) only using the leaves a and b works
-    # Returns the reduced pairs and the sets of trees thet were reduced
-    # CHANGES THE SET OF TREES, ONLY PERFORM IN A COPY OF THE CLASS INSTANCE
     def Reduce_Trivial_Pairs(self, candidate_leaves):
+        """
+        Reduces the trivial pairs in the current set of networks.
+        Runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs.
+        This set must be given; after a reduction of the pair (a,b) only using the leaves a and b works.
+        Returns the reduced pairs and the sets of networks that were reduced.
+
+        :note: This method changes the set of networks in the problem, so it should only be called in a copy of the problem.
+        """
         seq = []
         reduced_tree_sets = []
         while candidate_leaves:
@@ -432,12 +497,17 @@ class HybridizationProblem:
                     candidate_leaves = candidate_leaves | set(p)
         return seq, reduced_tree_sets
 
-    # reduces the trivial pairs in the current set of trees
-    # runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs
-    # this set must be given; after a reduction of the pair (a,b) only using the leaves a and b works
-    # Returns the reduced pairs and the sets of trees thet were reduced, also updates the reducible pairs.
-    # CHANGES THE SET OF TREES, ONLY PERFORM IN A COPY OF THE CLASS INSTANCE
     def Reduce_Trivial_Pairs_Store_Pairs(self, candidate_leaves, reducible_pairs):
+        """
+        Reduces the trivial pairs in the current set of networks.
+        Runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs.
+        This set must be given; after a reduction of the pair (a,b) only using the leaves a and b works.
+        Returns the reduced pairs and the sets of networks that were reduced, also updates the reducible pairs.
+
+        This method is similar to Reduce_Trivial_Pairs, but it uses and updates the dictionary of reducible pairs to reduce the trivial pairs.
+
+        :note: This method changes the set of networks in the problem, so it should only be called in a copy of the problem.
+        """
         seq = []
         reduced_tree_sets = []
         while candidate_leaves:
@@ -456,12 +526,18 @@ class HybridizationProblem:
                     candidate_leaves = candidate_leaves | set(p)
         return seq, reduced_tree_sets, reducible_pairs
 
-    # reduces the trivial pairs in the current set of trees with branch lengths
-    # runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs
-    # this set must be given; after a reduction of the pair (a,b) only using the leaves a and b works
-    # Returns the reduced pairs and the sets of trees thet were reduced, also updates the reducible pairs and their heights.
-    # CHANGES THE SET OF TREES, ONLY PERFORM IN A COPY OF THE CLASS INSTANCE
     def Reduce_Trivial_Pairs_Lengths(self, candidate_leaves, reducible_pairs):
+        """
+        Reduces the trivial pairs in the current set of networks.
+        Runs efficiently by giving a set of leaves 'candidate_leaves' that may be involved in trivial pairs.
+        This set must be given; after a reduction of the pair (a,b) only using the leaves a and b works.
+        Returns the reduced pairs and the sets of networks that were reduced, also updates the reducible pairs and their heights.
+
+        This method is similar to Reduce_Trivial_Pairs, but it uses and updates the dictionary of reducible pairs to reduce the trivial pairs.
+        It also keeps track of the heights of the reduced pairs.
+
+        :note: This method changes the set of networks in the problem, so it should only be called in a copy of the problem.
+        """
         seq = []
         reduced_tree_sets = []
         heights_seq = []
@@ -483,8 +559,10 @@ class HybridizationProblem:
                     candidate_leaves = candidate_leaves | set(p)
         return seq, reduced_tree_sets, reducible_pairs, heights_seq
 
-    # Returns all trivial pairs involving the leaf l
     def Trivial_Pair_With(self, l):
+        """
+        Returns all trivial pairs involving the leaf l as first element of the pair.
+        """
         pairs = set()
         # Go through all trees t with index i.
         for i, t in self.trees.items():
@@ -503,9 +581,11 @@ class HybridizationProblem:
                     break
         return pairs
 
-    # Improves a sequence 'CPS' for the input trees by removing elements and checking whether the new sequence still reduces all trees
-    # Returns this improved sequence and the corresponding sets of reduced trees for each pair.
     def Improve_Sequence(self, CPS, reduced_trees, progress=False):
+        """
+        Improves a sequence 'CPS' for the input trees by removing elements and checking whether the new sequence still reduces all trees.
+        Returns this improved sequence and the corresponding sets of reduced trees for each pair.
+        """
         seq = deepcopy(CPS)
         i = 0
         while i < len(seq):

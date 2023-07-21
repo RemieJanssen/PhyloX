@@ -11,6 +11,19 @@ from phylox.rearrangement.movetype import MoveType
 def random_vplu_move_at_bottom(network):
     """
     Returns a VPLU move that adds an edge between the incoming edges of two leaves.
+
+    :param network: the network to add an edge to.
+    :return: a VPLU move that adds an edge between the incoming edges of two leaves.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
+    >>> from phylox.generators.trees.well_known import generate_balanced_tree
+    >>> from phylox.generators.trees.add_edges import random_vplu_move_at_bottom
+    >>> tree = generate_balanced_tree(8)
+    >>> move = random_vplu_move_at_bottom(tree)
+    >>> move.is_type(MoveType.VPLU)
+    True
     """
     leaves = list(network.leaves)
     leaf_indices = np.random.choice(range(len(leaves)), 2, replace=False)
@@ -31,6 +44,19 @@ def random_vplu_move_uniform(network):
     """
     Returns a VPLU move that adds an edge between two edges in the network.
     Two edges are chosen uniformly at random from the network.
+
+    :param network: the network to add an edge to.
+    :return: a VPLU move that adds an edge between two edges in the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
+    >>> from phylox.generators.trees.well_known import generate_balanced_tree
+    >>> from phylox.generators.trees.add_edges import random_vplu_move_uniform
+    >>> tree = generate_balanced_tree(8)
+    >>> move = random_vplu_move_uniform(tree)
+    >>> move.is_type(MoveType.VPLU)
+    True
     """
     edges = list(network.edges())
     edge_indices = np.random.choice(range(len(edges)), 2, replace=False)
@@ -46,6 +72,22 @@ def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=Non
     """
     Returns a VPLU move that adds an edge between two edges in the network.
     Pick one edge, move a random number of edges through the network to find a second edge.
+
+    :param network: the network to add an edge to.
+    :param stop_prob: the probability to stop the random walk.
+    :param max_steps: the maximum number of steps to take in the random walk.
+    :param max_tries: the maximum number of tries to find a second edge.
+    :return: a VPLU move that adds an edge between two edges in the network.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
+    >>> from phylox.generators.trees.well_known import generate_balanced_tree
+    >>> from phylox.generators.trees.add_edges import random_vplu_move_local
+    >>> tree = generate_balanced_tree(8)
+    >>> move = random_vplu_move_local(tree)
+    >>> move.is_type(MoveType.VPLU)
+    True
     """
     try_number = 1
     while max_tries == None or try_number <= max_tries:
@@ -92,6 +134,23 @@ class AddEdgeMethod(Enum):
 def network_from_tree(tree, reticulations, method):
     """
     Returns a network with the given number of reticulations added to the given tree.
+
+    :param tree: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
+    :param reticulations: the number of reticulations to add to the tree.
+    :param method: the method to use to add the reticulations.
+    :return: a network with the given number of reticulations added to the given tree.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.movetype import MoveType
+    >>> from phylox.generators.trees.well_known import generate_balanced_tree
+    >>> from phylox.generators.trees.add_edges import network_from_tree, AddEdgeMethod
+    >>> tree = generate_balanced_tree(8)
+    >>> network = network_from_tree(tree, 2, AddEdgeMethod.BOTTOM)
+    >>> len(network.leaves)
+    8
+    >>> network.reticulation_number
+    2
     """
 
     if method == AddEdgeMethod.BOTTOM:

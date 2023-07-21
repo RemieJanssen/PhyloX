@@ -40,6 +40,14 @@ class TestRearrangementProblem(unittest.TestCase):
         network1_applied = apply_move(problem.network1, m)
         assert True
 
+    def test_apply_none_move(self):
+        m = Move(
+            move_type=MoveType.NONE,
+        )
+        problem = self.setup_simple_problem()
+        network1_applied = apply_move(problem.network1, m)
+        assert True
+
     def test_check_solution_valid(self):
         problem = self.setup_simple_problem()
         m = Move(

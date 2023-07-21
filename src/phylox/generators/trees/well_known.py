@@ -8,6 +8,18 @@ from phylox import DiNetwork
 
 
 def generate_balanced_tree(number_of_leaves):
+    """
+    Generates a balanced tree with the given number of leaves.
+
+    :param number_of_leaves: the number of leaves of the balanced tree (power of 2).
+    :return: a balanced tree with the given number of leaves.
+
+    :example:
+    >>> from phylox.generators.trees.well_known import generate_balanced_tree
+    >>> tree = generate_balanced_tree(8)
+    >>> len(tree.leaves)
+    8
+    """
     tree = DiNetwork()
     leaves = list(range(1, number_of_leaves + 1))
     tree.add_nodes_from(leaves)
@@ -27,6 +39,18 @@ def generate_balanced_tree(number_of_leaves):
 
 
 def generate_caterpillar(number_of_leaves):
+    """
+    Generates a caterpillar tree with the given number of leaves.
+
+    :param number_of_leaves: the number of leaves of the caterpillar tree.
+    :return: a caterpillar tree with the given number of leaves.
+
+    :example:
+    >>> from phylox.generators.trees.well_known import generate_caterpillar
+    >>> tree = generate_caterpillar(5)
+    >>> len(tree.leaves)
+    5
+    """
     tree = DiNetwork()
     tree.add_node(number_of_leaves + 1)
     for i in range(1, number_of_leaves):
