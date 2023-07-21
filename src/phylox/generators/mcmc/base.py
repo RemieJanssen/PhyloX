@@ -81,7 +81,7 @@ def sample_mcmc_networks(
     burn_in=1000,
     number_of_samples=1,
     add_root_if_necessary=False,
-):  
+):
     """
     Samples phylogenetic networks using a Markov-Chain Monte Carlo method.
 

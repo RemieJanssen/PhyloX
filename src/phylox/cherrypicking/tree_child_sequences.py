@@ -57,7 +57,7 @@ def find_tree_child_sequence(network, labels=False):
     >>> TC_sequence = find_tree_child_sequence(N, labels=True)
     >>> TC_sequence == [("B", "A"), ("B", "A"), ("B", "A")] or TC_sequence == [("A", "B"), ("B", "A"), ("B", "A")]
     True
-    """    
+    """
     N = deepcopy(network)
     reducible_pairs = []
     for x in N.leaves:

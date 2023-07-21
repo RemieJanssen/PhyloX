@@ -93,7 +93,7 @@ def find_reducible_pairs_with_first(N, x):
     ... )
     >>> find_reducible_pairs_with_first(network, 4)
     [(4, 3)]
-    """    
+    """
     if not N.is_leaf(x):
         raise ValueError("x must be a leaf of N")
 
