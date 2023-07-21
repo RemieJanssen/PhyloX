@@ -57,6 +57,27 @@ def find_tree_child_sequence(network, labels=False):
 
 
 def check_cherry_picking_sequence(N, cherry_picking_sequence, labels=False):
+    """
+    Check if a cherry picking sequence is valid for a network.
+
+    :param N: The network to check the cherry picking sequence for.
+    :type N: phylox.DiNetwork
+    :param cherry_picking_sequence: The cherry picking sequence to check.
+    :type cherry_picking_sequence: list
+    :param labels: Whether the cherry picking sequence is given as a list of labels instead of a list of nodes.
+    :type labels: bool
+    :return: True if the cherry picking sequence reduces the network to a single edge, False otherwise.
+    :rtype: bool
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> N = DiNetwork(
+    ...     edges=[(-1, 0), (0, 1), (0, 2), (1, 2), (1, 3), (2, 4)],
+    ...     labels=[(3, "A"), (4, "B")],
+    ... )
+    >>> check_cherry_picking_sequence(N, [("B", "A"), ("B", "A")], labels=True)
+    True
+    """
     if labels:
         cherry_picking_sequence = [
             (N.label_to_node_dict.get(x, None), N.label_to_node_dict.get(y, None))
