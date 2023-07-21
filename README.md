@@ -2,7 +2,7 @@
 
 PhyloX is a python package with tools for constructing, manipulating, and analyzing phylogenetic networks.
 
-For more information, see the [documentation]([url](https://phylox.readthedocs.io)).
+For more information, see the [documentation](https://phylox.readthedocs.io).
 
 ## Citing PhyloX
 
