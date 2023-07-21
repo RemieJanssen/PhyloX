@@ -22,6 +22,7 @@ Types of changes:
 - Usage of NetworkX referenced in README. (#14)
 - Cherry picking hybridization workflow works again, including tests. (#15)
 - Start documentation using sphinx. (#18)
+- ReadtheDocs config. (#21)
 
 ### Changed
 
