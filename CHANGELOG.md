@@ -13,7 +13,10 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [0.0.3] - (Unreleased)
+## [0.0.4] - (Unreleased)
+
+
+## [0.0.3] - (2023-07-22)
 
 ### Added
 
