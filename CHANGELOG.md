@@ -23,6 +23,7 @@ Types of changes:
 - Cherry picking hybridization workflow works again, including tests. (#15)
 - Start documentation using sphinx. (#18)
 - ReadtheDocs config. (#21)
+- CI/CD release. (#22)
 
 ### Changed
 
