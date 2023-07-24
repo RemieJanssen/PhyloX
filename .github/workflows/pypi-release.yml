@@ -42,4 +42,4 @@ jobs:
       if: github.ref == 'refs/heads/release' # run this job only for the dev branch
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
-        repository-url: https://pypi.org/
+        repository-url: https://upload.pypi.org/legacy/
