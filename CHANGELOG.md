@@ -13,8 +13,13 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [0.0.4] - (Unreleased)
+## [0.0.5] - (Unreleased)
 
+## [0.0.4] - (2023-07-24)
+
+### Fixed
+
+- Automatic pypi release when pushing to release.
 
 ## [0.0.3] - (2023-07-22)
 
