@@ -1,16 +1,87 @@
-# import os
-# import sys
-# import math
-# import re
-# import ast
-# import random
-# import numpy as np
-# import pandas as pd
-# from pathlib import Path
-# import multiprocessing
-# from multiprocessing import Manager
-# from ExtractNetworkProperties import *
-# import itertools
+import re
+import json
+from phylox import DiNetwork
+from phylox.base import find_unused_node
+
+
+def extended_newick_to_dinetwork(newick, internal_labels=False):
+    """
+    Converts a Newick string to a networkx DAG with leaf labels.
+    The newick string may or may not have length:bootstrap:probability annotations.
+    The newick string may or may not have internal node labels.
+    The newick string may or may not have hybrid nodes.
+
+    :param newick: a string in extended Newick format for phylogenetic networks.
+    :param internal_labels: a boolean, indicating whether the internal nodes of the network are labeled.
+    :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
+
+    :example:
+    >>> newick = "(A:1,B:1,(C:1,D:1)E:1)F;"
+    >>> network = extended_newick_to_dinetwork(newick)
+    >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
+    True
+    """
+    if newick[-1] != ";":
+        raise ValueError("Newick string does not end with ;")
+    newick = newick[:-1]
+
+    # convert the newick string to json string
+    # add ' or " to the names if necessary
+    newick = re.sub(r"#H([d]+)", r"#R\1", newick)
+
+    # replace [ or ( with {[ and ] or ) with ]}
+    newick = re.sub(r"[\[\(]", r'{"children": [', newick)
+    newick = re.sub(r"[\]\)]", r"]}", newick)
+
+    # replace :a:b:c values with dictionary {"length":a,"bootstrap":b,"probability":c}
+    # for internal nodes
+    newick = re.sub(
+        r"}([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
+        r', "label": "\1","length": \2,"bootstrap": \3,"probability": \4}',
+        newick,
+    )
+    # for leaves
+    newick = re.sub(
+        r"([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
+        r'{"label": "\1", "length": \2,"bootstrap": \3,"probability": \4}',
+        newick,
+    )
+    # replace :a values with dictionary {"length":a}
+    # for internal nodes
+    newick = re.sub(
+        r"}([\da-zA-Z\_]+):([\d\.]+)", r', "label": "\1","length": \2}', newick
+    )
+    # for leaves
+    newick = re.sub(
+        r"([\da-zA-Z\_]+):([\d\.]+)", r'{"label": "\1", "length": \2}', newick
+    )
+
+    # replace internal node name with dictionary {"label": name}
+    newick = re.sub(r"}([#a-zA-Z\d]+)", r', "label": "\1"}', newick)
+
+    # convert the json string to a network
+    newick_json = json.loads(newick)
+    network = json_to_dinetwork(newick_json)
+    return network
+
+
+def json_to_dinetwork(newick_json, network=None):
+    """
+    Converts a json string to a phylox DiNetwork
+
+    :param newick_json: a string in json format for phylogenetic networks.
+    """
+    network = network or DiNetwork()
+    node = newick_json.get("label", find_unused_node(network))
+    network.add_node(node)
+    for child_dict in newick_json.get("children", []):
+        child_dict_without_label_and_children = {
+            k: v for k, v in child_dict.items() if k not in ("label", "children")
+        }
+        child = child_dict.get("label", find_unused_node(network))
+        network.add_edge(node, child, **child_dict_without_label_and_children)
+        json_to_dinetwork(child_dict, network)
+    return network
 
 
 # def Newick_To_Network(newick):
@@ -198,15 +269,15 @@
 #         network.node[node]['label'] = value
 
 
-################################################################################
-################################################################################
-################################################################################
-########                                                           #############
-########                     AAE CutTree CLASS                     #############
-########                                                           #############
-################################################################################
-################################################################################
-################################################################################
+# ###############################################################################
+# ###############################################################################
+# ###############################################################################
+# #######                                                           #############
+# #######                     AAE CutTree CLASS                     #############
+# #######                                                           #############
+# ###############################################################################
+# ###############################################################################
+# ###############################################################################
 
 
 # #A class that represents a network as a tree where hybrid edges have been cut at the hybrid nodes.
