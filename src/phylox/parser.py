@@ -16,10 +16,13 @@ def extended_newick_to_dinetwork(newick, internal_labels=False):
     :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
 
     :example:
-    >>> newick = "(A:1,B:1,(C:1,D:1)E:1)F;"
+    >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
     >>> network = extended_newick_to_dinetwork(newick)
     >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
     True
+    >>> p = network.parent('A')
+    >>> network[p]['A']['length']
+    1.1
     """
     if newick[-1] != ";":
         raise ValueError("Newick string does not end with ;")
@@ -56,31 +59,55 @@ def extended_newick_to_dinetwork(newick, internal_labels=False):
         r"([\da-zA-Z\_]+):([\d\.]+)", r'{"label": "\1", "length": \2}', newick
     )
 
+    # add " around leaf names
+    while newick != re.sub(r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1"\2"\3', newick):
+        newick = re.sub(
+            r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1{"label": "\2"}\3', newick
+        )
+
     # replace internal node name with dictionary {"label": name}
     newick = re.sub(r"}([#a-zA-Z\d]+)", r', "label": "\1"}', newick)
 
     # convert the json string to a network
     newick_json = json.loads(newick)
     network = json_to_dinetwork(newick_json)
+    if not internal_labels:
+        network = remove_internal_labels(network)
     return network
 
 
-def json_to_dinetwork(newick_json, network=None):
+def remove_internal_labels(network):
+    """
+    Removes the internal labels from a network.
+
+    :param network: a phylogenetic network.
+    :return: a phylogenetic network with the internal labels removed.
+    """
+    for node in network.nodes:
+        if not network.is_leaf(node):
+            network.nodes[node].pop("label", None)
+    return network
+
+
+def json_to_dinetwork(newick_json, network=None, root_node=None):
     """
     Converts a json string to a phylox DiNetwork
 
     :param newick_json: a string in json format for phylogenetic networks.
     """
     network = network or DiNetwork()
-    node = newick_json.get("label", find_unused_node(network))
+
+    node = newick_json.get("label") or root_node or find_unused_node(network)
     network.add_node(node)
+    if label := newick_json.get("label"):
+        network.nodes[node]["label"] = label
     for child_dict in newick_json.get("children", []):
         child_dict_without_label_and_children = {
             k: v for k, v in child_dict.items() if k not in ("label", "children")
         }
         child = child_dict.get("label", find_unused_node(network))
         network.add_edge(node, child, **child_dict_without_label_and_children)
-        json_to_dinetwork(child_dict, network)
+        json_to_dinetwork(child_dict, network, root_node=child)
     return network
 
 
