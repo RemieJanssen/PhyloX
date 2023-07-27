@@ -33,28 +33,63 @@ def extended_newick_to_dinetwork(newick, internal_labels=False, network=None):
 
 
 def newick_to_nested_list(newick):
-    nested_list = [""]
-    print(newick)
+    nested_list = [{"children": [], "label_and_attr": ""}]
     while newick:
         character = newick[0]
         newick = newick[1:]
-        print()
-        print(character)
-        print(nested_list)
         if character == "(":
             newick, child = newick_to_nested_list(newick)
-            nested_list[-1] = child
-            nested_list+=[""]
+            nested_list[-1]["children"] += child
         elif character == ")":
             return newick, nested_list
         elif character == ",":
-            nested_list+=[""]
+            nested_list+=[{"children": [], "label_and_attr": ""}]
         elif character == ";":
             pass
         else:
-            nested_list[-1]+=character
-        print(nested_list)
+            nested_list[-1]["label_and_attr"]+=character
     return nested_list
+
+
+def json_to_dinetwork(json, network=None, root_node=None):
+    """
+    Converts a json string to a phylox DiNetwork
+
+    :param newick_json: a string in json format for phylogenetic networks.
+    """
+    network = network or DiNetwork()
+
+    node_attrs = label_and_attrs_to_dict(json["label_and_attr"])
+    node = json.get("label") or root_node or find_unused_node(network)
+    network.add_node(node)
+    if label := json.get("label"):
+        network.nodes[node]["label"] = label
+    for child_dict in json.get("children", []):
+        child_dict_without_label_and_children = {
+            k: v for k, v in child_dict.items() if k not in ("label", "children")
+        }
+        child = child_dict.get("label", find_unused_node(network))
+        network.add_edge(node, child, **child_dict_without_label_and_children)
+        json_to_dinetwork(child_dict, network, root_node=child)
+    return network
+
+
+def label_and_attrs_to_dict(label_and_attrs):
+    """
+    converts the label and attr part of an extended newick string
+    for one node to a dictionary. 
+    For example, the string "A:1.1:0.9:0.8" is converted to
+    {"label": "A", "length": 1.1, "bootstrap": 0.9, "probability": 0.8}
+    """
+    label_and_attrs = label_and_attrs.split(":")
+    label = label_and_attrs[0]
+    attrs = label_and_attrs[1:]
+    attrs_dict = {"label": label}
+    for attr in attrs:
+        attr_name, attr_value = attr.split("=")
+        attrs_dict[attr_name] = float(attr_value)
+    return attrs_dict
+
 
 
 
@@ -124,7 +159,7 @@ def extended_newick_to_dinetwork2(newick, internal_labels=False):
 
     # convert the json string to a network
     newick_json = json.loads(newick)
-    network = json_to_dinetwork(newick_json)
+    network = json_to_dinetwork2(newick_json)
     if not internal_labels:
         network = remove_internal_labels(network)
     return network
@@ -143,7 +178,7 @@ def remove_internal_labels(network):
     return network
 
 
-def json_to_dinetwork(newick_json, network=None, root_node=None):
+def json_to_dinetwork2(newick_json, network=None, root_node=None):
     """
     Converts a json string to a phylox DiNetwork
 
