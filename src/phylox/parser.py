@@ -4,7 +4,61 @@ from phylox import DiNetwork
 from phylox.base import find_unused_node
 
 
-def extended_newick_to_dinetwork(newick, internal_labels=False):
+def extended_newick_to_dinetwork(newick, internal_labels=False, network=None):
+    """
+    Converts a Newick string to a networkx DAG with leaf labels.
+    The newick string may or may not have length:bootstrap:probability annotations.
+    The newick string may or may not have internal node labels.
+    The newick string may or may not have hybrid nodes.
+
+    :param newick: a string in extended Newick format for phylogenetic networks.
+    :param internal_labels: a boolean, indicating whether the internal nodes of the network are labeled.
+    :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
+
+    :example:
+    >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
+    >>> network = extended_newick_to_dinetwork(newick)
+    >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
+    True
+    >>> p = network.parent('A')
+    >>> network[p]['A']['length']
+    1.1
+    """
+
+    network = network or DiNetwork()
+    nested_list = newick_to_nested_list(newick)
+    print(nested_list)
+
+
+
+
+def newick_to_nested_list(newick):
+    nested_list = [""]
+    print(newick)
+    while newick:
+        character = newick[0]
+        newick = newick[1:]
+        print()
+        print(character)
+        print(nested_list)
+        if character == "(":
+            newick, child = newick_to_nested_list(newick)
+            nested_list[-1] = child
+            nested_list+=[""]
+        elif character == ")":
+            return newick, nested_list
+        elif character == ",":
+            nested_list+=[""]
+        elif character == ";":
+            pass
+        else:
+            nested_list[-1]+=character
+        print(nested_list)
+    return nested_list
+
+
+
+def extended_newick_to_dinetwork2(newick, internal_labels=False):
     """
     Converts a Newick string to a networkx DAG with leaf labels.
     The newick string may or may not have length:bootstrap:probability annotations.
