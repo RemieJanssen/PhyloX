@@ -62,4 +62,3 @@ class TestExtendedNewickToDiNetwork(unittest.TestCase):
         node_a = network.label_to_node_dict["a"]
         parent_a = network.parent(node_a)
         self.assertEqual(network[parent_a][node_a]["length"], 1.0)
-

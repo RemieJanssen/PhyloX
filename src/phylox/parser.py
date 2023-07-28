@@ -4,6 +4,7 @@ from phylox import DiNetwork
 from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
 
+
 def extended_newick_to_dinetwork(newick, internal_labels=False):
     """
     Converts a Newick string to a networkx DAG with leaf labels.
