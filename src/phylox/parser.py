@@ -5,6 +5,47 @@ from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
 
 
+def dinetwork_to_extended_newick(network):
+    """
+    Converts a phylogenetic network to a Newick string.
+    The newick string has :length:bootstrap:probability annotations if any edge has a bootstrap or probability.
+    If only lengths are available, the newick string has :length annotations.
+
+    :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :return: a string in extended Newick format for phylogenetic networks.
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.constants import LENGTH_ATTR
+    >>> from phylox.parser import dinetwork_to_extended_newick
+    >>> network = DiNetwork(
+    ...     edges=[
+    ...         (0, 1),
+    ...         (0, 2),
+    ...         (1, 3),
+    ...         (2, 3),
+    ...         (1, 4),
+    ...         (2, 5),
+    ...         (3, 6),
+    ...     ],
+    ...     labels=((0, "A"), (4, "B"), (5, "C"), (6, "D")),
+    ... )
+    >>> network[2][5][LENGTH_ATTR] = 1.0
+    >>> newick = dinetwork_to_extended_newick(network)
+    >>> newick.contains("C:1.0")
+    True
+    """
+
+    cut_network = network.copy()
+    for node in [
+        node for node in cut_network.nodes if cut_network.is_reticulation(node)
+    ]:
+        release_node(network, node)
+
+    newick = ""
+    return newick
+
+
 def extended_newick_to_dinetwork(newick, internal_labels=False):
     """
     Converts a Newick string to a networkx DAG with leaf labels.
