@@ -2,7 +2,7 @@ import re
 import json
 from phylox import DiNetwork
 from phylox.base import find_unused_node
-
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
 
 def extended_newick_to_dinetwork(newick, internal_labels=False):
     """
@@ -117,7 +117,7 @@ def label_and_attrs_to_dict(label_and_attrs):
     if "#" in attrs_dict["label"]:
         label, retic_id = attrs_dict["label"].split("#")
         attrs_dict["label"] = label
-        attrs_dict["retic_id"] = retic_id[1:]
+        attrs_dict["retic_id"] = RETIC_PREFIX + retic_id[1:]
     if "label" in attrs_dict and attrs_dict["label"] == "":
         attrs_dict.pop("label")
     return attrs_dict
