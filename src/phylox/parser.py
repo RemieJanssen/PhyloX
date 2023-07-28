@@ -4,7 +4,7 @@ from phylox import DiNetwork
 from phylox.base import find_unused_node
 
 
-def extended_newick_to_dinetwork(newick, internal_labels=False, network=None):
+def extended_newick_to_dinetwork(newick, internal_labels=False):
     """
     Converts a Newick string to a networkx DAG with leaf labels.
     The newick string may or may not have length:bootstrap:probability annotations.
@@ -18,36 +18,36 @@ def extended_newick_to_dinetwork(newick, internal_labels=False, network=None):
     :example:
     >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
     >>> network = extended_newick_to_dinetwork(newick)
-    >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
+    >>> {network.nodes[leaf].get("label") for leaf in network.leaves} == {'A', 'B', 'C', 'D'}
     True
-    >>> p = network.parent('A')
-    >>> network[p]['A']['length']
+    >>> node_for_label_A = network.label_to_node_dict['A']
+    >>> p = network.parent(node_for_label_A)
+    >>> network[p][node_for_label_A]['length']
     1.1
     """
 
-    network = network or DiNetwork()
-    nested_list = newick_to_nested_list(newick)
-    print(nested_list)
+    network = DiNetwork()
+    network_json = newick_to_json(newick)[0]
+    network = json_to_dinetwork(network_json, network=network)
+    return network
 
 
-
-
-def newick_to_nested_list(newick):
+def newick_to_json(newick):
     nested_list = [{"children": [], "label_and_attr": ""}]
     while newick:
         character = newick[0]
         newick = newick[1:]
         if character == "(":
-            newick, child = newick_to_nested_list(newick)
+            newick, child = newick_to_json(newick)
             nested_list[-1]["children"] += child
         elif character == ")":
             return newick, nested_list
         elif character == ",":
-            nested_list+=[{"children": [], "label_and_attr": ""}]
+            nested_list += [{"children": [], "label_and_attr": ""}]
         elif character == ";":
             pass
         else:
-            nested_list[-1]["label_and_attr"]+=character
+            nested_list[-1]["label_and_attr"] += character
     return nested_list
 
 
@@ -60,16 +60,19 @@ def json_to_dinetwork(json, network=None, root_node=None):
     network = network or DiNetwork()
 
     node_attrs = label_and_attrs_to_dict(json["label_and_attr"])
-    node = json.get("label") or root_node or find_unused_node(network)
+    node = json.get("retic_id") or root_node or find_unused_node(network)
     network.add_node(node)
-    if label := json.get("label"):
-        network.nodes[node]["label"] = label
+    if "label" in node_attrs:
+        network.nodes[node]["label"] = node_attrs["label"]
     for child_dict in json.get("children", []):
-        child_dict_without_label_and_children = {
-            k: v for k, v in child_dict.items() if k not in ("label", "children")
+        child_attrs = label_and_attrs_to_dict(child_dict["label_and_attr"])
+        child_attrs_without_label_and_children = {
+            k: v
+            for k, v in child_attrs.items()
+            if k not in ("label", "children", "retic_id")
         }
-        child = child_dict.get("label", find_unused_node(network))
-        network.add_edge(node, child, **child_dict_without_label_and_children)
+        child = child_attrs.get("retic_id", find_unused_node(network))
+        network.add_edge(node, child, **child_attrs_without_label_and_children)
         json_to_dinetwork(child_dict, network, root_node=child)
     return network
 
@@ -77,127 +80,140 @@ def json_to_dinetwork(json, network=None, root_node=None):
 def label_and_attrs_to_dict(label_and_attrs):
     """
     converts the label and attr part of an extended newick string
-    for one node to a dictionary. 
+    for one node to a dictionary.
     For example, the string "A:1.1:0.9:0.8" is converted to
     {"label": "A", "length": 1.1, "bootstrap": 0.9, "probability": 0.8}
     """
-    label_and_attrs = label_and_attrs.split(":")
-    label = label_and_attrs[0]
-    attrs = label_and_attrs[1:]
-    attrs_dict = {"label": label}
-    for attr in attrs:
-        attr_name, attr_value = attr.split("=")
-        attrs_dict[attr_name] = float(attr_value)
+    attrs_dict = {"label": label_and_attrs}
+    if ":" in label_and_attrs:
+        label = label_and_attrs.split(":")[0]
+        attrs = label_and_attrs.split(":")[1:]
+        if len(attrs) == 1:
+            attrs_dict = {
+                "label": label,
+                "length": float(attrs[0]),
+            }
+        elif len(attrs) == 3:
+            attrs_dict = {
+                "label": label,
+                "length": float(attrs[0]),
+                "bootstrap": float(attrs[1]),
+                "probability": float(attrs[2]),
+            }
+    if "#" in attrs_dict["label"]:
+        label, retic_id = attrs_dict["label"].split("#")
+        attrs_dict["label"] = label
+        attrs_dict["retic_id"] = retic_id[1:]
+    if "label" in attrs_dict and attrs_dict["label"] == "":
+        attrs_dict.pop("label")
     return attrs_dict
 
 
+# def extended_newick_to_dinetwork2(newick, internal_labels=False):
+#     """
+#     Converts a Newick string to a networkx DAG with leaf labels.
+#     The newick string may or may not have length:bootstrap:probability annotations.
+#     The newick string may or may not have internal node labels.
+#     The newick string may or may not have hybrid nodes.
+
+#     :param newick: a string in extended Newick format for phylogenetic networks.
+#     :param internal_labels: a boolean, indicating whether the internal nodes of the network are labeled.
+#     :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
+
+#     :example:
+#     >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
+#     >>> network = extended_newick_to_dinetwork(newick)
+#     >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
+#     True
+#     >>> p = network.parent('A')
+#     >>> network[p]['A']['length']
+#     1.1
+#     """
+#     if newick[-1] != ";":
+#         raise ValueError("Newick string does not end with ;")
+#     newick = newick[:-1]
+
+#     # convert the newick string to json string
+#     # add ' or " to the names if necessary
+#     newick = re.sub(r"#H([d]+)", r"#R\1", newick)
+
+#     # replace [ or ( with {[ and ] or ) with ]}
+#     newick = re.sub(r"[\[\(]", r'{"children": [', newick)
+#     newick = re.sub(r"[\]\)]", r"]}", newick)
+
+#     # replace :a:b:c values with dictionary {"length":a,"bootstrap":b,"probability":c}
+#     # for internal nodes
+#     newick = re.sub(
+#         r"}([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
+#         r', "label": "\1","length": \2,"bootstrap": \3,"probability": \4}',
+#         newick,
+#     )
+#     # for leaves
+#     newick = re.sub(
+#         r"([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
+#         r'{"label": "\1", "length": \2,"bootstrap": \3,"probability": \4}',
+#         newick,
+#     )
+#     # replace :a values with dictionary {"length":a}
+#     # for internal nodes
+#     newick = re.sub(
+#         r"}([\da-zA-Z\_]+):([\d\.]+)", r', "label": "\1","length": \2}', newick
+#     )
+#     # for leaves
+#     newick = re.sub(
+#         r"([\da-zA-Z\_]+):([\d\.]+)", r'{"label": "\1", "length": \2}', newick
+#     )
+
+#     # add " around leaf names
+#     while newick != re.sub(r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1"\2"\3', newick):
+#         newick = re.sub(
+#             r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1{"label": "\2"}\3', newick
+#         )
+
+#     # replace internal node name with dictionary {"label": name}
+#     newick = re.sub(r"}([#a-zA-Z\d]+)", r', "label": "\1"}', newick)
+
+#     # convert the json string to a network
+#     newick_json = json.loads(newick)
+#     network = json_to_dinetwork2(newick_json)
+#     if not internal_labels:
+#         network = remove_internal_labels(network)
+#     return network
 
 
-def extended_newick_to_dinetwork2(newick, internal_labels=False):
-    """
-    Converts a Newick string to a networkx DAG with leaf labels.
-    The newick string may or may not have length:bootstrap:probability annotations.
-    The newick string may or may not have internal node labels.
-    The newick string may or may not have hybrid nodes.
+# def remove_internal_labels(network):
+#     """
+#     Removes the internal labels from a network.
 
-    :param newick: a string in extended Newick format for phylogenetic networks.
-    :param internal_labels: a boolean, indicating whether the internal nodes of the network are labeled.
-    :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
-
-    :example:
-    >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
-    >>> network = extended_newick_to_dinetwork(newick)
-    >>> set(network.leaves) == {'A', 'B', 'C', 'D'}
-    True
-    >>> p = network.parent('A')
-    >>> network[p]['A']['length']
-    1.1
-    """
-    if newick[-1] != ";":
-        raise ValueError("Newick string does not end with ;")
-    newick = newick[:-1]
-
-    # convert the newick string to json string
-    # add ' or " to the names if necessary
-    newick = re.sub(r"#H([d]+)", r"#R\1", newick)
-
-    # replace [ or ( with {[ and ] or ) with ]}
-    newick = re.sub(r"[\[\(]", r'{"children": [', newick)
-    newick = re.sub(r"[\]\)]", r"]}", newick)
-
-    # replace :a:b:c values with dictionary {"length":a,"bootstrap":b,"probability":c}
-    # for internal nodes
-    newick = re.sub(
-        r"}([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
-        r', "label": "\1","length": \2,"bootstrap": \3,"probability": \4}',
-        newick,
-    )
-    # for leaves
-    newick = re.sub(
-        r"([\da-zA-Z\_]+):([\d\.]+):([\d\.]+):([\d\.]+)",
-        r'{"label": "\1", "length": \2,"bootstrap": \3,"probability": \4}',
-        newick,
-    )
-    # replace :a values with dictionary {"length":a}
-    # for internal nodes
-    newick = re.sub(
-        r"}([\da-zA-Z\_]+):([\d\.]+)", r', "label": "\1","length": \2}', newick
-    )
-    # for leaves
-    newick = re.sub(
-        r"([\da-zA-Z\_]+):([\d\.]+)", r'{"label": "\1", "length": \2}', newick
-    )
-
-    # add " around leaf names
-    while newick != re.sub(r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1"\2"\3', newick):
-        newick = re.sub(
-            r"([\[\,])([#a-zA-Z\d]+)([\]\,])", r'\1{"label": "\2"}\3', newick
-        )
-
-    # replace internal node name with dictionary {"label": name}
-    newick = re.sub(r"}([#a-zA-Z\d]+)", r', "label": "\1"}', newick)
-
-    # convert the json string to a network
-    newick_json = json.loads(newick)
-    network = json_to_dinetwork2(newick_json)
-    if not internal_labels:
-        network = remove_internal_labels(network)
-    return network
+#     :param network: a phylogenetic network.
+#     :return: a phylogenetic network with the internal labels removed.
+#     """
+#     for node in network.nodes:
+#         if not network.is_leaf(node):
+#             network.nodes[node].pop("label", None)
+#     return network
 
 
-def remove_internal_labels(network):
-    """
-    Removes the internal labels from a network.
+# def json_to_dinetwork2(newick_json, network=None, root_node=None):
+#     """
+#     Converts a json string to a phylox DiNetwork
 
-    :param network: a phylogenetic network.
-    :return: a phylogenetic network with the internal labels removed.
-    """
-    for node in network.nodes:
-        if not network.is_leaf(node):
-            network.nodes[node].pop("label", None)
-    return network
+#     :param newick_json: a string in json format for phylogenetic networks.
+#     """
+#     network = network or DiNetwork()
 
-
-def json_to_dinetwork2(newick_json, network=None, root_node=None):
-    """
-    Converts a json string to a phylox DiNetwork
-
-    :param newick_json: a string in json format for phylogenetic networks.
-    """
-    network = network or DiNetwork()
-
-    node = newick_json.get("label") or root_node or find_unused_node(network)
-    network.add_node(node)
-    if label := newick_json.get("label"):
-        network.nodes[node]["label"] = label
-    for child_dict in newick_json.get("children", []):
-        child_dict_without_label_and_children = {
-            k: v for k, v in child_dict.items() if k not in ("label", "children")
-        }
-        child = child_dict.get("label", find_unused_node(network))
-        network.add_edge(node, child, **child_dict_without_label_and_children)
-        json_to_dinetwork(child_dict, network, root_node=child)
-    return network
+#     node = newick_json.get("label") or root_node or find_unused_node(network)
+#     network.add_node(node)
+#     if label := newick_json.get("label"):
+#         network.nodes[node]["label"] = label
+#     for child_dict in newick_json.get("children", []):
+#         child_dict_without_label_and_children = {
+#             k: v for k, v in child_dict.items() if k not in ("label", "children")
+#         }
+#         child = child_dict.get("label", find_unused_node(network))
+#         network.add_edge(node, child, **child_dict_without_label_and_children)
+#         json_to_dinetwork(child_dict, network, root_node=child)
+#     return network
 
 
 # def Newick_To_Network(newick):
