@@ -28,12 +28,12 @@ def extended_newick_to_dinetwork(newick, internal_labels=False):
     """
 
     network = DiNetwork()
-    network_json = newick_to_json(newick)[0]
-    network = json_to_dinetwork(network_json, network=network)
+    network_json = _newick_to_json(newick)[0]
+    network = _json_to_dinetwork(network_json, network=network)
     return network
 
 
-def newick_to_json(newick):
+def _newick_to_json(newick):
     """
     Converts a newick string to a json representing the nodes in a nested manner.
 
@@ -48,7 +48,7 @@ def newick_to_json(newick):
         character = newick[0]
         newick = newick[1:]
         if character == "(":
-            newick, child = newick_to_json(newick)
+            newick, child = _newick_to_json(newick)
             nested_list[-1]["children"] += child
         elif character == ")":
             return newick, nested_list
@@ -61,7 +61,7 @@ def newick_to_json(newick):
     return nested_list
 
 
-def json_to_dinetwork(json, network=None, root_node=None):
+def _json_to_dinetwork(json, network=None, root_node=None):
     """
     Converts a json string to a phylox DiNetwork
 
@@ -74,13 +74,13 @@ def json_to_dinetwork(json, network=None, root_node=None):
     """
     network = network or DiNetwork()
 
-    node_attrs = label_and_attrs_to_dict(json["label_and_attr"])
+    node_attrs = _label_and_attrs_to_dict(json["label_and_attr"])
     node = json.get("retic_id") or root_node or find_unused_node(network)
     network.add_node(node)
     if "label" in node_attrs:
         network.nodes[node]["label"] = node_attrs["label"]
     for child_dict in json.get("children", []):
-        child_attrs = label_and_attrs_to_dict(child_dict["label_and_attr"])
+        child_attrs = _label_and_attrs_to_dict(child_dict["label_and_attr"])
         child_attrs_without_label_and_children = {
             k: v
             for k, v in child_attrs.items()
@@ -88,11 +88,11 @@ def json_to_dinetwork(json, network=None, root_node=None):
         }
         child = child_attrs.get("retic_id", find_unused_node(network))
         network.add_edge(node, child, **child_attrs_without_label_and_children)
-        json_to_dinetwork(child_dict, network, root_node=child)
+        _json_to_dinetwork(child_dict, network, root_node=child)
     return network
 
 
-def label_and_attrs_to_dict(label_and_attrs):
+def _label_and_attrs_to_dict(label_and_attrs):
     """
     converts the label and attr part of an extended newick string
     for one node to a dictionary.
