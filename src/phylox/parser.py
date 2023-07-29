@@ -1,281 +1,240 @@
-# import os
-# import sys
-# import math
-# import re
-# import ast
-# import random
-# import numpy as np
-# import pandas as pd
-# from pathlib import Path
-# import multiprocessing
-# from multiprocessing import Manager
-# from ExtractNetworkProperties import *
-# import itertools
+import re
+import json
+from phylox import DiNetwork
+from phylox.base import find_unused_node
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
+from copy import deepcopy
 
 
-# def Newick_To_Network(newick):
-#     newick=newick[:-1]
+def dinetwork_to_extended_newick(network):
+    """
+    Converts a phylogenetic network to a Newick string.
+    The newick string has :length:bootstrap:probability annotations if any edge has a bootstrap or probability.
+    If only lengths are available, the newick string has :length annotations.
 
-#     #remove internal labels
-#     newick = re.sub(r"I([\d]+)", "", newick)
+    :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :return: a string in extended Newick format for phylogenetic networks.
 
-#     #remove lengths
-#     newick = re.sub(r"([\d]+)\.([\d]+)", "", newick)
-#     newick = re.sub(r"E-[\d]+", "", newick)
-#     newick = re.sub(r":", "", newick)
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.constants import LENGTH_ATTR
+    >>> from phylox.parser import dinetwork_to_extended_newick
+    >>> network = DiNetwork(
+    ...     edges=[
+    ...         (0, 1, {LENGTH_ATTR: 1.0}),
+    ...         (0, 2, {LENGTH_ATTR: 1.0}),
+    ...         (1, 3, {LENGTH_ATTR: 1.0}),
+    ...         (2, 3, {LENGTH_ATTR: 1.0}),
+    ...         (1, 4, {LENGTH_ATTR: 1.0}),
+    ...         (2, 5, {LENGTH_ATTR: 1.0}),
+    ...         (3, 6, {LENGTH_ATTR: 1.0}),
+    ...     ],
+    ...     labels=((0, "A"), (4, "B"), (5, "C"), (6, "D"), (3, "E")),
+    ... )
+    >>> newick = dinetwork_to_extended_newick(network)
+    >>> "C:1.0" in newick
+    True
+    """
 
-#     #make into list format
-#     newick = newick.replace("(","[")
-#     newick = newick.replace(")","]")
-#     newick = re.sub(r"\]\#H([\d]+)", r",#R\1]", newick)
-#     newick = re.sub(r"#([RH])([\d]+)", r"'#\1\2'", newick)
+    cut_network = deepcopy(network)
 
+    roots = cut_network.roots
+    if len(roots) > 1:
+        raise ValueError("Network has more than one root.")
+    root = roots.pop()
 
-#     #add "" if necessary
-#     newick = re.sub(r"([ABCD])", r"'\1'", newick)
-#     newick = re.sub(r" ", "", newick)
+    for retic_id, node in enumerate(
+        [node for node in cut_network.nodes if cut_network.is_reticulation(node)]
+    ):
+        _split_reticulation_node(cut_network, node, retic_id=retic_id)
 
+    has_lengths = any(
+        LENGTH_ATTR in cut_network[parent][child] for parent, child in cut_network.edges
+    )
+    has_bootstraps = any(
+        "bootstrap" in cut_network[parent][child] for parent, child in cut_network.edges
+    )
+    has_probabilities = any(
+        "probability" in cut_network[parent][child]
+        for parent, child in cut_network.edges
+    )
 
-#     nestedtree = ast.literal_eval(newick)
-#     edges, leaves, label_set, current_node = NestedList_To_Tree(nestedtree,1)
-#     edges.append([0,1])
-#     ret_labels = dict()
-#     leaf_labels = dict()
-#     for l in leaves:
-#         if len(l)>2 and (l[:2]=="#H" or l[:2]=="#R"):
-#             ret_labels[l[2:]]=[]
-#         else:
-#             leaf_labels[l]=[]
-#     for l in label_set:
-#         if len(l[0])>2 and (l[0][:2]=="#H" or l[0][:2]=="#R"):
-#             if l[0][1]=='H':
-#                 ret_labels[l[0][2:]]+=[l[1]]
-#             else:
-#                 ret_labels[l[0][2:]]=[l[1]]+ret_labels[l[0][2:]]
-#         else:
-#             leaf_labels[l[0]]+=[l[1]]
-#     network = nx.DiGraph()
-#     network.add_edges_from(edges)
-#     for retic in ret_labels:
-#         r = ret_labels[retic]
-#         receiving = r[0]
-#         parent_receiving = 0
-#         for p in network.predecessors(receiving):
-#             parent_receiving = p
-#         network.remove_node(receiving)
-#         for v in r[1:]:
-#             network.add_edge(v,parent_receiving)
-#             network = nx.contracted_edge(network,(v,parent_receiving))
-#             network.remove_edge(v,v)
-#             parent_receiving = v
-#     leaves = set()
-#     for l in leaf_labels:
-#          leaf_labels[l]=leaf_labels[l][0]
-#          leaves.add(l)
-#     return network, leaves, leaf_labels
+    def node_to_newick(node):
+        node_label = cut_network.nodes[node].get(LABEL_ATTR, "")
 
+        if cut_network.is_leaf(node):
+            return node_label
 
-# def NestedList_To_Tree(nestedList,next_node):
-#     edges = []
-#     leaves = set()
-#     labels = []
-#     top_node = next_node
-#     current_node = next_node+1
-#     for t in nestedList:
-#         edges.append((top_node,current_node))
-#         if type(t)==list:
-#             extra_edges, extra_leaves, extra_labels, current_node = NestedList_To_Tree(t,current_node)
-#         else:
-#             extra_edges = []
-#             extra_leaves = set([str(t)])
-#             extra_labels = [[str(t), current_node]]
-#             current_node+=1
-#         edges = edges + extra_edges
-#         leaves = leaves.union(extra_leaves)
-#         labels = labels + extra_labels
-#     return edges, leaves, labels, current_node
+        children_strings = []
+        for child in cut_network.successors(node):
+            child_str = node_to_newick(child)
+            if has_bootstraps or has_probabilities:
+                length = cut_network[node][child].get(LENGTH_ATTR, "")
+                bootstrap = cut_network[node][child].get("bootstrap", "")
+                probability = cut_network[node][child].get("probability", "")
+                child_str += f":{length}:{bootstrap}:{probability}"
+            elif has_lengths:
+                child_str += f":{cut_network[node][child].get(LENGTH_ATTR, '')}"
+            children_strings.append(child_str)
+
+        return "(" + ",".join(children_strings) + ")" + node_label
+
+    newick = node_to_newick(root)
+    return newick + ";"
 
 
-# network,_,leaf_labels = Newick_To_Network(newick_string)
-# reverse_labels = {x:y for (y,x) in leaf_labels.items()}
+def _split_reticulation_node(network, node, retic_id):
+    """
+    Splits a reticulation node into multiple nodes.
+
+    :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :param node: a node of network, indicating the reticulation node to be split.
+    :return: a phylogenetic network, i.e., a phylox DiNetwork.
+
+    :note: This function is used by dinetwork_to_extended_newick. It modifies the network in place.
+    """
+
+    parents = [
+        (parent, network[parent][node].get("probability", 0))
+        for parent in network.predecessors(node)
+    ]
+    parents.sort(key=lambda x: -x[1])
+    keep_parent, keep_probability = parents[0]
+    node_label = network.nodes[node].get(LABEL_ATTR, "")
+    network.nodes[node][LABEL_ATTR] = node_label + "#R" + str(retic_id)
+    new_node_label = node_label + "#H" + str(retic_id)
+    for parent, probability in parents[1:]:
+        new_node = find_unused_node(network)
+        network.add_edge(parent, new_node)
+        network.nodes[new_node][LABEL_ATTR] = new_node_label
+
+        length = network[parent][node].get(LENGTH_ATTR)
+        if length is not None:
+            network[parent][new_node][LENGTH_ATTR] = length
+        bootstrap = network[parent][node].get("bootstrap")
+        if bootstrap is not None:
+            network[parent][new_node]["bootstrap"] = bootstrap
+        probability = network[parent][node].get("probability")
+        if probability is not None:
+            network[parent][new_node]["probability"] = probability
+        network.remove_edge(parent, node)
+    return network
 
 
-# ################################################################################
-# ################################################################################
-# ################################################################################
-# ########                                                           #############
-# ########                         I/O Functions                     #############
-# ########                                                           #############
-# ################################################################################
-# ################################################################################
-# ################################################################################
+def extended_newick_to_dinetwork(newick, internal_labels=False):
+    """
+    Converts a Newick string to a networkx DAG with leaf labels.
+    The newick string may or may not have length:bootstrap:probability annotations.
+    The newick string may or may not have internal node labels.
+    The newick string may or may not have hybrid nodes.
+
+    :param newick: a string in extended Newick format for phylogenetic networks.
+    :param internal_labels: a boolean, indicating whether the internal nodes of the network are labeled.
+    :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
+
+    :example:
+    >>> newick = "(A:1.1,B:1.2,(C:1.3,D:1.4)E:1.6)F;"
+    >>> network = extended_newick_to_dinetwork(newick)
+    >>> {network.nodes[leaf].get("label") for leaf in network.leaves} == {'A', 'B', 'C', 'D'}
+    True
+    >>> node_for_label_A = network.label_to_node_dict['A']
+    >>> p = network.parent(node_for_label_A)
+    >>> network[p][node_for_label_A]['length']
+    1.1
+    """
+
+    network = DiNetwork()
+    network_json = _newick_to_json(newick)[0]
+    network = _json_to_dinetwork(network_json, network=network)
+    return network
 
 
-# ########
-# ######## Convert Newick to a networkx Digraph with labels (and branch lengths)
-# ########
-# # Write length newick: convert ":" to "," and then evaluate as list of lists using ast.literal_eval
-# # Then, in each list, the node is followed by the length of the incoming arc.
-# # This only works as long as each branch has length and all internal nodes are labeled.
-# def Newick_To_Network(newick):
-#     """
-#     Converts a Newick string to a networkx DAG with leaf labels.
+def _newick_to_json(newick):
+    """
+    Converts a newick string to a json representing the nodes in a nested manner.
 
-#     :param newick: a string in extended Newick format for phylogenetic networks.
-#     :return: a phylogenetic network, i.e., a networkx digraph with leaf labels represented by the `label' node attribute.
-#     """
-#     # Ignore the ';'
-#     newick = newick[:-1]
-#     # If names are not in string format between ', add these.
-#     if not "'" in newick and not '"' in newick:
-#         newick = re.sub(r"\)#H([\d]+)", r",#R\1)", newick)
-#         newick = re.sub(r"([,\(])([#a-zA-Z\d]+)", r"\1'\2", newick)
-#         newick = re.sub(r"([#a-zA-Z\d])([,\(\)])", r"\1'\2", newick)
-#     else:
-#         newick = re.sub(r"\)#H([d]+)", r"'#R\1'\)", newick)
-#     newick = newick.replace("(", "[")
-#     newick = newick.replace(")", "]")
-#     nestedtree = ast.literal_eval(newick)
-#     edges, current_node = NestedList_To_Network(nestedtree, 0, 1)
-#     network = nx.DiGraph()
-#     network.add_edges_from(edges)
-#     network = NetworkLeafToLabel(network)
-#     return network
+    :param newick: a string in newick format for phylogenetic networks.
+    :return: a json representing the nodes in a nested manner.
+
+    :note: This function is used by extended_newick_to_dinetwork. It modifies the network in place.
+    """
+
+    nested_list = [{"children": [], "label_and_attr": ""}]
+    while newick:
+        character = newick[0]
+        newick = newick[1:]
+        if character == "(":
+            newick, child = _newick_to_json(newick)
+            nested_list[-1]["children"] += child
+        elif character == ")":
+            return newick, nested_list
+        elif character == ",":
+            nested_list += [{"children": [], "label_and_attr": ""}]
+        elif character == ";":
+            pass
+        else:
+            nested_list[-1]["label_and_attr"] += character
+    return nested_list
 
 
-# # Returns a network in which the leaves have the original name as label, and all nodes have integer names.
-# def NetworkLeafToLabel(network):
-#     """
-#     Renames the network nodes to integers, while storing the original node names in the `original' node attribute.
+def _json_to_dinetwork(json, network=None, root_node=None):
+    """
+    Converts a json string to a phylox DiNetwork
 
-#     :param network: a phylogenetic network
-#     :return: a phylogenetic network with original node names in the `original' node attribute.
-#     """
-#     for node in network.nodes():
-#         if network.out_degree(node) == 0:
-#             network.node[node]['label'] = node
-#     return nx.convert_node_labels_to_integers(network, first_label=0, label_attribute='original')
+    :param newick_json: a string in json format for phylogenetic networks.
+    :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :param root_node: a node of network, indicating the root of the network.
+    :return: a phylogenetic network, i.e., a phylox DiNetwork.
 
+    :note: This function is used by extended_newick_to_dinetwork. It modifies the network in place.
+    """
+    network = network or DiNetwork()
 
-# # Auxiliary function to convert list of lists to graph
-# def NestedList_To_Network(nestedList, top_node, next_node):
-#     """
-#     Auxiliary function used to convert list of lists to graph.
-
-#     :param nestedList: a nested list.
-#     :param top_node: an integer, the node name of the top node of the network represented by the list.
-#     :param next_node: an integer, the lowest integer not yet used as node name in the network.
-#     :return: a set of edges of the network represented by the nested list, and an updated next_node.
-#     """
-#     edges = []
-#     if type(nestedList) == list:
-#         if type(nestedList[-1]) == str and len(nestedList[-1]) > 2 and nestedList[-1][:2] == '#R':
-#             retic_node = '#H' + nestedList[-1][2:]
-#             bottom_node = retic_node
-#         else:
-#             bottom_node = next_node
-#             next_node += 1
-#         edges.append((top_node, bottom_node))
-#         for t in nestedList:
-#             extra_edges, next_node = NestedList_To_Network(t, bottom_node, next_node)
-#             edges = edges + extra_edges
-#     else:
-#         if not (len(nestedList) > 2 and nestedList[:2] == '#R'):
-#             edges = [(top_node, nestedList)]
-#     return edges, next_node
+    node_attrs = _label_and_attrs_to_dict(json["label_and_attr"])
+    node = json.get("retic_id") or root_node or find_unused_node(network)
+    network.add_node(node)
+    if "label" in node_attrs:
+        network.nodes[node]["label"] = node_attrs["label"]
+    for child_dict in json.get("children", []):
+        child_attrs = _label_and_attrs_to_dict(child_dict["label_and_attr"])
+        child_attrs_without_label_and_children = {
+            k: v
+            for k, v in child_attrs.items()
+            if k not in ("label", "children", "retic_id")
+        }
+        child = child_attrs.get("retic_id", find_unused_node(network))
+        network.add_edge(node, child, **child_attrs_without_label_and_children)
+        _json_to_dinetwork(child_dict, network, root_node=child)
+    return network
 
 
-# # Sets the labels of the nodes of a network with a given label dictionary
-# def Set_Labels(network, label_dict):
-#     """
-#     Sets the labels of the leaves of a network using a dictionary of labels.
-
-#     :param network: a networkx digraph, a DAG.
-#     :param label_dict: a dictionary, containing the labels (values) of the nodes of the network (keys).
-#     :return: a phylogenetic network, obtained by labeling network with the labels.
-#     """
-#     for node, value in label_dict.items():
-#         network.node[node]['label'] = value
-
-
-################################################################################
-################################################################################
-################################################################################
-########                                                           #############
-########                     AAE CutTree CLASS                     #############
-########                                                           #############
-################################################################################
-################################################################################
-################################################################################
-
-
-# #A class that represents a network as a tree where hybrid edges have been cut at the hybrid nodes.
-# #Used as an intermediate to find the Newick string of a network.
-# class CutTree:
-#     def __init__(self, network = None, current_node = None, leaf_labels= dict()):
-#          self.hybrid_nodes = dict()
-#          self.no_of_hybrids = 0
-#          self.root = None
-#          self.nw = deepcopy(network)
-#          self.current_node = current_node
-#          self.leaf_labels = leaf_labels
-#          if not self.current_node:
-#              self.current_node = 2*len(self.nw)
-#          if network:
-#              self.Find_Root()
-#              network_nodes = list(self.nw.nodes)
-#              for node in network_nodes:
-#                  if self.nw.in_degree(node)>1:
-#                      self.no_of_hybrids+=1
-#                      enumerated_parents = list(enumerate(self.nw.predecessors(node)))
-#                      for i,parent in enumerated_parents:
-#                          if i==0:
-#                              self.hybrid_nodes[node]=self.no_of_hybrids
-#                          else:
-#                              self.nw.add_edges_from([(parent,self.current_node,self.nw[parent][node])])
-#                              self.nw.remove_edge(parent,node)
-#                              self.hybrid_nodes[self.current_node] = self.no_of_hybrids
-#                              self.current_node+=1
-# #             self.CheckLabelSet()
-
-#     #Returns the root node of the tree
-#     def Find_Root(self):
-#         for node in self.nw.nodes:
-#             if self.nw.in_degree(node)==0:
-#                 self.root = node
-#                 return node
-
-#     #Returns a newick string for the tree
-#     def Newick(self,probabilities = False):
-#         return self.Newick_Recursive(self.root,probabilities = probabilities)+";"
-
-#     #Returns the newick string for the subtree with given root
-#     #does not append the; at the end, for the full newick string of the tree, use Newick()
-#     # auxiliary function for finding the newick string for the tree
-#     def Newick_Recursive(self,root,probabilities = False):
-#         if self.nw.out_degree(root)==0:
-#             if root in self.hybrid_nodes:
-#                 return "#H"+str(self.hybrid_nodes[root])
-#             elif root in self.leaf_labels:
-#                 return self.leaf_labels[root]
-#             return str(root)
-#         Newick = ""
-#         for v in self.nw.successors(root):
-#             Newick+= self.Newick_Recursive(v,probabilities)+":"+str(self.nw[root][v]['length'])
-#             if probabilities and v in self.hybrid_nodes:
-#                 Newick+="::"+str(self.nw[root][v]['prob'])
-#             Newick+= ","
-#         Newick = "("+Newick[:-1]+")"
-#         if root in self.hybrid_nodes:
-#             Newick += "#H"+str(self.hybrid_nodes[root])
-#         return Newick
-
-#     '''
-#     def CheckLabelSet(self):
-#         for v in self.nw.nodes:
-#             if self.nw.out_degree(v)==0:
-#                 if v not in self.leaf_labels and v not in self.hybrid_nodes:
-#                     print("non-labelled leaf!")
-#                     return False
-#         return True
-#     '''
+def _label_and_attrs_to_dict(label_and_attrs):
+    """
+    converts the label and attr part of an extended newick string
+    for one node to a dictionary.
+    For example, the string "A:1.1:0.9:0.8" is converted to
+    {"label": "A", "length": 1.1, "bootstrap": 0.9, "probability": 0.8}
+    """
+    attrs_dict = {"label": label_and_attrs}
+    if ":" in label_and_attrs:
+        label = label_and_attrs.split(":")[0]
+        attrs = label_and_attrs.split(":")[1:]
+        if len(attrs) == 1:
+            attrs_dict = {
+                "label": label,
+                "length": float(attrs[0]),
+            }
+        elif len(attrs) == 3:
+            attrs_dict = {
+                "label": label,
+                "length": float(attrs[0]),
+                "bootstrap": float(attrs[1]),
+                "probability": float(attrs[2]),
+            }
+    if "#" in attrs_dict["label"]:
+        label, retic_id = attrs_dict["label"].split("#")
+        attrs_dict["label"] = label
+        attrs_dict["retic_id"] = RETIC_PREFIX + retic_id[1:]
+    if "label" in attrs_dict and attrs_dict["label"] == "":
+        attrs_dict.pop("label")
+    return attrs_dict

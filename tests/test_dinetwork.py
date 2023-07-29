@@ -2,6 +2,7 @@ import unittest
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
+from phylox.isomorphism import is_isomorphic
 
 
 class TestDiNetwork(unittest.TestCase):
@@ -90,3 +91,40 @@ class TestDiNetwork(unittest.TestCase):
         self.assertTrue(network.is_reticulation(4))
         self.assertFalse(network.is_reticulation(5))
         self.assertFalse(network.is_reticulation(6))
+
+    def test_is_leaf(self):
+        network = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        self.assertFalse(network.is_leaf(1))
+        self.assertFalse(network.is_leaf(2))
+        self.assertFalse(network.is_leaf(3))
+        self.assertFalse(network.is_leaf(4))
+        self.assertTrue(network.is_leaf(5))
+        self.assertTrue(network.is_leaf(6))
+
+    def test_is_root(self):
+        network = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
+            labels=[(5, "a"), (6, "b")],
+        )
+        self.assertTrue(network.is_root(1))
+        self.assertFalse(network.is_root(2))
+        self.assertFalse(network.is_root(3))
+        self.assertFalse(network.is_root(4))
+        self.assertFalse(network.is_root(5))
+        self.assertFalse(network.is_root(6))
+
+    def test_from_newick(self):
+        network = DiNetwork.from_newick("((a,b),c);")
+        network2 = DiNetwork(
+            edges=[(1, 2), (1, 3), (2, 4), (2, 5)],
+            labels=[(3, "c"), (4, "b"), (5, "a")],
+        )
+        self.assertTrue(is_isomorphic(network, network2))
+
+    def test_to_newick(self):
+        network = DiNetwork.from_newick("(a,b);")
+        newick = network.newick()
+        self.assertTrue(newick in ["(a,b);", "(b,a);"])
