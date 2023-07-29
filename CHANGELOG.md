@@ -15,6 +15,10 @@ Types of changes:
 
 ## [0.0.6] - (Unreleased)
 
+### Added
+
+- Parsers to and from newick. (#30)
+
 ## [0.0.5] - (2023-07-24)
 
 ### Fixed
