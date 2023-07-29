@@ -2,7 +2,7 @@ import unittest
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
-from phylox.parser import extended_newick_to_dinetwork
+from phylox.parser import extended_newick_to_dinetwork, dinetwork_to_extended_newick
 from phylox.isomorphism import is_isomorphic
 
 
@@ -62,3 +62,13 @@ class TestExtendedNewickToDiNetwork(unittest.TestCase):
         node_a = network.label_to_node_dict["a"]
         parent_a = network.parent(node_a)
         self.assertEqual(network[parent_a][node_a]["length"], 1.0)
+
+
+class TestNetworkToNewick(unittest.TestCase):
+    def test_small_tree(self):
+        network = DiNetwork(
+            edges=[(1, 2), (1, 3), (1, 4), (4, 5), (4, 6)],
+            labels=[(2, "a"), (3, "b"), (5, "c"), (6, "d")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        assert False

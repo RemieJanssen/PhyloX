@@ -3,6 +3,7 @@ import json
 from phylox import DiNetwork
 from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
+from copy import deepcopy
 
 
 def dinetwork_to_extended_newick(network):
@@ -20,30 +21,104 @@ def dinetwork_to_extended_newick(network):
     >>> from phylox.parser import dinetwork_to_extended_newick
     >>> network = DiNetwork(
     ...     edges=[
-    ...         (0, 1),
-    ...         (0, 2),
-    ...         (1, 3),
-    ...         (2, 3),
-    ...         (1, 4),
-    ...         (2, 5),
-    ...         (3, 6),
+    ...         (0, 1, {LENGTH_ATTR: 1.0}),
+    ...         (0, 2, {LENGTH_ATTR: 1.0}),
+    ...         (1, 3, {LENGTH_ATTR: 1.0}),
+    ...         (2, 3, {LENGTH_ATTR: 1.0}),
+    ...         (1, 4, {LENGTH_ATTR: 1.0}),
+    ...         (2, 5, {LENGTH_ATTR: 1.0}),
+    ...         (3, 6, {LENGTH_ATTR: 1.0}),
     ...     ],
-    ...     labels=((0, "A"), (4, "B"), (5, "C"), (6, "D")),
+    ...     labels=((0, "A"), (4, "B"), (5, "C"), (6, "D"), (3, "E")),
     ... )
-    >>> network[2][5][LENGTH_ATTR] = 1.0
     >>> newick = dinetwork_to_extended_newick(network)
-    >>> newick.contains("C:1.0")
+    >>> "C:1.0" in newick
     True
     """
 
-    cut_network = network.copy()
-    for node in [
-        node for node in cut_network.nodes if cut_network.is_reticulation(node)
-    ]:
-        release_node(network, node)
+    cut_network = deepcopy(network)
 
-    newick = ""
-    return newick
+    roots = cut_network.roots
+    if len(roots) > 1:
+        raise ValueError("Network has more than one root.")
+    root = roots.pop()
+
+    for retic_id, node in enumerate(
+        [node for node in cut_network.nodes if cut_network.is_reticulation(node)]
+    ):
+        _split_reticulation_node(cut_network, node, retic_id=retic_id)
+
+    has_lengths = any(
+        LENGTH_ATTR in cut_network[parent][child] for parent, child in cut_network.edges
+    )
+    has_bootstraps = any(
+        "bootstrap" in cut_network[parent][child] for parent, child in cut_network.edges
+    )
+    has_probabilities = any(
+        "probability" in cut_network[parent][child]
+        for parent, child in cut_network.edges
+    )
+
+    def node_to_newick(node):
+        node_label = cut_network.nodes[node].get(LABEL_ATTR, "")
+
+        if cut_network.is_leaf(node):
+            return node_label
+
+        children_strings = []
+        for child in cut_network.successors(node):
+            child_str = node_to_newick(child)
+            if has_bootstraps or has_probabilities:
+                length = cut_network[node][child].get(LENGTH_ATTR, "")
+                bootstrap = cut_network[node][child].get("bootstrap", "")
+                probability = cut_network[node][child].get("probability", "")
+                child_str += f":{length}:{bootstrap}:{probability}"
+            elif has_lengths:
+                child_str += f":{cut_network[node][child].get(LENGTH_ATTR, '')}"
+            children_strings.append(child_str)
+
+        return "(" + ",".join(children_strings) + ")" + node_label
+
+    newick = node_to_newick(root)
+    return newick + ";"
+
+
+def _split_reticulation_node(network, node, retic_id):
+    """
+    Splits a reticulation node into multiple nodes.
+
+    :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :param node: a node of network, indicating the reticulation node to be split.
+    :return: a phylogenetic network, i.e., a phylox DiNetwork.
+
+    :note: This function is used by dinetwork_to_extended_newick. It modifies the network in place.
+    """
+
+    parents = [
+        (parent, network[parent][node].get("probability", 0))
+        for parent in network.predecessors(node)
+    ]
+    parents.sort(key=lambda x: -x[1])
+    keep_parent, keep_probability = parents[0]
+    node_label = network.nodes[node].get(LABEL_ATTR, "")
+    network.nodes[node][LABEL_ATTR] = node_label + "#R" + str(retic_id)
+    new_node_label = node_label + "#H" + str(retic_id)
+    for parent, probability in parents[1:]:
+        new_node = find_unused_node(network)
+        network.add_edge(parent, new_node)
+        network.nodes[new_node][LABEL_ATTR] = new_node_label
+
+        length = network[parent][node].get(LENGTH_ATTR)
+        if length is not None:
+            network[parent][new_node][LENGTH_ATTR] = length
+        bootstrap = network[parent][node].get("bootstrap")
+        if bootstrap is not None:
+            network[parent][new_node]["bootstrap"] = bootstrap
+        probability = network[parent][node].get("probability")
+        if probability is not None:
+            network[parent][new_node]["probability"] = probability
+        network.remove_edge(parent, node)
+    return network
 
 
 def extended_newick_to_dinetwork(newick, internal_labels=False):
