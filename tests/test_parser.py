@@ -65,10 +65,145 @@ class TestExtendedNewickToDiNetwork(unittest.TestCase):
 
 
 class TestNetworkToNewick(unittest.TestCase):
+    def test_multirooted(self):
+        network = DiNetwork(
+            edges=[(0, 1), (2, 3), (3, 4), (3, 5)],
+            labels=[(1, "a"), (4, "b"), (5, "c")],
+        )
+        with self.assertRaises(ValueError):
+            dinetwork_to_extended_newick(network)
+
     def test_small_tree(self):
         network = DiNetwork(
-            edges=[(1, 2), (1, 3), (1, 4), (4, 5), (4, 6)],
-            labels=[(2, "a"), (3, "b"), (5, "c"), (6, "d")],
+            edges=[(1, 2), (1, 3)],
+            labels=[(2, "a"), (3, "b")],
         )
         newick = dinetwork_to_extended_newick(network)
-        assert False
+        self.assertTrue(
+            newick
+            in [
+                "(a,b);",
+                "(b,a);",
+            ]
+        )
+
+    def test_small_tree_lengths(self):
+        network = DiNetwork(
+            edges=[
+                (1, 2, {"length": 1.0}),
+                (1, 3, {"length": 2.0}),
+            ],
+            labels=[(2, "a"), (3, "b")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        self.assertTrue(
+            newick
+            in [
+                "(a:1.0,b:2.0);",
+                "(b:2.0,a:1.0);",
+            ]
+        )
+
+    def test_small_tree_more_attrs(self):
+        network = DiNetwork(
+            edges=[
+                (1, 2, {"length": 1.0, "bootstrap": 2.0, "probability": 3.0}),
+                (1, 3, {"length": 2.0, "bootstrap": 3.0, "probability": 4.0}),
+            ],
+            labels=[(2, "a"), (3, "b")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        self.assertTrue(
+            newick
+            in [
+                "(a:1.0:2.0:3.0,b:2.0:3.0:4.0);",
+                "(b:2.0:3.0:4.0,a:1.0:2.0:3.0);",
+            ]
+        )
+
+    def test_network(self):
+        network = DiNetwork(
+            edges=[(1, 2), (1, 3), (2, 4), (3, 4), (2, 5), (3, 6), (4, 7)],
+            labels=[(5, "a"), (6, "b"), (7, "c")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        self.assertTrue(
+            newick
+            in [
+                "((a,(c)#R0),(#H0,b));",
+                "(((c)#R0,a),(#H0,b));",
+                "((#H0,b),(a,(c)#R0));",
+                "((#H0,b),((c)#R0,a));",
+                "((a,(c)#R0),(b,#H0));",
+                "(((c)#R0,a),(b,#H0));",
+                "((b,#H0),(a,(c)#R0));",
+                "((b,#H0),((c)#R0,a));",
+                "((b,(c)#R0),(#H0,a));",
+                "(((c)#R0,b),(#H0,a));",
+                "((#H0,a),(b,(c)#R0));",
+                "((#H0,a),((c)#R0,b));",
+                "((b,(c)#R0),(a,#H0));",
+                "(((c)#R0,b),(a,#H0));",
+                "((a,#H0),(b,(c)#R0));",
+                "((a,#H0),((c)#R0,b));",
+            ]
+        )
+
+    def test_network_probability(self):
+        network = DiNetwork(
+            edges=[(1, 2), (1, 3), (2, 4), (3, 4), (2, 5), (3, 6), (4, 7)],
+            labels=[(5, "a"), (6, "b"), (7, "c")],
+        )
+        network[2][4]["probability"] = 0.2
+        network[3][4]["probability"] = 0.8
+        newick = dinetwork_to_extended_newick(network)
+        self.assertTrue(
+            newick
+            in [
+                "((b:::,(c:::)#R0:::0.8):::,(#H0:::0.2,a:::):::);",
+                "(((c:::)#R0:::0.8,b:::):::,(#H0:::0.2,a:::):::);",
+                "((#H0:::0.2,a:::):::,(b:::,(c:::)#R0:::0.8):::);",
+                "((#H0:::0.2,a:::):::,((c:::)#R0:::0.8,b:::):::);",
+                "((b:::,(c:::)#R0:::0.8):::,(a:::,#H0:::0.2):::);",
+                "(((c:::)#R0:::0.8,b:::):::,(a:::,#H0:::0.2):::);",
+                "((a:::,#H0:::0.2):::,(b:::,(c:::)#R0:::0.8):::);",
+                "((a:::,#H0:::0.2):::,((c:::)#R0:::0.8,b:::):::);",
+            ]
+        )
+
+    def test_network_all_attrs(self):
+        network = DiNetwork(
+            edges=[
+                (
+                    1,
+                    2,
+                    {
+                        "length": 1.0,
+                        "bootstrap": 2.0,
+                    },
+                ),
+                (1, 3, {"length": 2.0, "bootstrap": 3.0, "probability": 0.2}),
+                (2, 3, {"length": 3.0, "bootstrap": 4.0, "probability": 0.8}),
+                (
+                    2,
+                    4,
+                    {
+                        "length": 4.0,
+                        "bootstrap": 5.0,
+                    },
+                ),
+                (
+                    3,
+                    5,
+                    {
+                        "length": 5.0,
+                        "bootstrap": 6.0,
+                    },
+                ),
+            ],
+            labels=[(4, "a"), (5, "b")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        self.assertTrue("(b:5.0:6.0:)#R0:3.0:4.0:0.8" in newick)
+        self.assertTrue("a:4.0:5.0:" in newick)
+        self.assertTrue("#H0:2.0:3.0:0.2" in newick)
