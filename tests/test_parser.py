@@ -207,3 +207,30 @@ class TestNetworkToNewick(unittest.TestCase):
         self.assertTrue("(b:5.0:6.0:)#R0:3.0:4.0:0.8" in newick)
         self.assertTrue("a:4.0:5.0:" in newick)
         self.assertTrue("#H0:2.0:3.0:0.2" in newick)
+
+
+class TestNetworkToNewickAndBack(unittest.TestCase):
+    def test_larger_network(self):
+        network = DiNetwork(
+            edges=[
+                (1, 2),
+                (1, 3),
+                (2, 4),
+                (3, 4),
+                (2, 5),
+                (3, 13),
+                (4, 7),
+                (7, 8),
+                (7, 9),
+                (8, 10),
+                (9, 10),
+                (8, 11),
+                (9, 12),
+                (10, 13),
+                (13, 14),
+            ],
+            labels=[(5, "a"), (14, "b"), (11, "c"), (12, "d")],
+        )
+        newick = dinetwork_to_extended_newick(network)
+        network2 = extended_newick_to_dinetwork(newick)
+        self.assertTrue(is_isomorphic(network, network2))
