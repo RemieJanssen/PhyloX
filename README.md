@@ -2,6 +2,12 @@
 
 PhyloX is a python package with tools for constructing, manipulating, and analyzing phylogenetic networks.
 
+Installation as pypi package phylox is simple via pip or conda:
+```
+pip install phylox
+```
+You can load the package methods with `import phylox` in python.
+
 For more information, see the [documentation](https://phylox.readthedocs.io).
 
 ## Citing PhyloX
@@ -16,31 +22,13 @@ The implementation of PhyloX is based on NetworkX (NetworkX is distributed with 
 ### Citing specific functions
 When citing PhyloX, you are most likely also using specific methods, which can be traced back to their original papers. Please take care to cite the original papers as well. A reference to the original paper should be found in the documentation of the method, or of the module containing the method.
 
-## Install
-
-Install as pypi package phylox:
-```
-pip install phylox
-```
-
-## Usage
-
-You can load the package methods with `import phylox` in python.
-
-## Documentation
-
-Documentation is in the docs folder, and is created uses sphinx.
-to build the documentation, go to the docs folder and do:
-```
-make html
-```
-the docs will be in `docs/build/html`.
-
 ## Development
 
-### Linting
-
-precommit is yet to be configured, for now, simply run black and isort.
+For a development version, simply pull the project and in the home of the project do:
+```
+pip install -e .
+```
+This installs the phylox package from the source. When you change things in the source, the package gets updated as well.
 
 ### Release
 
@@ -55,3 +43,16 @@ git merge main
 git tag [version number]
 git push
 ```
+
+### Linting
+
+precommit is yet to be configured, for now, simply run black and isort.
+
+### Documentation
+
+Documentation is in the docs folder, and is created uses sphinx.
+to build the documentation, go to the docs folder and do:
+```
+make html
+```
+the docs will be in `docs/build/html`.
