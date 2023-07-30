@@ -19,6 +19,10 @@ Types of changes:
 
 - Parsers to and from newick. (#30)
 
+### Changed
+
+- Licence to BSD-3-Clause to align with networkx. (#32)
+
 ## [0.0.5] - (2023-07-24)
 
 ### Fixed
