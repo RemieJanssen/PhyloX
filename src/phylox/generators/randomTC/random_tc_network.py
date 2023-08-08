@@ -1,16 +1,17 @@
-import random
-
 from phylox import DiNetwork
+
+from networkx.utils.decorators import np_random_state, py_random_state
 
 ### For the tree child network containment paper by Murakami and Janssen
 ### This file contains functions to generate random tree-child (sub)networks
 
-
-def random_tree_child_sequence(leaves, reticulations):
+@py_random_state("seed")
+def random_tree_child_sequence(leaves, reticulations, seed=None):
     """
     Returns a random tree-child sequence with a given number of leaves and reticulations
     :param leaves: number of leaves
     :param reticulations: number of reticulations
+    :param seed: seed for the random number generator
     :return: a random tree-child sequence
 
     :example:
@@ -31,7 +32,7 @@ def random_tree_child_sequence(leaves, reticulations):
         type_added = "L"
         if len(not_forbidden) > 0 and leaves_left > 0 and retics_left > 0:
             if (
-                random.randint(0, leaves_left + retics_left - 1) < retics_left
+                seed.randint(0, leaves_left + retics_left - 1) < retics_left
             ):  # probability of retic depends on number of reticulations left to add
                 # if random.randint(0 , 1)<1:   #probability of reticulations and leaves are the same if both are an option
                 type_added = "R"
@@ -44,7 +45,7 @@ def random_tree_child_sequence(leaves, reticulations):
 
         # Actually add the pair
         if type_added == "R":
-            first_element = random.choice(list(not_forbidden))
+            first_element = seed.choice(list(not_forbidden))
             retics_left -= 1
         if type_added == "L":
             first_element = len(current_leaves) + 1
@@ -52,7 +53,7 @@ def random_tree_child_sequence(leaves, reticulations):
             current_leaves.add(first_element)
             not_forbidden.add(first_element)
 
-        second_element = random.choice(list(current_leaves - set([first_element])))
+        second_element = seed.choice(list(current_leaves - set([first_element])))
         not_forbidden.discard(second_element)
         seq.append((first_element, second_element))
 
@@ -60,12 +61,13 @@ def random_tree_child_sequence(leaves, reticulations):
     seq = [pair for pair in reversed(seq)]
     return seq
 
-
-def random_tree_child_subsequence(seq, r):
+@py_random_state("seed")
+def random_tree_child_subsequence(seq, r, seed=None):
     """
     Returns a random tree-child subsequence with a given number of reticulations
     :param seq: a tree-child sequence
     :param r: number of reticulations in the subsequence
+    :param seed: seed for the random number generator
     :return: a random tree-child subsequence
 
     :example:
@@ -84,7 +86,7 @@ def random_tree_child_subsequence(seq, r):
             indices.add(i)
             leaves[x] = (1, i)
         else:
-            if random.randint(0, leaves[x][0]) < 1:
+            if seed.randint(0, leaves[x][0]) < 1:
                 indices.remove(leaves[x][1])
                 indices.add(i)
                 leaves[x] = (leaves[x][0] + 1, i)
@@ -93,7 +95,7 @@ def random_tree_child_subsequence(seq, r):
     # Add r reticulations with a max of the whole sequence
     unused = set(range(len(seq))) - indices
     for j in range(r):
-        new = random.choice(list(unused))
+        new = seed.choice(list(unused))
         unused = unused - set([new])
         indices.add(new)
     newSeq = []
@@ -103,13 +105,15 @@ def random_tree_child_subsequence(seq, r):
     return newSeq
 
 
+@py_random_state("seed")
 def generate_network_random_tree_child_sequence(
-    leaves, reticulations, label_leaves=False
+    leaves, reticulations, label_leaves=False, seed=None
 ):
     """
     Returns a random tree-child network with a given number of leaves and reticulations
     :param leaves: number of leaves
     :param reticulations: number of reticulations
+    :param label_leaves: whether to label the leaves
     :return: a random tree-child network
 
     :example:
@@ -124,7 +128,7 @@ def generate_network_random_tree_child_sequence(
         raise ValueError(
             "Invalid number of leaves or reticulations, must be at least 2 and 0 respectively"
         )
-    seq = random_tree_child_sequence(leaves, reticulations)
+    seq = random_tree_child_sequence(leaves, reticulations, seed=seed)
     if not seq:
         return False
     return DiNetwork.from_cherry_picking_sequence(seq, label_leaves=label_leaves)

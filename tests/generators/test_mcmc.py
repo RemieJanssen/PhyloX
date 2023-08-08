@@ -8,7 +8,6 @@ from phylox.generators.mcmc import sample_mcmc_networks
 from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.movetype import MoveType
 
-
 class TestMCMCSamples(unittest.TestCase):
     def test_sample_no_moves(self):
         network = DiNetwork(
@@ -130,3 +129,42 @@ class TestMCMCSamples(unittest.TestCase):
         self.assertEqual(len(samples), 100)
         for sample in samples:
             self.assertTrue(is_stack_free(sample))
+
+    def test_seed(self):
+        number_of_samples = 2
+        network1 = DiNetwork(
+            edges=[(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
+            labels=[(3, "A"), (4, "B"), (5, "C"), (6, "D")]
+        )
+        move_type_probabilities = {
+            MoveType.TAIL: 0.5,
+            MoveType.HEAD: 0.5,
+        }
+        samples1 = sample_mcmc_networks(
+            network1,
+            move_type_probabilities=move_type_probabilities,
+            number_of_samples=number_of_samples,
+            burn_in=10,
+            seed=1,
+        )
+        samples2 = sample_mcmc_networks(
+            network1,
+            move_type_probabilities=move_type_probabilities,
+            number_of_samples=number_of_samples,
+            burn_in=10,
+            seed=1,
+        )
+        samples3 = sample_mcmc_networks(
+            network1,
+            move_type_probabilities=move_type_probabilities,
+            number_of_samples=number_of_samples,
+            burn_in=10,
+            seed=2,
+        )
+        self.assertEqual(len(samples1), number_of_samples)
+        self.assertEqual(len(samples2), number_of_samples)
+        self.assertEqual(len(samples3), number_of_samples)
+        for sample1, sample2 in zip(samples1, samples2):
+            self.assertTrue(is_isomorphic(sample1, sample2))
+        for sample1, sample3 in zip(samples1, samples3):
+            self.assertFalse(is_isomorphic(sample1, sample3))

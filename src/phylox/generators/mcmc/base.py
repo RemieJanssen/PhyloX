@@ -11,6 +11,8 @@ from phylox.rearrangement.invertsequence import from_edge
 from phylox.rearrangement.move import Move, apply_move
 from phylox.rearrangement.movetype import MoveType
 
+from networkx.utils.decorators import np_random_state
+
 
 def acceptance_probability(
     network,
@@ -73,6 +75,7 @@ def acceptance_probability(
     return p
 
 
+@np_random_state("seed")
 def sample_mcmc_networks(
     starting_network,
     move_type_probabilities,
@@ -81,6 +84,7 @@ def sample_mcmc_networks(
     burn_in=1000,
     number_of_samples=1,
     add_root_if_necessary=False,
+    seed=None,
 ):
     """
     Samples phylogenetic networks using a Markov-Chain Monte Carlo method.
@@ -92,6 +96,7 @@ def sample_mcmc_networks(
     :param burn_in: the number of steps (including rejected proposals) between each sample.
     :param number_of_samples: the number of networks to sample.
     :param add_root_if_necessary: whether to add a root edge to each root if it has out-degree > 1.
+    :param seed: the seed for the random number generator.
 
     :return: a list of phylox.DiNetwork objects.
 
@@ -117,6 +122,7 @@ def sample_mcmc_networks(
     ...     burn_in=100,
     ...     number_of_samples=50,
     ...     add_root_if_necessary=False,
+    ...     seed=1,
     ... )
     >>> all([network.reticulation_number<2 for network in sampled_networks])
     True
@@ -147,12 +153,13 @@ def sample_mcmc_networks(
                     available_tree_nodes=available_tree_nodes,
                     available_reticulations=available_reticulations,
                     move_type_probabilities=move_type_probabilities,
+                    seed=seed,
                 )
                 result_network = apply_move(network, move)
             except (InvalidMoveException, InvalidMoveDefinitionException) as e:
                 non_moves += 1
                 continue
-            if np.random.random() > acceptance_probability(
+            if seed.random() > acceptance_probability(
                 network,
                 result_network,
                 move,
