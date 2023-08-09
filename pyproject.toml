@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phylox"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="Remie Janssen", email="remiejanssen92@gmail.com" },
 ]
