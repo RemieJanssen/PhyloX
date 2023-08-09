@@ -18,6 +18,7 @@ Types of changes:
 ### Added
 
 - Parsers to and from newick. (#30)
+- Random methods with seed. (#34, #16)
 
 ### Changed
 
