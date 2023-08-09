@@ -1,7 +1,6 @@
 # These functions are implementations of the algorithms of Remie Janssen's PhD thesis
 
 import ast
-import random
 import re
 import sys
 import time

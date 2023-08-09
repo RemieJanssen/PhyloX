@@ -5,6 +5,8 @@ import networkx as nx
 from phylox.cherrypicking.base import CherryPickingMixin
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
+from networkx.utils.decorators import np_random_state, py_random_state
+
 
 class DiNetwork(nx.DiGraph, CherryPickingMixin):
     """
@@ -180,41 +182,44 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
             self._set_labels()
         return self._labels
 
-    def child(self, node, exclude=[], randomNodes=False):
+    @py_random_state("seed")
+    def child(self, node, exclude=[], randomNodes=False, seed=None):
         """
         Finds a child node of a node.
 
         :param node: a node of self.
         :param exclude: a set of nodes of self.
         :param randomNodes: a boolean value.
+        :param seed: a seed for the random number generator.
         :return: a child of node that is not in the set of nodes exclude. If randomNodes, then this child node is selected uniformly at random from all candidates.
         """
         child = None
-        for c in self.successors(node):
+        
+        for i, c in enumerate(self.successors(node)):
             if c not in exclude:
                 if not randomNodes:
                     return c
-                elif child is None or random.getrandbits(1):
-                    # As there are at most two children, we can simply replace the previous child with probability .5 to get a random parent
+                elif child is None or seed.random() < 1.0 / (i+1):
                     child = c
         return child
 
-    def parent(self, node, exclude=[], randomNodes=False):
+    @py_random_state("seed")
+    def parent(self, node, exclude=[], randomNodes=False, seed=None):
         """
         Finds a parent of a node in a network.
 
         :param node: a node in the network.
         :param exclude: a set of nodes of the network.
         :param randomNodes: a boolean value.
+        :param seed: a seed for the random number generator.
         :return: a parent of node that is not in the set of nodes exclude. If randomNodes, then this parent is selected uniformly at random from all candidates.
         """
         parent = None
-        for p in self.predecessors(node):
+        for i, p in enumerate(self.predecessors(node)):
             if p not in exclude:
                 if not randomNodes:
                     return p
-                elif parent is None or random.getrandbits(1):
-                    # As there are at most two parents, we can simply replace the previous parent with probability .5 to get a random parent
+                elif parent is None or seed.random() < 1.0 / (i+1):
                     parent = p
         return parent
 

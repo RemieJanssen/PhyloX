@@ -249,10 +249,31 @@ class TestHybridizationProblem(unittest.TestCase):
         )
         networks = [network1, network2, network3]
         problem = HybridizationProblem(networks, newick_strings=False)
-        result = problem.CPSBound(progress=True)
+        result = problem.CPSBound(progress=True, seed=1)
         for network in networks:
             print(network.edges(data=True))
             self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
+
+    def test_seed(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,6), (5,7), (6,8), (7,8), (7,9), (8,10), (9,10), (9,11), (10,12)],
+            labels=[(11, "A"), (12, "B")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,6), (5,7), (6,8), (7,8), (7,9), (8,10), (9,10), (9,11), (10,12)],
+            labels=[(11, "B"), (12, "A")],
+        )
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
+        result1 = problem.CPSBound(progress=True, seed=1)
+        problem.best_seq = None
+        problem.best_seq_with_lengths = None
+        result2 = problem.CPSBound(progress=True, seed=1)
+        problem.best_seq = None
+        problem.best_seq_with_lengths = None
+        result3 = problem.CPSBound(progress=True, seed=2)
+        self.assertEqual(result1, result2)
+        self.assertNotEqual(result1, result3)
 
 
 class TestHybridizationProblemTrackPairs(unittest.TestCase):
@@ -498,10 +519,34 @@ class TestHybridizationProblemTrackPairs(unittest.TestCase):
         )
         networks = [network1, network2, network3]
         problem = HybridizationProblem(networks, newick_strings=False)
-        result = problem.CPSBound(track=True, progress=True)
+        result = problem.CPSBound(track=True, progress=True, seed=1)
         for network in networks:
             print(network.edges(data=True))
             self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
+        
+    def test_seed(self):
+        network1 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,6), (5,7), (6,8), (7,8), (7,9), (8,10), (9,10), (9,11), (10,12)],
+            labels=[(11, "A"), (12, "B")],
+        )
+        network2 = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4), (3,4), (3,5), (4,6), (5,6), (5,7), (6,8), (7,8), (7,9), (8,10), (9,10), (9,11), (10,12)],
+            labels=[(11, "B"), (12, "A")],
+        )
+        networks = [network1, network2]
+        problem = HybridizationProblem(networks, newick_strings=False)
+        result1 = problem.CPSBound(track=True, progress=True, seed=1)
+        problem.best_seq = None
+        problem.best_seq_with_lengths = None
+        result2 = problem.CPSBound(track=True, progress=True, seed=1)
+        problem.best_seq = None
+        problem.best_seq_with_lengths = None
+        result3 = problem.CPSBound(track=True, progress=True, seed=2)
+        print(result1)
+        print(result2)
+        print(result3)
+        self.assertEqual(result1, result2)
+        self.assertNotEqual(result1, result3)
 
 
 class TestHybridizationProblemLengths(unittest.TestCase):
@@ -673,8 +718,7 @@ class TestHybridizationProblemLengths(unittest.TestCase):
         )
         networks = [network1, network2]
         problem = HybridizationProblem(networks, newick_strings=False)
-        result = problem.CPSBound(lengths=True, progress=True)
-        print(result)
+        result = problem.CPSBound(track=True, progress=True, seed=1)
         self.assertEqual(len(result), 3)
         for network in networks:
             self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))

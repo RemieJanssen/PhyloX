@@ -56,6 +56,16 @@ class TestDiNetwork(unittest.TestCase):
         self.assertEqual(network.child(2, exclude=[3], randomNodes=True), 4)
         self.assertEqual(network.child(2, exclude=[3, 4], randomNodes=True), None)
 
+    def test_child_seed(self):
+        network = DiNetwork(
+            edges=[(0,i) for i in range(1, 100)],
+        )
+        child1 = network.child(0, randomNodes=True, seed=1)
+        child2 = network.child(0, randomNodes=True, seed=1)
+        child3 = network.child(0, randomNodes=True, seed=2)
+        self.assertEqual(child1, child2)
+        self.assertNotEqual(child1, child3)
+
     def test_parent(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4), (3, 4), (3, 5), (4, 6)],
@@ -67,6 +77,16 @@ class TestDiNetwork(unittest.TestCase):
         self.assertIn(network.parent(4, randomNodes=True), [2, 3])
         self.assertEqual(network.parent(4, exclude=[2], randomNodes=True), 3)
         self.assertEqual(network.parent(4, exclude=[2, 3], randomNodes=True), None)
+
+    def test_parent_seed(self):
+        network = DiNetwork(
+            edges=[(i,0) for i in range(1, 100)],
+        )
+        parent1 = network.parent(0, randomNodes=True, seed=1)
+        parent2 = network.parent(0, randomNodes=True, seed=1)
+        parent3 = network.parent(0, randomNodes=True, seed=2)
+        self.assertEqual(parent1, parent2)
+        self.assertNotEqual(parent1, parent3)
 
     def test_is_tree_node(self):
         network = DiNetwork(

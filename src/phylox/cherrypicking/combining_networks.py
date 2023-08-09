@@ -20,6 +20,8 @@ from phylox.cherrypicking import (
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
+from networkx.utils.decorators import py_random_state, np_random_state
+
 # prefix for harmonized node names
 HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
 
@@ -87,8 +89,9 @@ class HybridizationProblem:
             tree._clear_cached()
 
     # Find new cherry-picking sequences for the trees and update the best found
+    @np_random_state("seed")
     def CPSBound(
-        self, repeats=1, progress=False, track=False, lengths=False, time_limit=None
+        self, repeats=1, progress=False, track=False, lengths=False, time_limit=None, seed=None
     ):
         """
         Finds a cherry-picking sequence for the input networks, and updates the best sequence found so far.
@@ -145,11 +148,11 @@ class HybridizationProblem:
         # Try as many times as required by the integer 'repeats'
         for i in range(repeats):
             if lengths:
-                new, reduced_trees, seq_heights = Heuristic(progress=progress)
+                new, reduced_trees, seq_heights = Heuristic(progress=progress, seed=seed)
                 if progress:
                     print("found sequence of length: " + str(len(new)))
             else:
-                new, reduced_trees = Heuristic(progress=progress)
+                new, reduced_trees = Heuristic(progress=progress, seed=seed)
                 if progress:
                     print("found sequence of length: " + str(len(new)))
                     print(new)
@@ -199,7 +202,8 @@ class HybridizationProblem:
             return self.best_seq
 
     # Version of the code that uses minimal memory: recompute reducible pairs when necessary.
-    def CPHeuristic(self, progress=False):
+    @np_random_state("seed")
+    def CPHeuristic(self, progress=False, seed=None):
         if progress:
             print("Copying all inputs to reduce on")
         # Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
@@ -226,11 +230,14 @@ class HybridizationProblem:
             if len(copy_of_inputs.trees) == 0:
                 break
             # Now reduce a random cherry from a random tree
-            random_index, random_tree = random.choice(
-                list(copy_of_inputs.trees.items())
-            )
+            random_index = seed.choice(
+                list(copy_of_inputs.trees.keys())
+            ) 
+            random_tree = copy_of_inputs.trees[random_index]
             list_of_cherries = find_all_reducible_pairs(random_tree)
-            random_cherry = random.choice(list(list_of_cherries))
+
+            random_cherry_index = seed.choice(range(len(list_of_cherries)))
+            random_cherry = list(list_of_cherries)[random_cherry_index]
             CPS += [random_cherry]
 
             reduced_by_random_cherry = copy_of_inputs.Reduce_Pair_In_All(random_cherry)
@@ -241,7 +248,8 @@ class HybridizationProblem:
 
     # Version of the code that uses more memory: stores all reducible pairs.
     # Runs when user toggles -t or --track
-    def CPHeuristicStorePairs(self, progress=False):
+    @np_random_state("seed")
+    def CPHeuristicStorePairs(self, progress=False, seed=None):
         if progress:
             print("Copying all inputs to reduce on")
         # Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
@@ -279,11 +287,13 @@ class HybridizationProblem:
 
             # Now reduce a random cherry from a random tree
             # EITHER: (Get random tree, then random pair from the tree), just like in CPHeuristic
-            random_index, random_tree = random.choice(
-                list(copy_of_inputs.trees.items())
+            random_index = seed.choice(
+                list(copy_of_inputs.trees.keys())
             )
+            random_tree = copy_of_inputs.trees[random_index]
             list_of_cherries = find_all_reducible_pairs(random_tree)
-            random_cherry = random.choice(list(list_of_cherries))
+            random_cherry_index = seed.choice(range(len(list_of_cherries))) 
+            random_cherry = list(list_of_cherries)[random_cherry_index]
 
             # OR: (Get a random reducible pair from all pairs)
             # Note that this would result in a different algorithm than CPHeuristic, so we use the previous option
@@ -304,7 +314,8 @@ class HybridizationProblem:
 
     # Version of the code that always picks the lowest available pair
     # Runs when user toggles -l or --lengths and all edges in the input trees have lengths.
-    def CPHeuristicLengths(self, progress=False):
+    @np_random_state("seed")
+    def CPHeuristicLengths(self, progress=False, seed=None):
         if progress:
             print("Copying all inputs to reduce on")
         # Works in a copy of the input trees, copy_of_inputs, because trees have to be reduced somewhere.
@@ -365,7 +376,7 @@ class HybridizationProblem:
                     lowest_heights_found = 1
                 elif lowest_height == height_pair:
                     lowest_heights_found += 1
-                    if random.random() < 1 / float(lowest_heights_found):
+                    if seed.random() < 1 / float(lowest_heights_found):
                         new_found = True
                 if new_found:
                     lowest_cherry = pair
