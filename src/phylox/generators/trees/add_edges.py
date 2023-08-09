@@ -1,18 +1,18 @@
 import random
 from enum import Enum
 
-import numpy as np
-
 from phylox.rearrangement.move import Move, apply_move
 from phylox.rearrangement.movetype import MoveType
-
+from networkx.utils.decorators import np_random_state, py_random_state
 
 # Pick two edges uniformly at random and add an edge between these
-def random_vplu_move_at_bottom(network):
+@np_random_state("seed")
+def random_vplu_move_at_bottom(network, seed=None):
     """
     Returns a VPLU move that adds an edge between the incoming edges of two leaves.
 
     :param network: the network to add an edge to.
+    :param seed: the seed to use for the random number generator, may be an integer or a numpy.random.RandomState.
     :return: a VPLU move that adds an edge between the incoming edges of two leaves.
 
     :example:
@@ -26,7 +26,7 @@ def random_vplu_move_at_bottom(network):
     True
     """
     leaves = list(network.leaves)
-    leaf_indices = np.random.choice(range(len(leaves)), 2, replace=False)
+    leaf_indices = seed.choice(range(len(leaves)), 2, replace=False)
     leaf1 = leaves[leaf_indices[0]]
     parent1 = network.parent(leaf1)
     leaf2 = leaves[leaf_indices[1]]
@@ -40,12 +40,14 @@ def random_vplu_move_at_bottom(network):
 
 
 # Pick two edges uniformly at random and add an edge between these
-def random_vplu_move_uniform(network):
+@np_random_state("seed")
+def random_vplu_move_uniform(network, seed=None):
     """
     Returns a VPLU move that adds an edge between two edges in the network.
     Two edges are chosen uniformly at random from the network.
 
     :param network: the network to add an edge to.
+    :param seed: the seed to use for the random number generator, may be an integer or a numpy.random.RandomState.
     :return: a VPLU move that adds an edge between two edges in the network.
 
     :example:
@@ -59,7 +61,7 @@ def random_vplu_move_uniform(network):
     True
     """
     edges = list(network.edges())
-    edge_indices = np.random.choice(range(len(edges)), 2, replace=False)
+    edge_indices = seed.choice(range(len(edges)), 2, replace=False)
     return Move(
         move_type=MoveType.VPLU,
         network=network,
@@ -68,7 +70,8 @@ def random_vplu_move_uniform(network):
     )
 
 
-def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=None):
+@py_random_state("seed")
+def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=None, seed=None):
     """
     Returns a VPLU move that adds an edge between two edges in the network.
     Pick one edge, move a random number of edges through the network to find a second edge.
@@ -92,21 +95,21 @@ def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=Non
     try_number = 1
     while max_tries == None or try_number <= max_tries:
         # Pick a random edge
-        edge1 = random.choice(list(network.edges()))
+        edge1 = seed.choice(list(network.edges()))
         edge2 = None
         # Initiate the random walk, by choosing an orientation
-        previous_node = random.choice(edge1)
+        previous_node = seed.choice(edge1)
         current_node = edge1[0]
         if current_node == previous_node:
             current_node = edge1[1]
         # Take a number of steps
         step_number = 1
         while max_steps == None or step_number <= max_steps:
-            previous_node, current_node = current_node, random.choice(
+            previous_node, current_node = current_node, seed.choice(
                 list(network.successors(current_node))
                 + list(network.predecessors(current_node))
             )
-            if random.random() < stop_prob:
+            if seed.random() < stop_prob:
                 break
             step_number += 1
         # Set the new edge
@@ -131,7 +134,8 @@ class AddEdgeMethod(Enum):
     LOCAL = 3
 
 
-def network_from_tree(tree, reticulations, method):
+@np_random_state("seed")
+def network_from_tree(tree, reticulations, method, seed=None):
     """
     Returns a network with the given number of reticulations added to the given tree.
 
@@ -169,7 +173,7 @@ def network_from_tree(tree, reticulations, method):
     reticulations = int(reticulations)
     while reticulations > 0:
         try:
-            move = add_edge_method(network)
+            move = add_edge_method(network, seed=seed)
             network = apply_move(network, move)
             reticulations -= 1
         except:

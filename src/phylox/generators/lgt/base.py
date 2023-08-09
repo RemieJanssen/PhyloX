@@ -8,13 +8,13 @@ PMID: 30703035 DOI: 10.1109/TCBB.2019.2895344
 Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
 """
 
-import random
 
 import networkx as nx
 import numpy as np
 
 from phylox import DiNetwork
 
+from networkx.utils.decorators import np_random_state, py_random_state
 
 def last_node(net):
     return max(net.nodes())
@@ -75,30 +75,32 @@ def internal_and_external_pairs(net):
     return internal_pairs, external_pairs
 
 
-def random_pair(net, wint, wext):
+@np_random_state("seed")
+def random_pair(net, wint, wext, seed=None):
     int_pairs, ext_pairs = internal_and_external_pairs(net)
-    return random.choices(
-        int_pairs + ext_pairs, weights=[wint] * len(int_pairs) + [wext] * len(ext_pairs)
-    )[0]
+    probabilities = [wint] * len(int_pairs) + [wext] * len(ext_pairs)
+    probabilities = np.array(probabilities) / sum(probabilities)
+    index = seed.choice(range(len(int_pairs) + len(ext_pairs)), p=probabilities)
+    return (int_pairs + ext_pairs)[index]
 
-
-def simulation_1(num_steps, prob_lgt, wint, wext):
+@np_random_state("seed")
+def simulation_1(num_steps, prob_lgt, wint, wext, seed=None):
     net = nx.DiGraph()
     net.add_edge(1, 2)
     net.add_edge(1, 3)
     for i in range(num_steps):
-        event = random.choices(["spec", "lgt"], [1 - prob_lgt, prob_lgt])[0]
+        event = seed.choice(["spec", "lgt"], p=[1 - prob_lgt, prob_lgt])
         # event = np.random.choice(['spec','lgt'],p=[1-prob_lgt, prob_lgt])
         if event == "spec":
-            l = random.choice(leaves(net))
+            l = seed.choice(leaves(net))
             speciate(net, l)
         else:
-            pair = random_pair(net, wint, wext)
+            pair = random_pair(net, wint, wext, seed=seed)
             lgt(net, pair[0], pair[1])
     return net
 
-
-def simulation_3(leaves_goal, retics_goal, wint, wext):
+@np_random_state("seed")
+def simulation_3(leaves_goal, retics_goal, wint, wext, seed=None):
     """
     Simulation 3 for generating networks with a given number of leaves and reticulations
     :param leaves_goal: number of leaves in the network
@@ -116,7 +118,7 @@ def simulation_3(leaves_goal, retics_goal, wint, wext):
     # pick a number of extant lineages for each LGT event independently
     retics_at_lineage = dict()
     for r in range(retics_goal):
-        lin = random.choice(range(2, leaves_goal + 1))
+        lin = seed.choice(range(2, leaves_goal + 1))
         if lin in retics_at_lineage:
             retics_at_lineage[lin] += 1
         else:
@@ -124,14 +126,14 @@ def simulation_3(leaves_goal, retics_goal, wint, wext):
     network = DiNetwork(edges=[(0, 1), (1, 2), (1, 3)])
     if 2 in retics_at_lineage:
         for j in range(retics_at_lineage[2]):
-            pair = random_pair(network, wint, wext)
+            pair = random_pair(network, wint, wext, seed=seed)
             lgt(network, pair[0], pair[1])
     for i in range(3, leaves_goal + 1):
-        l = random.choice(leaves(network))
+        l = seed.choice(leaves(network))
         speciate(network, l)
         if i in retics_at_lineage:
             for j in range(retics_at_lineage[i]):
-                pair = random_pair(network, wint, wext)
+                pair = random_pair(network, wint, wext, seed=seed)
                 lgt(network, pair[0], pair[1])
 
     if original_leaves_goal == 1:
@@ -150,7 +152,8 @@ def reticulations(G):
     return [v for v in G.nodes() if G.in_degree(v) == 2]
 
 
-def generate_network_lgt(n, k, wint=1, wext=1, max_tries=1000):
+@np_random_state("seed")
+def generate_network_lgt(n, k, wint=1, wext=1, max_tries=1000, seed=None):
     """
     Generate a network with a given number of leaves and reticulations
     :param n: number of leaves
@@ -158,6 +161,7 @@ def generate_network_lgt(n, k, wint=1, wext=1, max_tries=1000):
     :param alpha: parameter for the weight of internal edges
     :param beta: parameter for the weight of external edges
     :param max_tries: maximum number of tries to generate a network
+    :param seed: seed for the random number generator
     :return: a network with the given number of leaves and reticulations
     """
 
@@ -166,7 +170,7 @@ def generate_network_lgt(n, k, wint=1, wext=1, max_tries=1000):
         # (original by Pons et al., not made for exact number of reticulations)
         # resG = simulation_1(n+k, alpha, 1, beta)
         # faster method:
-        network = simulation_3(n, k, wint, wext)
+        network = simulation_3(n, k, wint, wext, seed=seed)
         if len(reticulations(network)) == k:
             return network
     raise Exception(

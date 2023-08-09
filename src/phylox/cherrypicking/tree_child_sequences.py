@@ -6,7 +6,6 @@ Based on "Linear Time Algorithm for Tree-Child network Containment" by Remie Jan
 
 import ast
 import itertools
-import random
 import time
 from copy import deepcopy
 

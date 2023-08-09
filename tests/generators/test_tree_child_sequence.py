@@ -7,6 +7,7 @@ from phylox.generators.randomTC import (
     random_tree_child_sequence,
     random_tree_child_subsequence,
 )
+from networkx.algorithms.isomorphism import is_isomorphic
 
 
 class TestRandomTC(unittest.TestCase):
@@ -81,3 +82,72 @@ class TestRandomTC(unittest.TestCase):
         self.assertEqual(len(subnetwork.leaves), leaves)
         self.assertEqual(len(subnetwork.roots), 1)
         self.assertEqual(subnetwork.reticulation_number, subsequence_reticulations)
+
+    def test_network_generation_seed(self):
+        leaves = 10
+        reticulations = 5
+        network1 = generate_network_random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=1,
+        )
+        network2 = generate_network_random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=1,
+        )
+        network3 = generate_network_random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=2,
+        )
+        self.assertTrue(is_isomorphic(network1, network2))
+        self.assertFalse(is_isomorphic(network1, network3))
+
+    def test_sequence_generation_seed(self):
+        leaves = 10
+        reticulations = 5
+        sequence1 = random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=1,
+        )
+        sequence2 = random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=1,
+        )
+        sequence3 = random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=2,
+        )
+        self.assertEqual(sequence1, sequence2)
+        self.assertNotEqual(sequence1, sequence3)
+
+    def test_subsequence_generation_seed(self):
+        leaves = 10
+        reticulations = 5
+        reticulations_subsequence = 3
+        sequence = random_tree_child_sequence(
+            leaves=leaves,
+            reticulations=reticulations,
+            seed=1,
+        )
+        subsequence1 = random_tree_child_subsequence(
+            sequence,
+            reticulations_subsequence,
+            seed=1,
+        )
+        subsequence2 = random_tree_child_subsequence(
+            sequence,
+            reticulations_subsequence,
+            seed=1,
+        )
+        subsequence3 = random_tree_child_subsequence(
+            sequence,
+            reticulations_subsequence,
+            seed=2,
+        )
+        self.assertEqual(subsequence1, subsequence2)
+        self.assertNotEqual(subsequence1, subsequence3)

@@ -1,7 +1,7 @@
 import unittest
 
 from phylox.generators.lgt import generate_network_lgt
-
+from phylox.isomorphism import is_isomorphic
 
 class TestLGTNetwork(unittest.TestCase):
     def test_one_leaf(self):
@@ -63,3 +63,28 @@ class TestLGTNetwork(unittest.TestCase):
         )
         self.assertEqual(len(network.leaves), 100)
         self.assertEqual(len(network.reticulations), 10)
+
+    def test_seed(self):
+        network1 = generate_network_lgt(
+            n=100,
+            k=10,
+            wint=1,
+            wext=1,
+            seed=1,
+        )
+        network2 = generate_network_lgt(
+            n=100,
+            k=10,
+            wint=1,
+            wext=1,
+            seed=1,
+        )
+        network3 = generate_network_lgt(
+            n=100,
+            k=10,
+            wint=1,
+            wext=1,
+            seed=2,
+        )
+        self.assertTrue(is_isomorphic(network1, network2))
+        self.assertFalse(is_isomorphic(network1, network3))

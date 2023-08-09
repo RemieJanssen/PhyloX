@@ -7,13 +7,11 @@ sequence data. Molecular biology and evolution 35(2), 504–517 (2018)
 
 """
 
-import random
-
 import numpy as np
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-
+from networkx.utils.decorators import np_random_state, py_random_state
 
 def multree_to_dinetwork(multree, hybrid_nodes):
     """
@@ -44,7 +42,8 @@ def multree_to_dinetwork(multree, hybrid_nodes):
     return network
 
 
-def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
+@np_random_state("seed")
+def generate_network_zods(time_limit, speciation_rate, hybridization_rate, seed=None):
     """
     Generates a network with the ZODS model.
 
@@ -56,6 +55,8 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
         The speciation rate of each lineage in the network.
     hybridization_rate : float
         The hybridization rate of each pair of lineages in the network.
+    seed : int or None
+        The seed to use for the random number generator.
 
     Returns
     -------
@@ -67,7 +68,7 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
     leaves = set([0])
     current_node = 1
 
-    extra_time = np.random.exponential(1 / float(speciation_rate))
+    extra_time = seed.exponential(1 / float(speciation_rate))
     current_time = extra_time
     current_speciation_rate = float(speciation_rate)
     current_hybridization_rate = float(0)
@@ -78,9 +79,9 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
     no_of_hybrids = 0
 
     while current_time < time_limit:
-        if random.random() < current_speciation_rate / rate:
+        if seed.random() < current_speciation_rate / rate:
             # Speciate
-            splitting_leaf = random.choice(list(leaves))
+            splitting_leaf = seed.choice(list(leaves))
             multree.add_weighted_edges_from(
                 [
                     (splitting_leaf, current_node, 0),
@@ -95,7 +96,7 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
         else:
             # Hybridize
             #  i.e.: pick two leaf nodes, merge those, and add a new leaf below this hybrid node.
-            merging = random.sample(sorted(leaves), 2)
+            merging = seed.choice(list(leaves), size=2)
             l0 = merging[0]
             l1 = merging[1]
             pl0 = -1
@@ -128,7 +129,7 @@ def generate_network_zods(time_limit, speciation_rate, hybridization_rate):
             hybridization_rate * (no_of_leaves * (no_of_leaves - 1)) / 2
         )
         rate = current_speciation_rate + current_hybridization_rate
-        extra_time = np.random.exponential(1 / rate)
+        extra_time = seed.exponential(1 / rate)
         current_time += extra_time
 
     # Correct for the fact that we might have gone over the time limit

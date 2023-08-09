@@ -6,13 +6,12 @@ The beta-splitting model is a model for generating random binary trees.
 The model is parameterized by a parameter beta > 0 which determines the shape of the tree.
 """
 
-import random
-
 import numpy as np
 from scipy.special import loggamma
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
+from networkx.utils.decorators import np_random_state, py_random_state
 
 ############################################
 # Simulation functions
@@ -38,8 +37,8 @@ def _compute_split_probability(n, beta):
     return q_n
 
 
-# n: number of tips
-def simulate_beta_splitting(n, beta):
+@py_random_state("seed")
+def simulate_beta_splitting(n, beta, seed=None):
     """
     Simulate a random binary tree with n leaves using the beta-splitting model.
 
@@ -68,7 +67,7 @@ def simulate_beta_splitting(n, beta):
         if n_node > 1:
             # Compute the "probability" to split n in (i|n-1), where i=1,..,n-1
             q_n = _compute_split_probability(n_node, beta)
-            split = random.choices(population=list(range(1, n_node)), weights=q_n, k=1)[
+            split = seed.choices(population=list(range(1, n_node)), weights=q_n, k=1)[
                 0
             ]
             # Create children.

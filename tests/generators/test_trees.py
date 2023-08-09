@@ -1,6 +1,7 @@
 import unittest
 
 from phylox.generators.trees.add_edges import AddEdgeMethod, network_from_tree
+from phylox.isomorphism import is_isomorphic
 
 # from phylox import DiNetwork
 from phylox.generators.trees.beta_splitting_tree import simulate_beta_splitting
@@ -35,6 +36,24 @@ class TestBetaSplitting(unittest.TestCase):
         self.assertEqual(len(tree.leaves), 10)
         self.assertEqual(len(tree.edges), 2 * 10 - 1)
 
+    def test_seed(self):
+        tree1 = simulate_beta_splitting(
+            n=10,
+            beta=0,
+            seed=1,
+        )
+        tree2 = simulate_beta_splitting(
+            n=10,
+            beta=0,
+            seed=1,
+        )
+        tree3 = simulate_beta_splitting(
+            n=10,
+            beta=0,
+            seed=2,
+        )
+        self.assertTrue(is_isomorphic(tree1, tree2))
+        self.assertFalse(is_isomorphic(tree1, tree3))
 
 class TestWellKnown(unittest.TestCase):
     def test_balanced_tree(self):
@@ -85,3 +104,22 @@ class TestAddEdges(unittest.TestCase):
         tree = generate_balanced_tree(8)
         with self.assertRaises(ValueError):
             network = network_from_tree(tree, 3, "TOP")
+
+    def test_seed(self):
+        tree = generate_balanced_tree(32)
+        reticulations = 10
+        network1 = network_from_tree(tree, reticulations, AddEdgeMethod.BOTTOM, seed=1)
+        network2 = network_from_tree(tree, reticulations, AddEdgeMethod.BOTTOM, seed=1)
+        network3 = network_from_tree(tree, reticulations, AddEdgeMethod.BOTTOM, seed=2)
+        self.assertTrue(is_isomorphic(network1, network2))
+        self.assertFalse(is_isomorphic(network1, network3))
+
+
+    def test_seed2(self):
+        tree = generate_balanced_tree(32)
+        reticulations = 10
+        network1 = network_from_tree(tree, reticulations, AddEdgeMethod.LOCAL, seed=1)
+        network2 = network_from_tree(tree, reticulations, AddEdgeMethod.LOCAL, seed=1)
+        network3 = network_from_tree(tree, reticulations, AddEdgeMethod.LOCAL, seed=2)
+        self.assertTrue(is_isomorphic(network1, network2))
+        self.assertFalse(is_isomorphic(network1, network3))
