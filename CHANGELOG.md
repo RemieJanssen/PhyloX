@@ -15,6 +15,9 @@ Types of changes:
 
 ## [0.0.7] - (Unreleased)
 
+### Added
+
+- Rearrangement move sequence calculations. (#35)
 
 ## [0.0.6] - (2023-08-09)
 
