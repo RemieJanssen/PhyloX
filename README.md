@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/650049974.svg)](https://zenodo.org/doi/10.5281/zenodo.10122403)
+
 # PhyloX
 
 PhyloX is a python package with tools for constructing, manipulating, and analyzing phylogenetic networks.
