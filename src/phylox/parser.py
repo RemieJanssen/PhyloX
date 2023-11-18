@@ -1,9 +1,10 @@
-import re
 import json
+import re
+from copy import deepcopy
+
 from phylox import DiNetwork
 from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
-from copy import deepcopy
 
 
 def dinetwork_to_extended_newick(network):

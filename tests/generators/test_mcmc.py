@@ -8,6 +8,7 @@ from phylox.generators.mcmc import sample_mcmc_networks
 from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.movetype import MoveType
 
+
 class TestMCMCSamples(unittest.TestCase):
     def test_sample_no_moves(self):
         network = DiNetwork(
@@ -134,7 +135,7 @@ class TestMCMCSamples(unittest.TestCase):
         number_of_samples = 2
         network1 = DiNetwork(
             edges=[(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
-            labels=[(3, "A"), (4, "B"), (5, "C"), (6, "D")]
+            labels=[(3, "A"), (4, "B"), (5, "C"), (6, "D")],
         )
         move_type_probabilities = {
             MoveType.TAIL: 0.5,

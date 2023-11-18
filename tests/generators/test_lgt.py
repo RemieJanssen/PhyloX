@@ -3,6 +3,7 @@ import unittest
 from phylox.generators.lgt import generate_network_lgt
 from phylox.isomorphism import is_isomorphic
 
+
 class TestLGTNetwork(unittest.TestCase):
     def test_one_leaf(self):
         network = generate_network_lgt(

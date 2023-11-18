@@ -1,7 +1,6 @@
 import unittest
 
 from phylox.generators.trees.add_edges import AddEdgeMethod, network_from_tree
-from phylox.isomorphism import is_isomorphic
 
 # from phylox import DiNetwork
 from phylox.generators.trees.beta_splitting_tree import simulate_beta_splitting
@@ -9,6 +8,7 @@ from phylox.generators.trees.well_known import (
     generate_balanced_tree,
     generate_caterpillar,
 )
+from phylox.isomorphism import is_isomorphic
 
 
 class TestBetaSplitting(unittest.TestCase):
@@ -54,6 +54,7 @@ class TestBetaSplitting(unittest.TestCase):
         )
         self.assertTrue(is_isomorphic(tree1, tree2))
         self.assertFalse(is_isomorphic(tree1, tree3))
+
 
 class TestWellKnown(unittest.TestCase):
     def test_balanced_tree(self):
@@ -113,7 +114,6 @@ class TestAddEdges(unittest.TestCase):
         network3 = network_from_tree(tree, reticulations, AddEdgeMethod.BOTTOM, seed=2)
         self.assertTrue(is_isomorphic(network1, network2))
         self.assertFalse(is_isomorphic(network1, network3))
-
 
     def test_seed2(self):
         tree = generate_balanced_tree(32)

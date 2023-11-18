@@ -3,6 +3,7 @@ import sys
 
 import networkx as nx
 import numpy as np
+from networkx.utils.decorators import np_random_state
 
 from phylox.base import find_unused_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
@@ -10,8 +11,6 @@ from phylox.isomorphism import count_automorphisms
 from phylox.rearrangement.invertsequence import from_edge
 from phylox.rearrangement.move import Move, apply_move
 from phylox.rearrangement.movetype import MoveType
-
-from networkx.utils.decorators import np_random_state
 
 
 def acceptance_probability(

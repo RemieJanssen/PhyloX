@@ -1,5 +1,7 @@
 import unittest
 
+from networkx.algorithms.isomorphism import is_isomorphic
+
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
 from phylox.generators.randomTC import (
@@ -7,7 +9,6 @@ from phylox.generators.randomTC import (
     random_tree_child_sequence,
     random_tree_child_subsequence,
 )
-from networkx.algorithms.isomorphism import is_isomorphic
 
 
 class TestRandomTC(unittest.TestCase):

@@ -8,10 +8,11 @@ sequence data. Molecular biology and evolution 35(2), 504–517 (2018)
 """
 
 import numpy as np
+from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-from networkx.utils.decorators import np_random_state, py_random_state
+
 
 def multree_to_dinetwork(multree, hybrid_nodes):
     """
