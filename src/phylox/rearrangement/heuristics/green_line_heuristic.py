@@ -1,11 +1,16 @@
 """
 A module containing the Green Line heuristic and its random version.
 The Green Line heuristic is a heuristic to find a sequence of rSPR or tail moves between two phylogenetic networks.
-The alorithms referred to in the comments are from the paper ???? TODO: add paper reference
+The algorithms referred to in the comments are from the R Janssen's PhD thesis, "Rearranging Phylogenetic Networks", 2021.
 """
 
+from phylox.rearrangement.heuristics.utils import *
+from phylox.rearrangement.movability import check_valid, check_movable
+from phylox.rearrangement.move import Move, apply_move
+from networkx.utils.decorators import py_random_state
 
-def GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
+@py_random_state("seed")
+def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     """
     An implementation of Algorithm 2. Finds a sequence of rSPR moves that makes it possible to add the lowest reticulation up to the down-closed isomrophism.
 
@@ -15,37 +20,51 @@ def GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
     :param isom_N_Np: a dictionary, containing a partial (down-closed) isomorphism map from N to Np. The inverse of isom_Np_N.
     :param isom_Np_N: a dictionary, containing a partial (down-closed) isomorphism map from Np to N. The inverse of isom_N_Np.
     :param randomNodes: a boolean value, determining whether the random version of this lemma is used.
+    :param seed: a seed for the random number generator.
     :return: a list of rSPR moves in N, a list of rSPR moves in Np, a node of N, a node of Np. After performing the lists of moves on the networks, the nodes can be added to the isomorphism.
     """
     # use notation as in the paper
     # ' is denoted p
-    xp = Child(Np, up)
+    xp = Np.child(up)
     x = isom_Np_N[xp]
-    z = Parent(N, x, exclude=isom_N_Np.keys(), randomNodes=randomNodes)
+    z = N.parent(x, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
 
     # Case1a: z is a reticulation
     if N.in_degree(z) == 2:
         return [], [], z, up
     # Case1b: z is not a reticulation
     # Find a retic v in N not in the isom yet
-    v = FindRetic(N, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes)
+    v = FindRetic(N, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
     u = None
     for parent in N.predecessors(v):
-        if CheckValid(N, (parent, v), v, (z, x)):
-            if not randomNodes:
-                u = parent
-                break
-            elif u == None or random.getrandbits(1):
-                u = parent
+        try:
+            move = Move(
+                move_type=MoveType.HEAD,
+                moving_edge=(parent, v),
+                target=(z, x),
+                network=N,
+            )
+            check_valid(N, move)
+        except (InvalidMoveException, InvalidMoveDefinitionException):
+            continue
+        if not randomNodes:
+            u = parent
+            break
+        elif u == None or seed.getrandbits(1):
+            u = parent
     # If v has an incoming arc (u,v) movable to (z,x), perform this move
     if u != None:
-        return [((u, v), v, (z, x))], [], v, up
+        move = Move(
+            move_type=MoveType.HEAD, moving_edge=(u, v), target=(z, x), network=N
+        )
+        return [move], [], v, up
     # if none of the moves is valid, this must be because
     # v is already a reticulation above x with its movable incoming arc (u,v) with u=z.
     return [], [], v, up
 
 
-def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
+@py_random_state("seed")
+def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     """
     An implementation of Algorithm 6. Finds a sequence of tail moves that makes it possible to add the lowest reticulation up to the down-closed isomrophism.
 
@@ -55,13 +74,14 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
     :param isom_N_Np: a dictionary, containing a partial (down-closed) isomorphism map from N to Np. The inverse of isom_Np_N.
     :param isom_Np_N: a dictionary, containing a partial (down-closed) isomorphism map from Np to N. The inverse of isom_N_Np.
     :param randomNodes: a boolean value, determining whether the random version of this lemma is used.
+    :param seed: a seed for the random number generator.
     :return: a list of tail moves in N, a list of tail moves in Np, a node of N, a node of Np. After performing the lists of moves on the networks, the nodes can be added to the isomorphism. Returns false if the networks are not isomorphic with 2 leaves and 1 reticulation.
     """
     # use notation as in the paper
     # ' is denoted p
-    xp = Child(Np, up)
+    xp = Np.child(up)
     x = isom_Np_N[xp]
-    z = Parent(N, x, exclude=isom_N_Np.keys(), randomNodes=randomNodes)
+    z = N.parent(x, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
     # Case1a: z is a reticulation
     if N.in_degree(z) == 2:
         return [], [], z, up
@@ -72,28 +92,43 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
         # Find a reticulation u in N not in the isomorphism yet
         # TODO: Can first check if the other parent of x suffices here, should heuristcally be better
         u = FindRetic(N, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes)
-        v = Child(N, u)
+        v = N.child(u)
         if v == x:
             return [], [], u, up
         # we may now assume v!=x
         if z == v:
-            v = Child(N, z, exclude=[x])
-            w = Parent(N, u, randomNodes=randomNodes)
-            return [((z, v), z, (w, u))], [], u, up
+            v = N.child(z, exclude=[x])
+            w = N.parent(u, randomNodes=randomNodes, seed=seed)
+            move = Move(
+                move_type=MoveType.TAIL,
+                moving_edge=(z, v),
+                target=(w, u),
+                network=N,
+            )
+            return [move], [], u, up
         w = Parent(N, u, exclude=[z], randomNodes=randomNodes)
-        return [((z, x), z, (u, v)), ((z, v), z, (w, u))], [], u, up
+        move1 = Move(
+            move_type=MoveType.TAIL, moving_edge=(z, x), target=(u, v), network=N
+        )
+        move2 = Move(
+            move_type=MoveType.TAIL, moving_edge=(z, v), target=(w, u), origin=(u,x)
+        )
+        return [(move1, move2)], [], u, up
     # Case1bii: (z,x) is not movable
-    c = Parent(N, z)
-    d = Child(N, z, exclude=[x])
+    c = N.parent(z)
+    d = N.child(z, exclude=[x])
     # TODO: b does not have to exist if we have an outdeg-2 root, this could be c!
-    b = Parent(N, c)
+    b = N.parent(c)
     if N.in_degree(b) != 0:
         # Case1biiA: b is not the root of N
-        a = Parent(N, b, randomNodes=randomNodes)
+        a = N.parent(b, randomNodes=randomNodes, seed=seed)
         # First do the move ((c,d),c,(a,b)), then Case1bi applies as (z,x) is now movable
-        newN = DoMove(N, (c, d), c, (a, b))
-        u = FindRetic(newN, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes)
-        v = Child(newN, u)
+        move1 = Move(
+            move_type=MoveType.TAIL, moving_edge=(c, d), target=(a, b), network=N
+        )
+        newN = apply_move(N, move1)
+        u = FindRetic(newN, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
+        v = newN.child(u)
         if v == x:
             # In this case, u is a reticulation parent of x and u is not in the isom. Hence, we can simply add it to the isom.
             # Note: The tail move we did is not necessary!
@@ -103,31 +138,62 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
         if z == v:
             # This only happens if z==v and u==b
             # we move z up above the retic b as well, too
-            w = Parent(newN, b, randomNodes=randomNodes)
-            return [((c, d), c, (a, b)), ((z, d), z, (w, b))], [], u, up
-        w = Parent(newN, u, exclude=[z], randomNodes=randomNodes)
-        return [((c, d), c, (a, b)), ((z, x), z, (u, v)), ((z, v), z, (w, u))], [], u, up
+            w = newN.parent(b, randomNodes=randomNodes, seed=seed)
+            move2 = Move(
+                move_type=MoveType.TAIL, moving_edge=(z, d), target=(w, b), network=newN
+            )
+            return [move1, move2], [], u, up
+        w = newN.parent(u, exclude=[z], randomNodes=randomNodes, seed=seed)
+        move2 = Move(
+            move_type=MoveType.TAIL, moving_edge=(z, x), target=(u, v), network=newN
+        )
+        move3 = Move(
+            move_type=MoveType.TAIL, moving_edge=(z, v), target=(w, u), origin=(u, x)
+        )
+        return [move1, move2, move3], [], u, up
     # Case1biiB: b is the root of N
     # Note: d is not in the isomorphism
-    e = Child(N, d)
+    e = N.child(d)
     if e == x:
         return [], [], d, up
     if N.out_degree(x) == 2:
-        s = Child(N, x)
-        t = Child(N, x, exclude=[s])
+        s = N.child(x)
+        t = N.child(x, exclude=[s])
         if s == e:
-            return [((x, t), x, (d, e))], [], d, up
+            move = Move(
+                move_type=MoveType.TAIL, moving_edge=(x, t), target=(d,e), network=N
+            )
+            return [move], [], d, up
         if t == e:
-            return [((x, s), x, (d, e))], [], d, up
-        return [((x, s), x, (d, e)), ((x, e), x, (z, t)), ((x, t), x, (d, s))], [], d, up
+            move = Move(
+                move_type=MoveType.TAIL, moving_edge=(x, s), target=(d,e), network=N
+            )
+            return [move], [], d, up
+        moves = [
+            Move(move_type=MoveType.TAIL, moving_edge=(x, s), target=(d, e), network=N),
+            Move(move_type=MoveType.TAIL, moving_edge=(x, e), target=(z, t), origin=(d, s)),
+            Move(move_type=MoveType.TAIL, moving_edge=(x, t), target=(d, s), origin=(z, e)),
+        ]
+        return moves, [], d, up
     if N.out_degree(e) == 2:
-        s = Child(N, e)
-        t = Child(N, e, exclude=[s])
+        s = N.child(e)
+        t = N.child(e, exclude=[s])
         if s == x:
-            return [((e, t), e, (z, x))], [], d, up
+            move = Move(
+                move_type=MoveType.TAIL, moving_edge=(e, t), target=(z,x), network=N
+            )
+            return [move], [], d, up
         if t == x:
-            return [((e, s), e, (z, x))], [], d, up
-        return [((e, s), e, (z, x)), ((e, x), e, (d, t)), ((e, t), e, (z, s))], [], d, up
+            move = Move(
+                move_type=MoveType.TAIL, moving_edge=(e, s), target=(z,x), network=N
+            )
+            return [move], [], d, up
+        moves = [
+            Move(move_type=MoveType.TAIL, moving_edge=(e, s), target=(z, x), network=N),
+            Move(move_type=MoveType.TAIL, moving_edge=(e, x), target=(d, t), origin=(z, s)),
+            Move(move_type=MoveType.TAIL, moving_edge=(e, t), target=(z, s), origin=(d, x)),
+        ]
+        return moves, [], d, up
     # neither are tree nodes, so both must be leaves
     # In that case, there is no sequence between the two networks.
     return [], [], None, None
@@ -214,6 +280,7 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
 def Green_Line(network1, network2, head_moves=True):
     """
     An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
+    Assumes the networks have the same leaf set, the same number of reticulations, and are both binary.
 
     :param network1: a phylogenetic network.
     :param network2: a phylogenetic network.
@@ -257,17 +324,17 @@ def Green_Line(network1, network2, head_moves=True):
             # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
             up = lowest_retic_network1
             if head_moves:
-                moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_rSPR(network2,
-                                                                                                             network1,
-                                                                                                             up,
-                                                                                                             isom_2_1,
-                                                                                                             isom_1_2)
+                moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(network2,
+                                                                                                            network1,
+                                                                                                            up,
+                                                                                                            isom_2_1,
+                                                                                                            isom_1_2)
             else:
                 moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(network2,
-                                                                                                             network1,
-                                                                                                             up,
-                                                                                                             isom_2_1,
-                                                                                                             isom_1_2)
+                                                                                                            network1,
+                                                                                                            up,
+                                                                                                            isom_2_1,
+                                                                                                            isom_1_2)
                 if added_node_network_1 == None:
                     return False
         ######################################
@@ -276,17 +343,17 @@ def Green_Line(network1, network2, head_moves=True):
             # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
             up = lowest_retic_network2
             if head_moves:
-                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_rSPR(network1,
-                                                                                                             network2,
-                                                                                                             up,
-                                                                                                             isom_1_2,
-                                                                                                             isom_2_1)
+                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(network1,
+                                                                                                            network2,
+                                                                                                            up,
+                                                                                                            isom_1_2,
+                                                                                                            isom_2_1)
             else:
                 moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(network1,
-                                                                                                             network2,
-                                                                                                             up,
-                                                                                                             isom_1_2,
-                                                                                                             isom_2_1)
+                                                                                                            network2,
+                                                                                                            up,
+                                                                                                            isom_1_2,
+                                                                                                            isom_2_1)
                 if added_node_network_1 == None:
                     return False
 
@@ -381,9 +448,9 @@ def Green_Line_Random_Single(network1, network2, head_moves=True):
     while (isom_size < goal_size):
         # Find all lowest nodes above the isom in the networks:
         lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys(),
-                                                                                       allnodes=True)
+                                                                                    allnodes=True)
         lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys(),
-                                                                                       allnodes=True)
+                                                                                    allnodes=True)
 
         # Construct a list of all lowest nodes in a tuple with the corresponding network (in random order)
         # I.e. If u is a lowest node of network one, it will appear in the list as (u,1)
@@ -400,7 +467,7 @@ def Green_Line_Random_Single(network1, network2, head_moves=True):
                 # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
                 up = lowest_node
                 if head_moves:
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_rSPR(
+                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(
                         network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
                 else:
                     moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(
@@ -417,7 +484,7 @@ def Green_Line_Random_Single(network1, network2, head_moves=True):
                 # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
                 up = lowest_node
                 if head_moves:
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_rSPR(
+                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(
                         network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
                 else:
                     moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(

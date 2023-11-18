@@ -19,4 +19,6 @@ R Janssen
 PhD thesis
 """
 
-from phylox.rearrangement.exact_distance.base import *
+from phylox.rearrangement.heuristics.green_line_heuristic import (
+    green_line_heuristic,
+)
