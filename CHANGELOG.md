@@ -15,6 +15,9 @@ Types of changes:
 
 ## [0.0.7] - (Unreleased)
 
+### Added
+- Exact methods for rearrangement distance computation. (#37)
+
 
 ## [0.0.6] - (2023-08-09)
 
