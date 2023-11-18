@@ -58,7 +58,7 @@ class TestDiNetwork(unittest.TestCase):
 
     def test_child_seed(self):
         network = DiNetwork(
-            edges=[(0,i) for i in range(1, 100)],
+            edges=[(0, i) for i in range(1, 100)],
         )
         child1 = network.child(0, randomNodes=True, seed=1)
         child2 = network.child(0, randomNodes=True, seed=1)
@@ -80,7 +80,7 @@ class TestDiNetwork(unittest.TestCase):
 
     def test_parent_seed(self):
         network = DiNetwork(
-            edges=[(i,0) for i in range(1, 100)],
+            edges=[(i, 0) for i in range(1, 100)],
         )
         parent1 = network.parent(0, randomNodes=True, seed=1)
         parent2 = network.parent(0, randomNodes=True, seed=1)

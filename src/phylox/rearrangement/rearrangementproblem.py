@@ -1,10 +1,11 @@
 from copy import deepcopy
 
 from phylox.isomorphism import is_isomorphic
+from phylox.rearrangement.exact_distance import ExactMethodsMixin
 from phylox.rearrangement.move import apply_move_sequence
 
 
-class RearrangementProblem(object):
+class RearrangementProblem(ExactMethodsMixin):
     """
     A rearrangement problem is a tuple (N1, N2, M) where N1 and N2 are phylogenetic networks and M is a move type.
 

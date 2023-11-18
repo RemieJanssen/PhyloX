@@ -1,9 +1,11 @@
 import random
 from enum import Enum
 
+from networkx.utils.decorators import np_random_state, py_random_state
+
 from phylox.rearrangement.move import Move, apply_move
 from phylox.rearrangement.movetype import MoveType
-from networkx.utils.decorators import np_random_state, py_random_state
+
 
 # Pick two edges uniformly at random and add an edge between these
 @np_random_state("seed")
@@ -71,7 +73,9 @@ def random_vplu_move_uniform(network, seed=None):
 
 
 @py_random_state("seed")
-def random_vplu_move_local(network, stop_prob=0.2, max_steps=None, max_tries=None, seed=None):
+def random_vplu_move_local(
+    network, stop_prob=0.2, max_steps=None, max_tries=None, seed=None
+):
     """
     Returns a VPLU move that adds an edge between two edges in the network.
     Pick one edge, move a random number of edges through the network to find a second edge.

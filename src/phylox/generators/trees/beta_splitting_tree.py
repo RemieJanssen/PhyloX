@@ -7,11 +7,11 @@ The model is parameterized by a parameter beta > 0 which determines the shape of
 """
 
 import numpy as np
+from networkx.utils.decorators import np_random_state, py_random_state
 from scipy.special import loggamma
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
-from networkx.utils.decorators import np_random_state, py_random_state
 
 ############################################
 # Simulation functions
@@ -67,9 +67,7 @@ def simulate_beta_splitting(n, beta, seed=None):
         if n_node > 1:
             # Compute the "probability" to split n in (i|n-1), where i=1,..,n-1
             q_n = _compute_split_probability(n_node, beta)
-            split = seed.choices(population=list(range(1, n_node)), weights=q_n, k=1)[
-                0
-            ]
+            split = seed.choices(population=list(range(1, n_node)), weights=q_n, k=1)[0]
             # Create children.
             for new_n in [split, n_node - split]:
                 if new_n == 1:
