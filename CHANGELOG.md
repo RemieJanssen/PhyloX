@@ -17,7 +17,7 @@ Types of changes:
 
 ### Added
 
-- Rearrangement move sequence calculations. (#35)
+- Heustics for rearrangement move sequence calculations. (#35)
 
 ## [0.0.6] - (2023-08-09)
 
