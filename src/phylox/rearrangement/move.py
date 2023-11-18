@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import numpy as np
+from networkx.utils.decorators import np_random_state
 
 from phylox.base import find_unused_node, suppress_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
@@ -8,7 +9,6 @@ from phylox.rearrangement.invertsequence import from_edge
 from phylox.rearrangement.movability import check_valid
 from phylox.rearrangement.movetype import MoveType
 
-from networkx.utils.decorators import np_random_state
 
 def apply_move(network, move):
     """
@@ -122,6 +122,100 @@ def apply_move_sequence(network, seq_moves):
     for move in seq_moves:
         network = apply_move(network, move)
     return network
+
+
+def _all_valid_tail_or_head_moves(network, move_type=MoveType.TAIL):
+    if move_type not in [MoveType.TAIL, MoveType.HEAD]:
+        raise InvalidMoveException("only tail or head moves are valid options.")
+    if move_type == MoveType.TAIL:
+        target_endpoint_index = 0
+    else:
+        target_endpoint_index = 1
+
+    for moving_edge in network.edges():
+        for target_edge in network.edges():
+            moving_endpoint_index = target_endpoint_index
+            moving_endpoint = moving_edge[moving_endpoint_index]
+            origin = from_edge(network, moving_edge, moving_endpoint=moving_endpoint)
+            try:
+                move = Move(
+                    move_type=move_type,
+                    origin=origin,
+                    moving_edge=moving_edge,
+                    target=target_edge,
+                )
+                check_valid(network, move)
+            except (InvalidMoveException, InvalidMoveDefinitionException):
+                continue
+            yield move
+
+
+def _all_valid_vplu_moves(network):
+    for start_edge in network.edges:
+        for end_edge in network.edges:
+            try:
+                move = Move(
+                    move_type=MoveType.VPLU,
+                    start_edge=start_edge,
+                    end_edge=end_edge,
+                    network=network,
+                )
+                check_valid(network, move)
+            except (InvalidMoveException, InvalidMoveDefinitionException) as e:
+                continue
+            yield move
+
+
+def _all_valid_vmin_moves(network):
+    for removed_edge in network.edges:
+        try:
+            move = Move(
+                move_type=MoveType.VMIN,
+                removed_edge=removed_edge,
+            )
+            check_valid(network, move)
+        except (InvalidMoveException, InvalidMoveDefinitionException):
+            continue
+        yield move
+
+
+def all_valid_moves(network, move_type=MoveType.ALL):
+    """
+    Generates all possible valid moves for a given network and move type.
+
+    :param network: a phylogenetic network (phylox.DiNetwork).
+    :param move_type: the type of moves to generate (phylox.rearrangement.movetype.MoveType).
+    :yield: a move (phylox.rearrangement.move.Move).
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.rearrangement.move import all_valid_moves
+    >>> network = DiNetwork(
+    ...     edges=[(0,1),(1,2),(1,3)],
+    ... )
+    >>> moves = list(all_valid_moves(network, MoveType.TAIL))
+    >>> len(moves)
+    4
+    >>> moves[0].is_type(MoveType.TAIL)
+    True
+    >>> moves = list(all_valid_moves(network, MoveType.VERT))
+    >>> len(moves)
+    4
+    >>> moves[0].is_type(MoveType.VPLU)
+    True
+    """
+    if move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
+        for move in _all_valid_tail_or_head_moves(network, move_type=MoveType.TAIL):
+            yield move
+    if move_type in [MoveType.HEAD, MoveType.RSPR, MoveType.ALL]:
+        for move in _all_valid_tail_or_head_moves(network, move_type=MoveType.HEAD):
+            yield move
+    if move_type in [MoveType.VPLU, MoveType.VERT, MoveType.ALL]:
+        for move in _all_valid_vplu_moves(network):
+            yield move
+    if move_type in [MoveType.VMIN, MoveType.VERT, MoveType.ALL]:
+        for move in _all_valid_vmin_moves(network):
+            yield move
 
 
 class Move(object):

@@ -2,8 +2,8 @@ import unittest
 
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
-from phylox.parser import extended_newick_to_dinetwork, dinetwork_to_extended_newick
 from phylox.isomorphism import is_isomorphic
+from phylox.parser import dinetwork_to_extended_newick, extended_newick_to_dinetwork
 
 
 class TestExtendedNewickToDiNetwork(unittest.TestCase):

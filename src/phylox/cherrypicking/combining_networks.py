@@ -4,6 +4,7 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
+from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox import DiNetwork
 from phylox.cherrypicking import (
@@ -19,8 +20,6 @@ from phylox.cherrypicking import (
     reduce_pair,
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-
-from networkx.utils.decorators import py_random_state, np_random_state
 
 # prefix for harmonized node names
 HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
@@ -91,7 +90,13 @@ class HybridizationProblem:
     # Find new cherry-picking sequences for the trees and update the best found
     @np_random_state("seed")
     def CPSBound(
-        self, repeats=1, progress=False, track=False, lengths=False, time_limit=None, seed=None
+        self,
+        repeats=1,
+        progress=False,
+        track=False,
+        lengths=False,
+        time_limit=None,
+        seed=None,
     ):
         """
         Finds a cherry-picking sequence for the input networks, and updates the best sequence found so far.
@@ -148,7 +153,9 @@ class HybridizationProblem:
         # Try as many times as required by the integer 'repeats'
         for i in range(repeats):
             if lengths:
-                new, reduced_trees, seq_heights = Heuristic(progress=progress, seed=seed)
+                new, reduced_trees, seq_heights = Heuristic(
+                    progress=progress, seed=seed
+                )
                 if progress:
                     print("found sequence of length: " + str(len(new)))
             else:
@@ -230,9 +237,7 @@ class HybridizationProblem:
             if len(copy_of_inputs.trees) == 0:
                 break
             # Now reduce a random cherry from a random tree
-            random_index = seed.choice(
-                list(copy_of_inputs.trees.keys())
-            ) 
+            random_index = seed.choice(list(copy_of_inputs.trees.keys()))
             random_tree = copy_of_inputs.trees[random_index]
             list_of_cherries = find_all_reducible_pairs(random_tree)
 
@@ -287,12 +292,10 @@ class HybridizationProblem:
 
             # Now reduce a random cherry from a random tree
             # EITHER: (Get random tree, then random pair from the tree), just like in CPHeuristic
-            random_index = seed.choice(
-                list(copy_of_inputs.trees.keys())
-            )
+            random_index = seed.choice(list(copy_of_inputs.trees.keys()))
             random_tree = copy_of_inputs.trees[random_index]
             list_of_cherries = find_all_reducible_pairs(random_tree)
-            random_cherry_index = seed.choice(range(len(list_of_cherries))) 
+            random_cherry_index = seed.choice(range(len(list_of_cherries)))
             random_cherry = list(list_of_cherries)[random_cherry_index]
 
             # OR: (Get a random reducible pair from all pairs)

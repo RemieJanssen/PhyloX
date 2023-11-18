@@ -1,11 +1,10 @@
 import random
 
 import networkx as nx
+from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox.cherrypicking.base import CherryPickingMixin
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-
-from networkx.utils.decorators import np_random_state, py_random_state
 
 
 class DiNetwork(nx.DiGraph, CherryPickingMixin):
@@ -194,12 +193,12 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
         :return: a child of node that is not in the set of nodes exclude. If randomNodes, then this child node is selected uniformly at random from all candidates.
         """
         child = None
-        
+
         for i, c in enumerate(self.successors(node)):
             if c not in exclude:
                 if not randomNodes:
                     return c
-                elif child is None or seed.random() < 1.0 / (i+1):
+                elif child is None or seed.random() < 1.0 / (i + 1):
                     child = c
         return child
 
@@ -219,7 +218,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
             if p not in exclude:
                 if not randomNodes:
                     return p
-                elif parent is None or seed.random() < 1.0 / (i+1):
+                elif parent is None or seed.random() < 1.0 / (i + 1):
                     parent = p
         return parent
 

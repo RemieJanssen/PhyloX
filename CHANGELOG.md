@@ -18,6 +18,8 @@ Types of changes:
 ### Added
 
 - Heustics for rearrangement move sequence calculations. (#35)
+- Exact methods for rearrangement distance computation. (#37)
+
 
 ## [0.0.6] - (2023-08-09)
 

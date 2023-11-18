@@ -1,9 +1,10 @@
-from phylox import DiNetwork
-
 from networkx.utils.decorators import np_random_state, py_random_state
+
+from phylox import DiNetwork
 
 ### For the tree child network containment paper by Murakami and Janssen
 ### This file contains functions to generate random tree-child (sub)networks
+
 
 @py_random_state("seed")
 def random_tree_child_sequence(leaves, reticulations, seed=None):
@@ -60,6 +61,7 @@ def random_tree_child_sequence(leaves, reticulations, seed=None):
     # reverse the sequence, as it was built in reverse order
     seq = [pair for pair in reversed(seq)]
     return seq
+
 
 @py_random_state("seed")
 def random_tree_child_subsequence(seq, r, seed=None):

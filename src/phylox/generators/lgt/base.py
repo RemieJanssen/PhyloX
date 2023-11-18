@@ -2,7 +2,7 @@
 A module for generating (random) LGT phylogenetic networks.
 
 By Joan Carles Pons, Celine Scornavacca, Gabriel Cardona
-With their paper: Generation of Level- k LGT Networks
+With their paper: Generation of Level-k LGT Networks
 PMID: 30703035 DOI: 10.1109/TCBB.2019.2895344
 
 Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
@@ -11,10 +11,10 @@ Adapted by RemieJanssen to output networks with a given number of leaves and ret
 
 import networkx as nx
 import numpy as np
+from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox import DiNetwork
 
-from networkx.utils.decorators import np_random_state, py_random_state
 
 def last_node(net):
     return max(net.nodes())
@@ -83,6 +83,7 @@ def random_pair(net, wint, wext, seed=None):
     index = seed.choice(range(len(int_pairs) + len(ext_pairs)), p=probabilities)
     return (int_pairs + ext_pairs)[index]
 
+
 @np_random_state("seed")
 def simulation_1(num_steps, prob_lgt, wint, wext, seed=None):
     net = nx.DiGraph()
@@ -98,6 +99,7 @@ def simulation_1(num_steps, prob_lgt, wint, wext, seed=None):
             pair = random_pair(net, wint, wext, seed=seed)
             lgt(net, pair[0], pair[1])
     return net
+
 
 @np_random_state("seed")
 def simulation_3(leaves_goal, retics_goal, wint, wext, seed=None):
