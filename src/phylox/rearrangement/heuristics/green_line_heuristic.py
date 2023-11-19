@@ -199,7 +199,8 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None)
     return [], [], None, None
 
 
-def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
+@py_random_state("seed")
+def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     """
     An implementation of Algorithm 3. Finds a sequence of tail moves that makes it possible to add the lowest tree node up to the down-closed isomrophism.
 
@@ -209,6 +210,7 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
     :param isom_N_Np: a dictionary, containing a partial (down-closed) isomorphism map from N to Np. The inverse of isom_Np_N.
     :param isom_Np_N: a dictionary, containing a partial (down-closed) isomorphism map from Np to N. The inverse of isom_N_Np.
     :param randomNodes: a boolean value, determining whether the random version of this lemma is used.
+    :param seed: a seed for the random number generator.
     :return: a list of tail moves in N, a list of tail moves in Np, a node of N, a node of Np. After performing the lists of moves on the networks, the nodes can be added to the isomorphism.
     """
     # Find the children x' and y' of u'
@@ -229,20 +231,32 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
             if not randomNodes:
                 return [], [], parent, up
     if common_parents_not_Y:
-        return [], [], random.choice(common_parents_not_Y), up
+        return [], [], seed.choice(common_parents_not_Y), up
 
     # Case3b: x and y do not have a common parent in the isomorphism
     # For both, find a parent not in the isomorphism yet
     # TODO: preferably make them tree nodes
-    z_x = Parent(N, x, exclude=isom_N_Np.keys(), randomNodes=randomNodes)
-    z_y = Parent(N, y, exclude=isom_N_Np.keys(), randomNodes=randomNodes)
+    z_x = N.parent(x, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
+    z_y = N.parent(y, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
 
     # Case3bi: (z_x,x) is movable
-    if CheckValid(N, (z_x, x), z_x, (z_y, y)):
-        return [((z_x, x), z_x, (z_y, y))], [], z_x, up
+    try: 
+        move = Move(
+            move_type=MoveType.TAIL, moving_edge=(z_x, x), target=(z_y, y), network=N
+        )
+        check_valid(N, move)
+        return [move], [], z_x, up
+    except (InvalidMoveException, InvalidMoveDefinitionException):
+        pass
     # Case3bii: (z_y,y) is movable
-    if CheckValid(N, (z_y, y), z_y, (z_x, x)):
-        return [((z_y, y), z_y, (z_x, x))], [], z_y, up
+    try: 
+        move = Move(
+            move_type=MoveType.TAIL, moving_edge=(z_y, y), target=(z_x, x), network=N
+        )
+        check_valid(N, move)
+        return [move], [], z_y, up
+    except (InvalidMoveException, InvalidMoveDefinitionException):
+        pass
     # Case3biii: Neither (z_x,x) nor (z_y,y) is movable
 
     if N.in_degree(z_x) == 2 or N.in_degree(z_y) == 2:
@@ -252,15 +266,15 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
 
     # As both nodes are tree nodes and the arcs immovable, both arcs hang of the side of a triangle.
     # Find the top node of the triangle for z_x
-    c_x = Parent(N, z_x)
-    b_x = Parent(N, c_x)
+    c_x = N.parent(z_x)
+    b_x = N.parent(c_x)
 
     # Find the top node of the triangle for z_y
-    c_y = Parent(N, z_y)
+    c_y = N.parent(z_y)
     #    print()
     #    print(z_y,N.edges())
 
-    b_y = Parent(N, c_y)
+    b_y = N.parent(c_y)
 
     if N.in_degree(b_x) == 0:
         # c_x is the child of the root
@@ -272,9 +286,15 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False):
         c_x, c_y = c_y, c_x
     # c_x is not the child of the root
     # find a parent of b_x, and the bottom node of the triangle d_x
-    a_x = Parent(N, b_x, randomNodes=randomNodes)
-    d_x = Child(N, c_x, exclude=[z_x])
-    return [((c_x, d_x), c_x, (a_x, b_x)), ((z_x, x), z_x, (z_y, y))], [], z_x, up
+    a_x = N.parent(b_x, randomNodes=randomNodes, seed=seed)
+    d_x = N.child(c_x, exclude=[z_x])
+    # e_x not in the proof, but needed to define the origin of the second move
+    e_x = N.parent(c_x)
+    moves = [
+        Move(move_type=MoveType.TAIL, moving_edge=(c_x, d_x), target=(a_x, b_x), network=N),
+        Move(move_type=MoveType.TAIL, moving_edge=(z_x, x), target=(z_y, y), origin=(e_x, d_x)),
+    ]
+    return moves, [], z_x, up
 
 
 def Green_Line(network1, network2, head_moves=True):
