@@ -42,28 +42,29 @@ We can use the `sample_size` argument to specify how many networks we want to sa
 Finally, we write the sampled networks to a file in newick format.
 
 The final code looks like this:
-```python
-from phylox.generators.randomTC import generate_network_random_tree_child_sequence
-from phylox.generators.mcmc import sample_mcmc_networks
-from phylox.classes import is_orchard
-from phylox.rearrangement.move import MoveType
 
-# Generate an arbitrary orchard network with 10 leaves and 5 reticulations
-start_network = generate_network_random_tree_child_sequence(10, 5)
-# Generate 1000 orchard networks with 10 leaves and 5 reticulations
-sampled_networks = sample_mcmc_networks(
-    start_network, 
-    {"vertical": 0},
-    number_of_samples=1000, 
-    burn_in=1000
-    restriction_map=is_orchard, 
-    seed=1234,
-)
-# Write the sampled networks to a file
-with open("sampled_networks.nwk", "w") as f:
-    for network in sampled_networks:
-        f.write(network.to_newick() + "\n")
-```
+.. code-block:: python
+
+   from phylox.generators.randomTC import generate_network_random_tree_child_sequence
+   from phylox.generators.mcmc import sample_mcmc_networks
+   from phylox.classes import is_orchard
+   from phylox.rearrangement.move import MoveType
+
+   # Generate an arbitrary orchard network with 10 leaves and 5 reticulations
+   start_network = generate_network_random_tree_child_sequence(10, 5)
+   # Generate 1000 orchard networks with 10 leaves and 5 reticulations
+   sampled_networks = sample_mcmc_networks(
+      start_network, 
+      {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
+      number_of_samples=10, 
+      burn_in=1000,
+      restriction_map=is_orchard, 
+      seed=1234,
+   )
+   # Write the sampled networks to a file
+   with open("sampled_networks.nwk", "w") as f:
+      for network in sampled_networks:
+         f.write(network.to_newick() + "\n")
 
 
 Indices and tables
