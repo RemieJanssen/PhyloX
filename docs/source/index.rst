@@ -56,15 +56,16 @@ The final code looks like this:
    sampled_networks = sample_mcmc_networks(
       start_network, 
       {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
-      number_of_samples=10, 
-      burn_in=1000,
+      number_of_samples=100, 
+      burn_in=100,
       restriction_map=is_orchard, 
       seed=1234,
+      add_root_if_necessary=True,
    )
    # Write the sampled networks to a file
    with open("sampled_networks.nwk", "w") as f:
       for network in sampled_networks:
-         f.write(network.to_newick() + "\n")
+         f.write(network.newick() + "\n")
 
 
 Indices and tables
