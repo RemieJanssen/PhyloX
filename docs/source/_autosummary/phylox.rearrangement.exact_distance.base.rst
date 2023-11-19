@@ -13,6 +13,14 @@ phylox.rearrangement.exact\_distance.base
 
    
    
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ExactMethodsMixin
+   
    
 
    

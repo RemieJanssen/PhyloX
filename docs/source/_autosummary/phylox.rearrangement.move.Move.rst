@@ -17,8 +17,10 @@ phylox.rearrangement.move.Move
    .. autosummary::
    
       ~Move.__init__
+      ~Move.invert
       ~Move.is_type
       ~Move.random_move
+      ~Move.rename_nodes
    
    
 

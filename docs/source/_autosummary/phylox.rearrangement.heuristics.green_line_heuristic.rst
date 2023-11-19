@@ -13,6 +13,14 @@ phylox.rearrangement.heuristics.green\_line\_heuristic
 
    
    
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      HeuristicDistanceMixin
+   
    
 
    

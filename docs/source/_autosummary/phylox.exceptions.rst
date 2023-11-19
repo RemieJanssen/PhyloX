@@ -30,4 +30,6 @@ phylox.exceptions
 
    phylox.exceptions.invalidmovedefinitionexception
    phylox.exceptions.invalidmoveexception
+   phylox.exceptions.nosolutionexception
+   phylox.exceptions.timeoutexception
 

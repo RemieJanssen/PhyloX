@@ -30,6 +30,6 @@ phylox.rearrangement.heuristics
 
    phylox.rearrangement.heuristics.cli_main
    phylox.rearrangement.heuristics.green_line_heuristic
-   phylox.rearrangement.heuristics.heuristic_tools
    phylox.rearrangement.heuristics.red_line_heuristic
+   phylox.rearrangement.heuristics.utils
 

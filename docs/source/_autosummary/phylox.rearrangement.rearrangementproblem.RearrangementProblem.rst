@@ -17,7 +17,12 @@ phylox.rearrangement.rearrangementproblem.RearrangementProblem
    .. autosummary::
    
       ~RearrangementProblem.__init__
+      ~RearrangementProblem.check_green_line_requirements
       ~RearrangementProblem.check_solution
+      ~RearrangementProblem.heuristic_green_line
+      ~RearrangementProblem.heuristic_green_line_random
+      ~RearrangementProblem.solve_depth_first
+      ~RearrangementProblem.solve_depth_first_bounded
    
    
 

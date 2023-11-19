@@ -15,7 +15,6 @@ phylox.generators.mcmc.base
       :toctree:
    
       acceptance_probability
-      sample_mcmc_networks
    
    
 

@@ -9,13 +9,6 @@ phylox.generators.trees.beta\_splitting\_tree
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      simulate_beta_splitting
-   
    
 
    
