@@ -296,275 +296,274 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     ]
     return moves, [], z_x, up
 
-
-def Green_Line(network1, network2, head_moves=True):
+class GreenLineMixin():
     """
-    An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
-    Assumes the networks have the same leaf set, the same number of reticulations, and are both binary.
-
-    :param network1: a phylogenetic network.
-    :param network2: a phylogenetic network.
-    :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
-    :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
+    A class containing the Green Line heuristic and its random version.
+    Meant to be inherited by the RearrangementProblem class.
     """
-    # Find the root and labels of the networks
-    root1 = Root(network1)
-    root2 = Root(network2)
-    label_dict_1 = Labels(network1)
-    label_dict_2 = Labels(network2)
+    def Green_Line(self):
+        """
+        An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
+        Assumes the networks have the same leaf set, the same number of reticulations, are both binary, and all labels are unique.
 
-    # initialize isomorphism
-    isom_1_2 = dict()
-    isom_2_1 = dict()
-    isom_size = 0
-    for label, node1 in label_dict_1.items():
-        node2 = label_dict_2[label]
-        isom_1_2[node1] = node2
-        isom_2_1[node2] = node1
-        isom_size += 1
+        :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
+        """
+        # Find the root and labels of the networks
+        root1 = self.network1.roots[0]
+        root2 = self.network2.roots[0]
 
-    # Keep track of the size of the isomorphism and the size it is at the end of the green line algorithm
-    goal_size = len(network1) - 1
+        # initialize isomorphism
+        isom_1_2 = dict()
+        isom_2_1 = dict()
+        isom_size = 0
+        for label, [node1] in self.network1.labels.items():
+            node2 = self.network2.labels[label][0]
+            isom_1_2[node1] = node2
+            isom_2_1[node2] = node1
+            isom_size += 1
 
-    # init lists of sequence of moves
-    # list of (moving_edge,moving_endpoint,from_edge,to_edge)
-    seq_from_1 = []
-    seq_from_2 = []
-    # TODO keep track of lowest nodes? (Currently, the code does not do this, but it could speed up the code)
+        # Keep track of the size of the isomorphism and the size it is at the end of the green line algorithm
+        goal_size = len(self.network1) - 1
 
-    # Do the green line algorithm
-    while (isom_size < goal_size):
-        # Find lowest nodes above the isom in the networks:
-        lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys())
-        lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys())
+        # init lists of sequence of moves
+        # list of (moving_edge,moving_endpoint,from_edge,to_edge)
+        seq_from_1 = []
+        seq_from_2 = []
+        # TODO keep track of lowest nodes? (Currently, the code does not do this, but it could speed up the code)
 
-        ######################################
-        # Case1: a lowest retic in network1
-        if lowest_retic_network1 != None:
-            # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
-            up = lowest_retic_network1
-            if head_moves:
-                moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(network2,
-                                                                                                            network1,
-                                                                                                            up,
-                                                                                                            isom_2_1,
-                                                                                                            isom_1_2)
-            else:
-                moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(network2,
-                                                                                                            network1,
-                                                                                                            up,
-                                                                                                            isom_2_1,
-                                                                                                            isom_1_2)
-                if added_node_network_1 == None:
-                    return False
-        ######################################
-        # Case2: a lowest retic in network2
-        elif lowest_retic_network2 != None:
-            # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
-            up = lowest_retic_network2
-            if head_moves:
-                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(network1,
-                                                                                                            network2,
-                                                                                                            up,
-                                                                                                            isom_1_2,
-                                                                                                            isom_2_1)
-            else:
-                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(network1,
-                                                                                                            network2,
-                                                                                                            up,
-                                                                                                            isom_1_2,
-                                                                                                            isom_2_1)
-                if added_node_network_1 == None:
-                    return False
+        network1 = self.network1
+        network2 = self.network2
+        # Do the green line algorithm
+        while (isom_size < goal_size):
+            # Find lowest nodes above the isom in the networks:
+            lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys())
+            lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys())
 
-                    ######################################
-        # Case3: a lowest tree node in network1
-        else:
-            # use notation as in the paper network1 = N, network2 = N'
-            up = lowest_tree_node_network2
-            moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1, network2,
-                                                                                                    up, isom_1_2,
-                                                                                                    isom_2_1)
-        # Now perform the moves and update the isomorphism
-        isom_1_2[added_node_network_1] = added_node_network_2
-        isom_2_1[added_node_network_2] = added_node_network_1
-        for move in moves_network_1:
-            seq_from_1.append((move[0], move[1], From_Edge(network1, move[0], move[1]), move[2]))
-            network1 = DoMove(network1, move[0], move[1], move[2], check_validity=False)
-        for move in moves_network_2:
-            seq_from_2.append((move[0], move[1], From_Edge(network2, move[0], move[1]), move[2]))
-            network2 = DoMove(network2, move[0], move[1], move[2], check_validity=False)
-        isom_size += 1
-    # TESTING FOR CORRECTNESS WHILE RUNNING
-    #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
-    #            print("not unlabeled isom")
-    #            print(seq_from_1)
-    #            print(seq_from_2)
-    #            print(network1.subgraph(isom_1_2.keys()).edges())
-    #            print(network2.subgraph(isom_2_1.keys()).edges())
-
-    # Add the root to the isomorphism, if it was there
-    isom_1_2[root1] = root2
-    isom_2_1[root2] = root1
-    # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-    return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
-
-
-def Green_Line_Random(network1, network2, head_moves=True, repeats=1):
-    """
-    Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism a number of times, and only keeping the shortest sequence.
-
-    :param network1: a phylogenetic network.
-    :param network2: a phylogenetic network.
-    :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
-    :param repeats: an integer, determining how many repeats of Green_Line_Random_Single are performed.
-    :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
-    """
-    best_seq = None
-    for i in range(repeats):
-        candidate_seq = Green_Line_Random_Single(network1, network2, head_moves=head_moves)
-        if candidate_seq == False:
-            return False
-        if best_seq == None or len(best_seq) > len(candidate_seq):
-            best_seq = candidate_seq
-    return best_seq
-
-
-def Green_Line_Random_Single(network1, network2, head_moves=True):
-    """
-    An implementation of Algorithm 5 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism.
-
-    :param network1: a phylogenetic network.
-    :param network2: a phylogenetic network.
-    :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
-    :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
-    """
-    # Find the root and labels of the networks
-    root1 = Root(network1)
-    root2 = Root(network2)
-    label_dict_1 = Labels(network1)
-    label_dict_2 = Labels(network2)
-
-    # initialize isomorphism
-    isom_1_2 = dict()
-    isom_2_1 = dict()
-    isom_size = 0
-    for label, node1 in label_dict_1.items():
-        node2 = label_dict_2[label]
-        isom_1_2[node1] = node2
-        isom_2_1[node2] = node1
-        isom_size += 1
-
-    # Keep track of the size of the isomorphism and the size it is at the end of the green line algorithm
-    goal_size = len(network1) - 1
-
-    # init lists of sequence of moves
-    # list of (moving_edge,moving_endpoint,from_edge,to_edge)
-    seq_from_1 = []
-    seq_from_2 = []
-    # TODO keep track of lowest nodes?
-
-    # Do the green line algorithm
-    while (isom_size < goal_size):
-        # Find all lowest nodes above the isom in the networks:
-        lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys(),
-                                                                                    allnodes=True)
-        lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys(),
-                                                                                    allnodes=True)
-
-        # Construct a list of all lowest nodes in a tuple with the corresponding network (in random order)
-        # I.e. If u is a lowest node of network one, it will appear in the list as (u,1)
-        lowest_nodes_network1 = [(u, 1) for u in lowest_tree_node_network1 + lowest_retic_network1]
-        lowest_nodes_network2 = [(u, 2) for u in lowest_tree_node_network2 + lowest_retic_network2]
-        candidate_lowest_nodes = lowest_nodes_network1 + lowest_nodes_network2
-        random.shuffle(candidate_lowest_nodes)
-
-        # As some cases do not give an addition to the isom, we continue trying lowest nodes until we find one that does.
-        for lowest_node, network_number in candidate_lowest_nodes:
             ######################################
             # Case1: a lowest retic in network1
-            if network_number == 1 and network1.in_degree(lowest_node) == 2:
+            if lowest_retic_network1 != None:
                 # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
-                up = lowest_node
+                up = lowest_retic_network1
                 if head_moves:
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(
-                        network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(network2,
+                                                                                                                network1,
+                                                                                                                up,
+                                                                                                                isom_2_1,
+                                                                                                                isom_1_2)
                 else:
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(
-                        network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(network2,
+                                                                                                                network1,
+                                                                                                                up,
+                                                                                                                isom_2_1,
+                                                                                                                isom_1_2)
                     if added_node_network_1 == None:
-                        # The networks are non-isom networks with 2 leaves and 1 reticulation
                         return False
-                # This case always gives a node to add to the isom
-                break
-
             ######################################
             # Case2: a lowest retic in network2
-            elif network_number == 2 and network2.in_degree(lowest_node) == 2:
+            elif lowest_retic_network2 != None:
                 # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
-                up = lowest_node
+                up = lowest_retic_network2
                 if head_moves:
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(
-                        network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(network1,
+                                                                                                                network2,
+                                                                                                                up,
+                                                                                                                isom_1_2,
+                                                                                                                isom_2_1)
                 else:
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(
-                        network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(network1,
+                                                                                                                network2,
+                                                                                                                up,
+                                                                                                                isom_1_2,
+                                                                                                                isom_2_1)
                     if added_node_network_1 == None:
-                        # The networks are non-isom networks with 2 leaves and 1 reticulation
                         return False
-                        # This case always gives a node to add to the isom
-                break
 
-            ######################################
+                        ######################################
             # Case3: a lowest tree node in network1
-            elif network_number == 2 and network2.out_degree(lowest_node) == 2:
-                # use notation as in the paper network1 = N, network2 = N'
-                up = lowest_node
-                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1,
-                                                                                                        network2, up,
-                                                                                                        isom_1_2,
-                                                                                                        isom_2_1,
-                                                                                                        randomNodes=True)
-                # If we can add a node to the isom, added_node_network_2 has a value
-                if added_node_network_2:
-                    break
-
-            ######################################
-            # Case3': a lowest tree node in network2
             else:
                 # use notation as in the paper network1 = N, network2 = N'
-                up = lowest_node
-                moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case3(network2,
-                                                                                                        network1, up,
-                                                                                                        isom_2_1,
-                                                                                                        isom_1_2,
-                                                                                                        randomNodes=True)
-                # If we can add a node to the isom, added_node_network_2 has a value
-                if added_node_network_2:
+                up = lowest_tree_node_network2
+                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1, network2,
+                                                                                                        up, isom_1_2,
+                                                                                                        isom_2_1)
+            # Now perform the moves and update the isomorphism
+            isom_1_2[added_node_network_1] = added_node_network_2
+            isom_2_1[added_node_network_2] = added_node_network_1
+            seq_from_1 += moves_network_1
+            seq_from_2 += moves_network_2
+            network1 = apply_move_sequence(network1, moves_network_1)
+            network2 = apply_move_sequence(network2, moves_network_2)
+            isom_size += 1
+        # TESTING FOR CORRECTNESS WHILE RUNNING
+        #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
+        #            print("not unlabeled isom")
+        #            print(seq_from_1)
+        #            print(seq_from_2)
+        #            print(network1.subgraph(isom_1_2.keys()).edges())
+        #            print(network2.subgraph(isom_2_1.keys()).edges())
+
+        # Add the root to the isomorphism, if it was there
+        isom_1_2[root1] = root2
+        isom_2_1[root2] = root1
+        # invert seq_from_2, rename to node names of network1, and append to seq_from_1
+        return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
+
+
+    def Green_Line_Random(network1, network2, head_moves=True, repeats=1):
+        """
+        Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism a number of times, and only keeping the shortest sequence.
+
+        :param network1: a phylogenetic network.
+        :param network2: a phylogenetic network.
+        :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
+        :param repeats: an integer, determining how many repeats of Green_Line_Random_Single are performed.
+        :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
+        """
+        best_seq = None
+        for i in range(repeats):
+            candidate_seq = Green_Line_Random_Single(network1, network2, head_moves=head_moves)
+            if candidate_seq == False:
+                return False
+            if best_seq == None or len(best_seq) > len(candidate_seq):
+                best_seq = candidate_seq
+        return best_seq
+
+
+    def Green_Line_Random_Single(network1, network2, head_moves=True):
+        """
+        An implementation of Algorithm 5 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism.
+
+        :param network1: a phylogenetic network.
+        :param network2: a phylogenetic network.
+        :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
+        :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
+        """
+        # Find the root and labels of the networks
+        root1 = Root(network1)
+        root2 = Root(network2)
+        label_dict_1 = Labels(network1)
+        label_dict_2 = Labels(network2)
+
+        # initialize isomorphism
+        isom_1_2 = dict()
+        isom_2_1 = dict()
+        isom_size = 0
+        for label, node1 in label_dict_1.items():
+            node2 = label_dict_2[label]
+            isom_1_2[node1] = node2
+            isom_2_1[node2] = node1
+            isom_size += 1
+
+        # Keep track of the size of the isomorphism and the size it is at the end of the green line algorithm
+        goal_size = len(network1) - 1
+
+        # init lists of sequence of moves
+        # list of (moving_edge,moving_endpoint,from_edge,to_edge)
+        seq_from_1 = []
+        seq_from_2 = []
+        # TODO keep track of lowest nodes?
+
+        # Do the green line algorithm
+        while (isom_size < goal_size):
+            # Find all lowest nodes above the isom in the networks:
+            lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys(),
+                                                                                        allnodes=True)
+            lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys(),
+                                                                                        allnodes=True)
+
+            # Construct a list of all lowest nodes in a tuple with the corresponding network (in random order)
+            # I.e. If u is a lowest node of network one, it will appear in the list as (u,1)
+            lowest_nodes_network1 = [(u, 1) for u in lowest_tree_node_network1 + lowest_retic_network1]
+            lowest_nodes_network2 = [(u, 2) for u in lowest_tree_node_network2 + lowest_retic_network2]
+            candidate_lowest_nodes = lowest_nodes_network1 + lowest_nodes_network2
+            random.shuffle(candidate_lowest_nodes)
+
+            # As some cases do not give an addition to the isom, we continue trying lowest nodes until we find one that does.
+            for lowest_node, network_number in candidate_lowest_nodes:
+                ######################################
+                # Case1: a lowest retic in network1
+                if network_number == 1 and network1.in_degree(lowest_node) == 2:
+                    # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
+                    up = lowest_node
+                    if head_moves:
+                        moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(
+                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                    else:
+                        moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(
+                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                        if added_node_network_1 == None:
+                            # The networks are non-isom networks with 2 leaves and 1 reticulation
+                            return False
+                    # This case always gives a node to add to the isom
                     break
 
-        # Now perform the moves and update the isomorphism
-        isom_1_2[added_node_network_1] = added_node_network_2
-        isom_2_1[added_node_network_2] = added_node_network_1
-        for move in moves_network_1:
-            seq_from_1.append((move[0], move[1], From_Edge(network1, move[0], move[1]), move[2]))
-            network1 = DoMove(network1, move[0], move[1], move[2], check_validity=False)
-        for move in moves_network_2:
-            seq_from_2.append((move[0], move[1], From_Edge(network2, move[0], move[1]), move[2]))
-            network2 = DoMove(network2, move[0], move[1], move[2], check_validity=False)
-        isom_size += 1
-    # TESTING FOR CORRECTNESS WHILE RUNNING
-    #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
-    #            print("not unlabeled isom")
-    #            print(seq_from_1)
-    #            print(seq_from_2)
-    #            print(isom_1_2)
-    #            print(network1.subgraph(isom_1_2.keys()).edges())
-    #            print(network2.subgraph(isom_2_1.keys()).edges())
+                ######################################
+                # Case2: a lowest retic in network2
+                elif network_number == 2 and network2.in_degree(lowest_node) == 2:
+                    # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
+                    up = lowest_node
+                    if head_moves:
+                        moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(
+                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                    else:
+                        moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(
+                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                        if added_node_network_1 == None:
+                            # The networks are non-isom networks with 2 leaves and 1 reticulation
+                            return False
+                            # This case always gives a node to add to the isom
+                    break
 
-    # Add the root to the isomorphism, if it was there
-    isom_1_2[root1] = root2
-    isom_2_1[root2] = root1
+                ######################################
+                # Case3: a lowest tree node in network1
+                elif network_number == 2 and network2.out_degree(lowest_node) == 2:
+                    # use notation as in the paper network1 = N, network2 = N'
+                    up = lowest_node
+                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1,
+                                                                                                            network2, up,
+                                                                                                            isom_1_2,
+                                                                                                            isom_2_1,
+                                                                                                            randomNodes=True)
+                    # If we can add a node to the isom, added_node_network_2 has a value
+                    if added_node_network_2:
+                        break
 
-    # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-    return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
+                ######################################
+                # Case3': a lowest tree node in network2
+                else:
+                    # use notation as in the paper network1 = N, network2 = N'
+                    up = lowest_node
+                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case3(network2,
+                                                                                                            network1, up,
+                                                                                                            isom_2_1,
+                                                                                                            isom_1_2,
+                                                                                                            randomNodes=True)
+                    # If we can add a node to the isom, added_node_network_2 has a value
+                    if added_node_network_2:
+                        break
+
+            # Now perform the moves and update the isomorphism
+            isom_1_2[added_node_network_1] = added_node_network_2
+            isom_2_1[added_node_network_2] = added_node_network_1
+            for move in moves_network_1:
+                seq_from_1.append((move[0], move[1], From_Edge(network1, move[0], move[1]), move[2]))
+                network1 = DoMove(network1, move[0], move[1], move[2], check_validity=False)
+            for move in moves_network_2:
+                seq_from_2.append((move[0], move[1], From_Edge(network2, move[0], move[1]), move[2]))
+                network2 = DoMove(network2, move[0], move[1], move[2], check_validity=False)
+            isom_size += 1
+        # TESTING FOR CORRECTNESS WHILE RUNNING
+        #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
+        #            print("not unlabeled isom")
+        #            print(seq_from_1)
+        #            print(seq_from_2)
+        #            print(isom_1_2)
+        #            print(network1.subgraph(isom_1_2.keys()).edges())
+        #            print(network2.subgraph(isom_2_1.keys()).edges())
+
+        # Add the root to the isomorphism, if it was there
+        isom_1_2[root1] = root2
+        isom_2_1[root2] = root1
+
+        # invert seq_from_2, rename to node names of network1, and append to seq_from_1
+        return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
