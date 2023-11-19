@@ -18,7 +18,3 @@ Journal of Graph Algorithms and Applications 25 (1), 263-310
 R Janssen
 PhD thesis
 """
-
-from phylox.rearrangement.heuristics.green_line_heuristic import (
-    green_line_heuristic,
-)

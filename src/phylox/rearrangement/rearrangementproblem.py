@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.exact_distance import ExactMethodsMixin
+from phylox.rearrangement.heuristics.green_line_heuristic import HeuristicDistanceMixin
 from phylox.rearrangement.move import apply_move_sequence
 
 

@@ -6,8 +6,10 @@ The algorithms referred to in the comments are from the R Janssen's PhD thesis, 
 
 from phylox.rearrangement.heuristics.utils import *
 from phylox.rearrangement.movability import check_valid, check_movable
-from phylox.rearrangement.move import Move, apply_move
+from phylox.rearrangement.move import Move, apply_move, MoveType, apply_move_sequence
+from phylox.exceptions import InvalidMoveException, InvalidMoveDefinitionException
 from networkx.utils.decorators import py_random_state
+
 
 @py_random_state("seed")
 def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
@@ -29,6 +31,8 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
     x = isom_Np_N[xp]
     z = N.parent(x, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
 
+    print(xp,x,z)
+
     # Case1a: z is a reticulation
     if N.in_degree(z) == 2:
         return [], [], z, up
@@ -37,6 +41,7 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
     v = FindRetic(N, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
     u = None
     for parent in N.predecessors(v):
+        print((parent, v), (z, x))
         try:
             move = Move(
                 move_type=MoveType.HEAD,
@@ -45,7 +50,9 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
                 network=N,
             )
             check_valid(N, move)
-        except (InvalidMoveException, InvalidMoveDefinitionException):
+        except (InvalidMoveException, InvalidMoveDefinitionException) as e:
+            print(e)
+            print("no t valid")
             continue
         if not randomNodes:
             u = parent
@@ -296,21 +303,25 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     ]
     return moves, [], z_x, up
 
-class GreenLineMixin():
+class HeuristicDistanceMixin():
     """
     A class containing the Green Line heuristic and its random version.
     Meant to be inherited by the RearrangementProblem class.
     """
-    def Green_Line(self):
+    def heuristic_green_line(self):
         """
         An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
         Assumes the networks have the same leaf set, the same number of reticulations, are both binary, and all labels are unique.
 
         :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
         """
+        if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
+            raise Exception("Move type not supported by Green Line heuristic")
+        head_moves = (self.move_type in [MoveType.RSPR, MoveType.ALL])
+
         # Find the root and labels of the networks
-        root1 = self.network1.roots[0]
-        root2 = self.network2.roots[0]
+        root1 = list(self.network1.roots)[0]
+        root2 = list(self.network2.roots)[0]
 
         # initialize isomorphism
         isom_1_2 = dict()
@@ -333,11 +344,22 @@ class GreenLineMixin():
 
         network1 = self.network1
         network2 = self.network2
+
         # Do the green line algorithm
         while (isom_size < goal_size):
             # Find lowest nodes above the isom in the networks:
             lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys())
             lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys())
+            print()
+            print("isoms")
+            print(isom_1_2)
+            print(isom_2_1)
+            print("lowest nodes")
+            print(lowest_tree_node_network1, lowest_retic_network1)
+            print(lowest_tree_node_network2, lowest_retic_network2)
+            print("moves")
+            print(seq_from_1)
+            print(seq_from_2)
 
             ######################################
             # Case1: a lowest retic in network1
@@ -394,74 +416,50 @@ class GreenLineMixin():
             network1 = apply_move_sequence(network1, moves_network_1)
             network2 = apply_move_sequence(network2, moves_network_2)
             isom_size += 1
-        # TESTING FOR CORRECTNESS WHILE RUNNING
-        #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
-        #            print("not unlabeled isom")
-        #            print(seq_from_1)
-        #            print(seq_from_2)
-        #            print(network1.subgraph(isom_1_2.keys()).edges())
-        #            print(network2.subgraph(isom_2_1.keys()).edges())
 
         # Add the root to the isomorphism, if it was there
         isom_1_2[root1] = root2
         isom_2_1[root2] = root1
         # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-        return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
+        return seq_from_1 + [move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)]
 
 
-    def Green_Line_Random(network1, network2, head_moves=True, repeats=1):
-        """
-        Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism a number of times, and only keeping the shortest sequence.
-
-        :param network1: a phylogenetic network.
-        :param network2: a phylogenetic network.
-        :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
-        :param repeats: an integer, determining how many repeats of Green_Line_Random_Single are performed.
-        :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
-        """
-        best_seq = None
-        for i in range(repeats):
-            candidate_seq = Green_Line_Random_Single(network1, network2, head_moves=head_moves)
-            if candidate_seq == False:
-                return False
-            if best_seq == None or len(best_seq) > len(candidate_seq):
-                best_seq = candidate_seq
-        return best_seq
-
-
-    def Green_Line_Random_Single(network1, network2, head_moves=True):
+    @py_random_state("seed")
+    def heuristic_green_line_random(self, seed=None):
         """
         An implementation of Algorithm 5 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by randomly building a down-closed isomorphism.
 
-        :param network1: a phylogenetic network.
-        :param network2: a phylogenetic network.
-        :param head_moves: a boolean value determining whether head moves are allowed (if True we use rSPR moves, if False we only use tail moves).
         :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
         """
+        if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
+            raise Exception("Move type not supported by Green Line heuristic")
+        head_moves = (self.move_type in [MoveType.RSPR, MoveType.ALL])
+
         # Find the root and labels of the networks
-        root1 = Root(network1)
-        root2 = Root(network2)
-        label_dict_1 = Labels(network1)
-        label_dict_2 = Labels(network2)
+        root1 = list(self.network1.roots)[0]
+        root2 = list(self.network2.roots)[0]
 
         # initialize isomorphism
         isom_1_2 = dict()
         isom_2_1 = dict()
         isom_size = 0
-        for label, node1 in label_dict_1.items():
-            node2 = label_dict_2[label]
+        for label, [node1] in self.network1.labels.items():
+            node2 = self.network2.labels[label][0]
             isom_1_2[node1] = node2
             isom_2_1[node2] = node1
             isom_size += 1
 
         # Keep track of the size of the isomorphism and the size it is at the end of the green line algorithm
-        goal_size = len(network1) - 1
+        goal_size = len(self.network1) - 1
 
         # init lists of sequence of moves
         # list of (moving_edge,moving_endpoint,from_edge,to_edge)
         seq_from_1 = []
         seq_from_2 = []
-        # TODO keep track of lowest nodes?
+        # TODO keep track of lowest nodes? (Currently, the code does not do this, but it could speed up the code)
+
+        network1 = self.network1
+        network2 = self.network2
 
         # Do the green line algorithm
         while (isom_size < goal_size):
@@ -476,7 +474,7 @@ class GreenLineMixin():
             lowest_nodes_network1 = [(u, 1) for u in lowest_tree_node_network1 + lowest_retic_network1]
             lowest_nodes_network2 = [(u, 2) for u in lowest_tree_node_network2 + lowest_retic_network2]
             candidate_lowest_nodes = lowest_nodes_network1 + lowest_nodes_network2
-            random.shuffle(candidate_lowest_nodes)
+            seed.shuffle(candidate_lowest_nodes)
 
             # As some cases do not give an addition to the isom, we continue trying lowest nodes until we find one that does.
             for lowest_node, network_number in candidate_lowest_nodes:
@@ -487,10 +485,10 @@ class GreenLineMixin():
                     up = lowest_node
                     if head_moves:
                         moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(
-                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True, seed=seed)
                     else:
                         moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(
-                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True)
+                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True, seed=seed)
                         if added_node_network_1 == None:
                             # The networks are non-isom networks with 2 leaves and 1 reticulation
                             return False
@@ -504,10 +502,10 @@ class GreenLineMixin():
                     up = lowest_node
                     if head_moves:
                         moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(
-                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True, seed=seed)
                     else:
                         moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(
-                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True)
+                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True, seed=seed)
                         if added_node_network_1 == None:
                             # The networks are non-isom networks with 2 leaves and 1 reticulation
                             return False
@@ -523,7 +521,8 @@ class GreenLineMixin():
                                                                                                             network2, up,
                                                                                                             isom_1_2,
                                                                                                             isom_2_1,
-                                                                                                            randomNodes=True)
+                                                                                                            randomNodes=True,
+                                                                                                            seed=seed)
                     # If we can add a node to the isom, added_node_network_2 has a value
                     if added_node_network_2:
                         break
@@ -537,7 +536,8 @@ class GreenLineMixin():
                                                                                                             network1, up,
                                                                                                             isom_2_1,
                                                                                                             isom_1_2,
-                                                                                                            randomNodes=True)
+                                                                                                            randomNodes=True,
+                                                                                                            seed=seed)
                     # If we can add a node to the isom, added_node_network_2 has a value
                     if added_node_network_2:
                         break
@@ -545,12 +545,10 @@ class GreenLineMixin():
             # Now perform the moves and update the isomorphism
             isom_1_2[added_node_network_1] = added_node_network_2
             isom_2_1[added_node_network_2] = added_node_network_1
-            for move in moves_network_1:
-                seq_from_1.append((move[0], move[1], From_Edge(network1, move[0], move[1]), move[2]))
-                network1 = DoMove(network1, move[0], move[1], move[2], check_validity=False)
-            for move in moves_network_2:
-                seq_from_2.append((move[0], move[1], From_Edge(network2, move[0], move[1]), move[2]))
-                network2 = DoMove(network2, move[0], move[1], move[2], check_validity=False)
+            seq_from_1 += moves_network_1
+            seq_from_2 += moves_network_2
+            network1 = apply_move_sequence(network1, moves_network_1)
+            network2 = apply_move_sequence(network2, moves_network_2)
             isom_size += 1
         # TESTING FOR CORRECTNESS WHILE RUNNING
         #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
@@ -566,4 +564,4 @@ class GreenLineMixin():
         isom_2_1[root2] = root1
 
         # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-        return seq_from_1 + ReplaceNodeNamesInMoveSequence(InvertMoveSequence(seq_from_2), isom_2_1)
+        return seq_from_1 + [move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)]
