@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 from networkx.utils.decorators import np_random_state
+from networkx.exception import NetworkXError
 
 from phylox.base import find_unused_node, suppress_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
@@ -243,14 +244,30 @@ class Move(object):
             )
         elif self.move_type in [MoveType.TAIL, MoveType.HEAD]:
             try:
-                self.origin = kwargs["origin"]
                 self.moving_edge = kwargs["moving_edge"]
                 self.target = kwargs["target"]
             except KeyError:
                 raise InvalidMoveDefinitionException(
-                    "Missing one of origin, moving_edge, or target."
+                    "Missing one of moving_edge or target."
                 )
-
+            self.origin = kwargs.get("origin")
+            if self.origin is None:
+                if "network" not in kwargs:
+                    raise InvalidMoveDefinitionException(
+                        "Either a network or an origin must be given."
+                    )
+                moving_endpoint_index = 0 if self.move_type == MoveType.TAIL else 1
+                moving_endpoint = self.moving_edge[moving_endpoint_index]
+                try:
+                    self.origin = from_edge(
+                        kwargs["network"],
+                        self.moving_edge,
+                        moving_endpoint=moving_endpoint,
+                    )
+                except NetworkXError:
+                    raise InvalidMoveDefinitionException(
+                        "Origin edge could not be computed."
+                    )
             if self.move_type == MoveType.TAIL:
                 self.moving_node = self.moving_edge[0]
             else:
@@ -344,6 +361,82 @@ class Move(object):
         ):
             return True
         return move_type == self.move_type
+
+    def rename_nodes(self, isomorphism):
+        """
+        Renames the nodes in the move using an isomorphism mapping between two networks.
+
+        :param isomorphism: a dictionary, containing a bijective mapping from nodes of the networks to another set.
+        :return: a new move with the nodes renamed.
+        """
+        if self.move_type == MoveType.NONE:
+            return self
+        if self.move_type in [MoveType.TAIL, MoveType.HEAD]:
+            return Move(
+                move_type=self.move_type,
+                origin=(isomorphism[self.origin[0]], isomorphism[self.origin[1]]),
+                moving_edge=(
+                    isomorphism[self.moving_edge[0]],
+                    isomorphism[self.moving_edge[1]],
+                ),
+                target=(isomorphism[self.target[0]], isomorphism[self.target[1]]),
+            )
+        elif self.move_type == MoveType.VPLU:
+            return Move(
+                move_type=self.move_type,
+                start_edge=(
+                    isomorphism[self.start_edge[0]],
+                    isomorphism[self.start_edge[1]],
+                ),
+                end_edge=(isomorphism[self.end_edge[0]], isomorphism[self.end_edge[1]]),
+                start_node=isomorphism[self.start_node],
+                end_node=isomorphism[self.end_node],
+            )
+        elif self.move_type == MoveType.VMIN:
+            return Move(
+                move_type=self.move_type,
+                removed_edge=(
+                    isomorphism[self.removed_edge[0]],
+                    isomorphism[self.removed_edge[1]],
+                ),
+            )
+
+    def invert(self, network=None):
+        """
+        Inverts the move.
+
+        :param network: a phylogenetic network (phylox.DiNetwork) in which to invert the move.
+            (needed for VMIN moves)
+        :return: a new move that is the inverse of the current move.
+        """
+        if self.move_type == MoveType.NONE:
+            return self
+        if self.move_type in [MoveType.TAIL, MoveType.HEAD]:
+            return Move(
+                move_type=self.move_type,
+                origin=self.target,
+                moving_edge=self.moving_edge,
+                target=self.origin,
+            )
+        elif self.move_type == MoveType.VPLU:
+            return Move(
+                move_type=self.VMIN,
+                removed_edge=(self.start_node, self.end_node),
+            )
+        elif self.move_type == MoveType.VMIN:
+            if network is None:
+                raise InvalidMoveException(
+                    "Cannot invert a VMIN move without a network."
+                )
+            start_edge = from_edge(network, self.removed_edge, self.removed_edge[0])
+            end_edge = from_edge(network, self.removed_edge, self.removed_edge[1])
+            return Move(
+                move_type=self.VPLU,
+                start_edge=start_edge,
+                end_edge=end_edge,
+                start_node=self.removed_edge[0],
+                end_node=self.removed_edge[1],
+            )
 
     @classmethod
     @np_random_state("seed")

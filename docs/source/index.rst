@@ -13,6 +13,60 @@ Welcome to PhyloX's documentation!
 
    phylox
 
+PhyloX is a python package for parsing, manipulating, and analysing phylogenetic networks.
+By building upon the widely used `NetworkX <https://networkx.github.io/>`_ package, PhyloX provides a simple and intuitive interface for working with phylogenetic networks.
+Unlike other packages like `Biopython <https://biopython.org/>`_ and `DendroPy <https://dendropy.org/>`_, PhyloX is designed to work with phylogenetic networks, rather than phylogenetic trees. 
+Moreover, PhyloX is designed to work with networks that have internally labelled nodes, multiple roots, and non-binary nodes (although not all methods are implemented for all these types of networks).
+
+Some of the features of PhyloX include:
+ - Reading and writing phylogenetic networks in extended Newick format with internal node labels, edge lengths, support values, and inheritance probabilities.- Generating random phylogenetic networks with several different models.
+ - Modifying and analysing phylogenetic networks using rearrangement moves
+   - Calculating the rearrangement distance between two network (exact and heuristically).
+   - Generating the set of all networks that can be reached from a given network using a single rearrangement move.
+   - Moves are robust objects, that give meaningful error messages when they are applied to networks that they are not applicable to.
+ - Cherry-picking methods for phylogenetic networks.
+   - Checking whether a network is orchard
+   - Network containment checking for tree-child networks using cherry-picking sequences.
+   - Combining networks using cherry-picking sequences.
+ - Isomorpism functions for phylogenetic networks.
+   - Checking whether two networks are isomorphic.
+   - Counting the number of automorphisms of a network.
+
+A use-case that neatly combines many of these features is the following. Suppose we want a test set of orchard networks with 10 leaves and 5 reticulations. These networks can be generated randomly with a Metropolis-Hasting sampling. 
+
+We start with an arbitrary orchard network with 10 leaves and 5 reticulations, which can be generated with the function :func:`phylox.generators.randomTC:generate_network_random_tree_child_sequence`.
+Then repeatedly apply some (large number of) random rearrangement moves, only actually applying moves if the resulting network is orchard.
+This can be done with the built-in MCMC sampler, :func:`phylox.generators.mcmc:sample_mcmc_networks`. 
+To ensure all sampled networks are orchard, we use the `restriction_map` argument to specify that only orchard networks should be sampled, and to ensure the right number of leaves and reticulations are sampled, we set the `move_type_probabilities` for vertical moves to 0.
+We can use the `sample_size` argument to specify how many networks we want to sample.
+Finally, we write the sampled networks to a file in newick format.
+
+The final code looks like this:
+
+.. code-block:: python
+
+   from phylox.generators.randomTC import generate_network_random_tree_child_sequence
+   from phylox.generators.mcmc import sample_mcmc_networks
+   from phylox.classes import is_orchard
+   from phylox.rearrangement.move import MoveType
+
+   # Generate an arbitrary orchard network with 10 leaves and 5 reticulations
+   start_network = generate_network_random_tree_child_sequence(10, 5)
+   # Generate 1000 orchard networks with 10 leaves and 5 reticulations
+   sampled_networks = sample_mcmc_networks(
+      start_network, 
+      {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
+      number_of_samples=100, 
+      burn_in=100,
+      restriction_map=is_orchard, 
+      seed=1234,
+      add_root_if_necessary=True,
+   )
+   # Write the sampled networks to a file
+   with open("sampled_networks.nwk", "w") as f:
+      for network in sampled_networks:
+         f.write(network.newick() + "\n")
+
 
 Indices and tables
 ==================

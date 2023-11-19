@@ -28,9 +28,9 @@ class TestMoveClass(unittest.TestCase):
     def test_invalid_move_missing_arg(self):
         with pytest.raises(
             InvalidMoveDefinitionException,
-            match="Missing one of origin, moving_edge, or target.",
+            match="Missing one of moving_edge or target.",
         ):
-            Move(origin=(0, 1), moving_edge=(2, 3), move_type=MoveType.TAIL)
+            Move(origin=(0, 1), target=(2, 3), move_type=MoveType.TAIL)
 
     def test_invalid_move_target_equals_moving_edge(self):
         with pytest.raises(

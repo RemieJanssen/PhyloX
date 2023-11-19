@@ -2,10 +2,11 @@ from copy import deepcopy
 
 from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.exact_distance import ExactMethodsMixin
+from phylox.rearrangement.heuristics.green_line_heuristic import HeuristicDistanceMixin
 from phylox.rearrangement.move import apply_move_sequence
 
 
-class RearrangementProblem(ExactMethodsMixin):
+class RearrangementProblem(ExactMethodsMixin, HeuristicDistanceMixin):
     """
     A rearrangement problem is a tuple (N1, N2, M) where N1 and N2 are phylogenetic networks and M is a move type.
 

@@ -14,6 +14,7 @@ phylox.rearrangement.move
    .. autosummary::
       :toctree:
    
+      all_valid_moves
       apply_move
       apply_move_sequence
    

@@ -24,6 +24,7 @@ phylox.dinetwork.DiNetwork
       ~DiNetwork.is_reticulation
       ~DiNetwork.is_root
       ~DiNetwork.is_tree_node
+      ~DiNetwork.newick
       ~DiNetwork.parent
    
    

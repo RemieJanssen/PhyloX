@@ -9,15 +9,6 @@ phylox.generators.randomTC.random\_tc\_network
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      generate_network_random_tree_child_sequence
-      random_tree_child_sequence
-      random_tree_child_subsequence
-   
    
 
    

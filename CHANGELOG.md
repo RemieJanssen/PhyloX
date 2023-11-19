@@ -16,6 +16,8 @@ Types of changes:
 ## [0.0.7] - (Unreleased)
 
 ### Added
+
+- Heustics for rearrangement move sequence calculations. (#35)
 - Exact methods for rearrangement distance computation. (#37)
 
 
