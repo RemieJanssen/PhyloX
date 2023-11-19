@@ -110,7 +110,11 @@ def FindTreeNode(network, excludedSet=[], randomNodes=False, seed=None):
     """
     all_found = []
     for node in network.nodes():
-        if node not in excludedSet and network.out_degree(node) == 2 and network.in_degree(node) == 1:
+        if (
+            node not in excludedSet
+            and network.out_degree(node) == 2
+            and network.in_degree(node) == 1
+        ):
             if randomNodes:
                 all_found += [node]
             else:
@@ -118,6 +122,7 @@ def FindTreeNode(network, excludedSet=[], randomNodes=False, seed=None):
     if all_found and randomNodes:
         return seed.choice(all_found)
     return None
+
 
 @py_random_state("seed")
 def FindLeaf(network, excludedSet=[], excludedParents=[], randomNodes=False, seed=None):
@@ -134,7 +139,11 @@ def FindLeaf(network, excludedSet=[], excludedParents=[], randomNodes=False, see
     all_found = []
     for node in network.nodes():
         parent = Parent(network, node)
-        if network.out_degree(node) == 0 and parent not in excludedParents and node not in excludedSet:
+        if (
+            network.out_degree(node) == 0
+            and parent not in excludedParents
+            and node not in excludedSet
+        ):
             if randomNodes:
                 all_found += [node]
             else:

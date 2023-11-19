@@ -26,7 +26,6 @@ class TestRearrangementProblemGreenLine(unittest.TestCase):
         solution = problem.heuristic_green_line()
         assert problem.check_solution(solution)
 
-
     def test_solve_green_line_random(self):
         problem = self.setup_simple_problem()
         solution = problem.heuristic_green_line_random()

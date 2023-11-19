@@ -261,7 +261,6 @@ class Move(object):
                     kwargs["network"], self.moving_edge, moving_endpoint=moving_endpoint
                 )
 
-
             if self.move_type == MoveType.TAIL:
                 self.moving_node = self.moving_edge[0]
             else:
@@ -369,13 +368,19 @@ class Move(object):
             return Move(
                 move_type=self.move_type,
                 origin=(isomorphism[self.origin[0]], isomorphism[self.origin[1]]),
-                moving_edge=(isomorphism[self.moving_edge[0]], isomorphism[self.moving_edge[1]]),
+                moving_edge=(
+                    isomorphism[self.moving_edge[0]],
+                    isomorphism[self.moving_edge[1]],
+                ),
                 target=(isomorphism[self.target[0]], isomorphism[self.target[1]]),
             )
         elif self.move_type == MoveType.VPLU:
             return Move(
                 move_type=self.move_type,
-                start_edge=(isomorphism[self.start_edge[0]], isomorphism[self.start_edge[1]]),
+                start_edge=(
+                    isomorphism[self.start_edge[0]],
+                    isomorphism[self.start_edge[1]],
+                ),
                 end_edge=(isomorphism[self.end_edge[0]], isomorphism[self.end_edge[1]]),
                 start_node=isomorphism[self.start_node],
                 end_node=isomorphism[self.end_node],
@@ -383,7 +388,10 @@ class Move(object):
         elif self.move_type == MoveType.VMIN:
             return Move(
                 move_type=self.move_type,
-                removed_edge=(isomorphism[self.removed_edge[0]], isomorphism[self.removed_edge[1]]),
+                removed_edge=(
+                    isomorphism[self.removed_edge[0]],
+                    isomorphism[self.removed_edge[1]],
+                ),
             )
 
     def invert(self, network=None):

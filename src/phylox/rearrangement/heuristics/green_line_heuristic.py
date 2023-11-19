@@ -31,8 +31,6 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
     x = isom_Np_N[xp]
     z = N.parent(x, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
 
-    print(xp,x,z)
-
     # Case1a: z is a reticulation
     if N.in_degree(z) == 2:
         return [], [], z, up
@@ -41,7 +39,6 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
     v = FindRetic(N, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
     u = None
     for parent in N.predecessors(v):
-        print((parent, v), (z, x))
         try:
             move = Move(
                 move_type=MoveType.HEAD,
@@ -50,9 +47,7 @@ def _GL_Case1_rSPR(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None
                 network=N,
             )
             check_valid(N, move)
-        except (InvalidMoveException, InvalidMoveDefinitionException) as e:
-            print(e)
-            print("no t valid")
+        except (InvalidMoveException, InvalidMoveDefinitionException):
             continue
         if not randomNodes:
             u = parent
@@ -118,7 +113,7 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None)
             move_type=MoveType.TAIL, moving_edge=(z, x), target=(u, v), network=N
         )
         move2 = Move(
-            move_type=MoveType.TAIL, moving_edge=(z, v), target=(w, u), origin=(u,x)
+            move_type=MoveType.TAIL, moving_edge=(z, v), target=(w, u), origin=(u, x)
         )
         return [(move1, move2)], [], u, up
     # Case1bii: (z,x) is not movable
@@ -134,7 +129,9 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None)
             move_type=MoveType.TAIL, moving_edge=(c, d), target=(a, b), network=N
         )
         newN = apply_move(N, move1)
-        u = FindRetic(newN, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
+        u = FindRetic(
+            newN, excludedSet=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed
+        )
         v = newN.child(u)
         if v == x:
             # In this case, u is a reticulation parent of x and u is not in the isom. Hence, we can simply add it to the isom.
@@ -168,18 +165,28 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None)
         t = N.child(x, exclude=[s])
         if s == e:
             move = Move(
-                move_type=MoveType.TAIL, moving_edge=(x, t), target=(d,e), network=N
+                move_type=MoveType.TAIL, moving_edge=(x, t), target=(d, e), network=N
             )
             return [move], [], d, up
         if t == e:
             move = Move(
-                move_type=MoveType.TAIL, moving_edge=(x, s), target=(d,e), network=N
+                move_type=MoveType.TAIL, moving_edge=(x, s), target=(d, e), network=N
             )
             return [move], [], d, up
         moves = [
             Move(move_type=MoveType.TAIL, moving_edge=(x, s), target=(d, e), network=N),
-            Move(move_type=MoveType.TAIL, moving_edge=(x, e), target=(z, t), origin=(d, s)),
-            Move(move_type=MoveType.TAIL, moving_edge=(x, t), target=(d, s), origin=(z, e)),
+            Move(
+                move_type=MoveType.TAIL,
+                moving_edge=(x, e),
+                target=(z, t),
+                origin=(d, s),
+            ),
+            Move(
+                move_type=MoveType.TAIL,
+                moving_edge=(x, t),
+                target=(d, s),
+                origin=(z, e),
+            ),
         ]
         return moves, [], d, up
     if N.out_degree(e) == 2:
@@ -187,18 +194,28 @@ def GL_Case1_Tail(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None)
         t = N.child(e, exclude=[s])
         if s == x:
             move = Move(
-                move_type=MoveType.TAIL, moving_edge=(e, t), target=(z,x), network=N
+                move_type=MoveType.TAIL, moving_edge=(e, t), target=(z, x), network=N
             )
             return [move], [], d, up
         if t == x:
             move = Move(
-                move_type=MoveType.TAIL, moving_edge=(e, s), target=(z,x), network=N
+                move_type=MoveType.TAIL, moving_edge=(e, s), target=(z, x), network=N
             )
             return [move], [], d, up
         moves = [
             Move(move_type=MoveType.TAIL, moving_edge=(e, s), target=(z, x), network=N),
-            Move(move_type=MoveType.TAIL, moving_edge=(e, x), target=(d, t), origin=(z, s)),
-            Move(move_type=MoveType.TAIL, moving_edge=(e, t), target=(z, s), origin=(d, x)),
+            Move(
+                move_type=MoveType.TAIL,
+                moving_edge=(e, x),
+                target=(d, t),
+                origin=(z, s),
+            ),
+            Move(
+                move_type=MoveType.TAIL,
+                moving_edge=(e, t),
+                target=(z, s),
+                origin=(d, x),
+            ),
         ]
         return moves, [], d, up
     # neither are tree nodes, so both must be leaves
@@ -247,7 +264,7 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     z_y = N.parent(y, exclude=isom_N_Np.keys(), randomNodes=randomNodes, seed=seed)
 
     # Case3bi: (z_x,x) is movable
-    try: 
+    try:
         move = Move(
             move_type=MoveType.TAIL, moving_edge=(z_x, x), target=(z_y, y), network=N
         )
@@ -256,7 +273,7 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     except (InvalidMoveException, InvalidMoveDefinitionException):
         pass
     # Case3bii: (z_y,y) is movable
-    try: 
+    try:
         move = Move(
             move_type=MoveType.TAIL, moving_edge=(z_y, y), target=(z_x, x), network=N
         )
@@ -278,9 +295,6 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
 
     # Find the top node of the triangle for z_y
     c_y = N.parent(z_y)
-    #    print()
-    #    print(z_y,N.edges())
-
     b_y = N.parent(c_y)
 
     if N.in_degree(b_x) == 0:
@@ -298,16 +312,28 @@ def GL_Case3(N, Np, up, isom_N_Np, isom_Np_N, randomNodes=False, seed=None):
     # e_x not in the proof, but needed to define the origin of the second move
     e_x = N.parent(c_x)
     moves = [
-        Move(move_type=MoveType.TAIL, moving_edge=(c_x, d_x), target=(a_x, b_x), network=N),
-        Move(move_type=MoveType.TAIL, moving_edge=(z_x, x), target=(z_y, y), origin=(e_x, d_x)),
+        Move(
+            move_type=MoveType.TAIL,
+            moving_edge=(c_x, d_x),
+            target=(a_x, b_x),
+            network=N,
+        ),
+        Move(
+            move_type=MoveType.TAIL,
+            moving_edge=(z_x, x),
+            target=(z_y, y),
+            origin=(e_x, d_x),
+        ),
     ]
     return moves, [], z_x, up
 
-class HeuristicDistanceMixin():
+
+class HeuristicDistanceMixin:
     """
     A class containing the Green Line heuristic and its random version.
     Meant to be inherited by the RearrangementProblem class.
     """
+
     def heuristic_green_line(self):
         """
         An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
@@ -317,7 +343,7 @@ class HeuristicDistanceMixin():
         """
         if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
             raise Exception("Move type not supported by Green Line heuristic")
-        head_moves = (self.move_type in [MoveType.RSPR, MoveType.ALL])
+        head_moves = self.move_type in [MoveType.RSPR, MoveType.ALL]
 
         # Find the root and labels of the networks
         root1 = list(self.network1.roots)[0]
@@ -346,20 +372,16 @@ class HeuristicDistanceMixin():
         network2 = self.network2
 
         # Do the green line algorithm
-        while (isom_size < goal_size):
+        while isom_size < goal_size:
             # Find lowest nodes above the isom in the networks:
-            lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys())
-            lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys())
-            print()
-            print("isoms")
-            print(isom_1_2)
-            print(isom_2_1)
-            print("lowest nodes")
-            print(lowest_tree_node_network1, lowest_retic_network1)
-            print(lowest_tree_node_network2, lowest_retic_network2)
-            print("moves")
-            print(seq_from_1)
-            print(seq_from_2)
+            (
+                lowest_tree_node_network1,
+                lowest_retic_network1,
+            ) = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys())
+            (
+                lowest_tree_node_network2,
+                lowest_retic_network2,
+            ) = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys())
 
             ######################################
             # Case1: a lowest retic in network1
@@ -367,17 +389,19 @@ class HeuristicDistanceMixin():
                 # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
                 up = lowest_retic_network1
                 if head_moves:
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(network2,
-                                                                                                                network1,
-                                                                                                                up,
-                                                                                                                isom_2_1,
-                                                                                                                isom_1_2)
+                    (
+                        moves_network_2,
+                        moves_network_1,
+                        added_node_network_2,
+                        added_node_network_1,
+                    ) = _GL_Case1_rSPR(network2, network1, up, isom_2_1, isom_1_2)
                 else:
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(network2,
-                                                                                                                network1,
-                                                                                                                up,
-                                                                                                                isom_2_1,
-                                                                                                                isom_1_2)
+                    (
+                        moves_network_2,
+                        moves_network_1,
+                        added_node_network_2,
+                        added_node_network_1,
+                    ) = GL_Case1_Tail(network2, network1, up, isom_2_1, isom_1_2)
                     if added_node_network_1 == None:
                         return False
             ######################################
@@ -386,17 +410,19 @@ class HeuristicDistanceMixin():
                 # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
                 up = lowest_retic_network2
                 if head_moves:
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(network1,
-                                                                                                                network2,
-                                                                                                                up,
-                                                                                                                isom_1_2,
-                                                                                                                isom_2_1)
+                    (
+                        moves_network_1,
+                        moves_network_2,
+                        added_node_network_1,
+                        added_node_network_2,
+                    ) = _GL_Case1_rSPR(network1, network2, up, isom_1_2, isom_2_1)
                 else:
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(network1,
-                                                                                                                network2,
-                                                                                                                up,
-                                                                                                                isom_1_2,
-                                                                                                                isom_2_1)
+                    (
+                        moves_network_1,
+                        moves_network_2,
+                        added_node_network_1,
+                        added_node_network_2,
+                    ) = GL_Case1_Tail(network1, network2, up, isom_1_2, isom_2_1)
                     if added_node_network_1 == None:
                         return False
 
@@ -405,9 +431,12 @@ class HeuristicDistanceMixin():
             else:
                 # use notation as in the paper network1 = N, network2 = N'
                 up = lowest_tree_node_network2
-                moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1, network2,
-                                                                                                        up, isom_1_2,
-                                                                                                        isom_2_1)
+                (
+                    moves_network_1,
+                    moves_network_2,
+                    added_node_network_1,
+                    added_node_network_2,
+                ) = GL_Case3(network1, network2, up, isom_1_2, isom_2_1)
             # Now perform the moves and update the isomorphism
             isom_1_2[added_node_network_1] = added_node_network_2
             isom_2_1[added_node_network_2] = added_node_network_1
@@ -421,8 +450,9 @@ class HeuristicDistanceMixin():
         isom_1_2[root1] = root2
         isom_2_1[root2] = root1
         # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-        return seq_from_1 + [move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)]
-
+        return seq_from_1 + [
+            move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)
+        ]
 
     @py_random_state("seed")
     def heuristic_green_line_random(self, seed=None):
@@ -433,7 +463,7 @@ class HeuristicDistanceMixin():
         """
         if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
             raise Exception("Move type not supported by Green Line heuristic")
-        head_moves = (self.move_type in [MoveType.RSPR, MoveType.ALL])
+        head_moves = self.move_type in [MoveType.RSPR, MoveType.ALL]
 
         # Find the root and labels of the networks
         root1 = list(self.network1.roots)[0]
@@ -462,17 +492,25 @@ class HeuristicDistanceMixin():
         network2 = self.network2
 
         # Do the green line algorithm
-        while (isom_size < goal_size):
+        while isom_size < goal_size:
             # Find all lowest nodes above the isom in the networks:
-            lowest_tree_node_network1, lowest_retic_network1 = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys(),
-                                                                                        allnodes=True)
-            lowest_tree_node_network2, lowest_retic_network2 = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys(),
-                                                                                        allnodes=True)
+            (
+                lowest_tree_node_network1,
+                lowest_retic_network1,
+            ) = LowestReticAndTreeNodeAbove(network1, isom_1_2.keys(), allnodes=True)
+            (
+                lowest_tree_node_network2,
+                lowest_retic_network2,
+            ) = LowestReticAndTreeNodeAbove(network2, isom_2_1.keys(), allnodes=True)
 
             # Construct a list of all lowest nodes in a tuple with the corresponding network (in random order)
             # I.e. If u is a lowest node of network one, it will appear in the list as (u,1)
-            lowest_nodes_network1 = [(u, 1) for u in lowest_tree_node_network1 + lowest_retic_network1]
-            lowest_nodes_network2 = [(u, 2) for u in lowest_tree_node_network2 + lowest_retic_network2]
+            lowest_nodes_network1 = [
+                (u, 1) for u in lowest_tree_node_network1 + lowest_retic_network1
+            ]
+            lowest_nodes_network2 = [
+                (u, 2) for u in lowest_tree_node_network2 + lowest_retic_network2
+            ]
             candidate_lowest_nodes = lowest_nodes_network1 + lowest_nodes_network2
             seed.shuffle(candidate_lowest_nodes)
 
@@ -484,11 +522,35 @@ class HeuristicDistanceMixin():
                     # use notation as in the paper network1 = N', network2 = N, where ' is denoted p
                     up = lowest_node
                     if head_moves:
-                        moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = _GL_Case1_rSPR(
-                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True, seed=seed)
+                        (
+                            moves_network_2,
+                            moves_network_1,
+                            added_node_network_2,
+                            added_node_network_1,
+                        ) = _GL_Case1_rSPR(
+                            network2,
+                            network1,
+                            up,
+                            isom_2_1,
+                            isom_1_2,
+                            randomNodes=True,
+                            seed=seed,
+                        )
                     else:
-                        moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case1_Tail(
-                            network2, network1, up, isom_2_1, isom_1_2, randomNodes=True, seed=seed)
+                        (
+                            moves_network_2,
+                            moves_network_1,
+                            added_node_network_2,
+                            added_node_network_1,
+                        ) = GL_Case1_Tail(
+                            network2,
+                            network1,
+                            up,
+                            isom_2_1,
+                            isom_1_2,
+                            randomNodes=True,
+                            seed=seed,
+                        )
                         if added_node_network_1 == None:
                             # The networks are non-isom networks with 2 leaves and 1 reticulation
                             return False
@@ -501,11 +563,35 @@ class HeuristicDistanceMixin():
                     # use notation as in the paper network2 = N', network1 = N, where ' is denoted p
                     up = lowest_node
                     if head_moves:
-                        moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = _GL_Case1_rSPR(
-                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True, seed=seed)
+                        (
+                            moves_network_1,
+                            moves_network_2,
+                            added_node_network_1,
+                            added_node_network_2,
+                        ) = _GL_Case1_rSPR(
+                            network1,
+                            network2,
+                            up,
+                            isom_1_2,
+                            isom_2_1,
+                            randomNodes=True,
+                            seed=seed,
+                        )
                     else:
-                        moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case1_Tail(
-                            network1, network2, up, isom_1_2, isom_2_1, randomNodes=True, seed=seed)
+                        (
+                            moves_network_1,
+                            moves_network_2,
+                            added_node_network_1,
+                            added_node_network_2,
+                        ) = GL_Case1_Tail(
+                            network1,
+                            network2,
+                            up,
+                            isom_1_2,
+                            isom_2_1,
+                            randomNodes=True,
+                            seed=seed,
+                        )
                         if added_node_network_1 == None:
                             # The networks are non-isom networks with 2 leaves and 1 reticulation
                             return False
@@ -517,12 +603,20 @@ class HeuristicDistanceMixin():
                 elif network_number == 2 and network2.out_degree(lowest_node) == 2:
                     # use notation as in the paper network1 = N, network2 = N'
                     up = lowest_node
-                    moves_network_1, moves_network_2, added_node_network_1, added_node_network_2 = GL_Case3(network1,
-                                                                                                            network2, up,
-                                                                                                            isom_1_2,
-                                                                                                            isom_2_1,
-                                                                                                            randomNodes=True,
-                                                                                                            seed=seed)
+                    (
+                        moves_network_1,
+                        moves_network_2,
+                        added_node_network_1,
+                        added_node_network_2,
+                    ) = GL_Case3(
+                        network1,
+                        network2,
+                        up,
+                        isom_1_2,
+                        isom_2_1,
+                        randomNodes=True,
+                        seed=seed,
+                    )
                     # If we can add a node to the isom, added_node_network_2 has a value
                     if added_node_network_2:
                         break
@@ -532,12 +626,20 @@ class HeuristicDistanceMixin():
                 else:
                     # use notation as in the paper network1 = N, network2 = N'
                     up = lowest_node
-                    moves_network_2, moves_network_1, added_node_network_2, added_node_network_1 = GL_Case3(network2,
-                                                                                                            network1, up,
-                                                                                                            isom_2_1,
-                                                                                                            isom_1_2,
-                                                                                                            randomNodes=True,
-                                                                                                            seed=seed)
+                    (
+                        moves_network_2,
+                        moves_network_1,
+                        added_node_network_2,
+                        added_node_network_1,
+                    ) = GL_Case3(
+                        network2,
+                        network1,
+                        up,
+                        isom_2_1,
+                        isom_1_2,
+                        randomNodes=True,
+                        seed=seed,
+                    )
                     # If we can add a node to the isom, added_node_network_2 has a value
                     if added_node_network_2:
                         break
@@ -550,18 +652,12 @@ class HeuristicDistanceMixin():
             network1 = apply_move_sequence(network1, moves_network_1)
             network2 = apply_move_sequence(network2, moves_network_2)
             isom_size += 1
-        # TESTING FOR CORRECTNESS WHILE RUNNING
-        #        if not Isomorphic(network1.subgraph(isom_1_2.keys()),network2.subgraph(isom_2_1.keys())):
-        #            print("not unlabeled isom")
-        #            print(seq_from_1)
-        #            print(seq_from_2)
-        #            print(isom_1_2)
-        #            print(network1.subgraph(isom_1_2.keys()).edges())
-        #            print(network2.subgraph(isom_2_1.keys()).edges())
 
         # Add the root to the isomorphism, if it was there
         isom_1_2[root1] = root2
         isom_2_1[root2] = root1
 
         # invert seq_from_2, rename to node names of network1, and append to seq_from_1
-        return seq_from_1 + [move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)]
+        return seq_from_1 + [
+            move.invert().rename_nodes(isom_2_1) for move in reversed(seq_from_2)
+        ]
