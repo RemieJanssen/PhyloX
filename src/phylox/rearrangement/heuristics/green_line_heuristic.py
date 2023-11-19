@@ -9,6 +9,7 @@ from phylox.rearrangement.movability import check_valid, check_movable
 from phylox.rearrangement.move import Move, apply_move, MoveType, apply_move_sequence
 from phylox.exceptions import InvalidMoveException, InvalidMoveDefinitionException
 from networkx.utils.decorators import py_random_state
+from phylox.classes.dinetwork import is_binary, is_leaf_labeled_single_root_network
 
 
 @py_random_state("seed")
@@ -334,6 +335,28 @@ class HeuristicDistanceMixin:
     Meant to be inherited by the RearrangementProblem class.
     """
 
+    def check_green_line_requirements(self):
+        if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
+            raise Exception("Move type not supported by Green Line heuristic")
+        if not is_binary(self.network1) or not is_binary(self.network2):
+            raise Exception("Green Line heuristic only works for binary networks")
+        if not is_leaf_labeled_single_root_network(
+            self.network1
+        ) or not is_leaf_labeled_single_root_network(self.network2):
+            raise Exception(
+                "Green Line heuristic only works for leaf-labeled networks with a single root"
+            )
+        if not len(self.network1.leaves) == len(self.network1.labels) or not len(
+            self.network2.leaves
+        ) == len(self.network2.labels):
+            raise Exception(
+                "Green Line heuristic only works for networks with unique labels"
+            )
+        if self.network1.labels == self.network2.labels:
+            raise Exception(
+                "Green Line heuristic only works for networks with the same set of labels"
+            )
+
     def heuristic_green_line(self):
         """
         An implementation of Algorithm 4 and its tail move counterpart. Finds a sequence of tail/rSPR moves from network1 to network2 by building a down-closed isomorphism.
@@ -341,8 +364,8 @@ class HeuristicDistanceMixin:
 
         :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
         """
-        if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
-            raise Exception("Move type not supported by Green Line heuristic")
+        self.check_green_line_requirements()
+
         head_moves = self.move_type in [MoveType.RSPR, MoveType.ALL]
 
         # Find the root and labels of the networks
@@ -461,8 +484,7 @@ class HeuristicDistanceMixin:
 
         :return: A list of tail/rSPR moves from network1 to network2. Returns False if such a sequence does not exist.
         """
-        if not self.move_type in [MoveType.TAIL, MoveType.RSPR, MoveType.ALL]:
-            raise Exception("Move type not supported by Green Line heuristic")
+        self.check_green_line_requirements()
         head_moves = self.move_type in [MoveType.RSPR, MoveType.ALL]
 
         # Find the root and labels of the networks

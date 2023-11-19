@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 from networkx.utils.decorators import np_random_state
+from networkx.exception import NetworkXError
 
 from phylox.base import find_unused_node, suppress_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
@@ -257,10 +258,16 @@ class Move(object):
                     )
                 moving_endpoint_index = 0 if self.move_type == MoveType.TAIL else 1
                 moving_endpoint = self.moving_edge[moving_endpoint_index]
-                self.origin = from_edge(
-                    kwargs["network"], self.moving_edge, moving_endpoint=moving_endpoint
-                )
-
+                try:
+                    self.origin = from_edge(
+                        kwargs["network"],
+                        self.moving_edge,
+                        moving_endpoint=moving_endpoint,
+                    )
+                except NetworkXError:
+                    raise InvalidMoveDefinitionException(
+                        "Origin edge could not be computed."
+                    )
             if self.move_type == MoveType.TAIL:
                 self.moving_node = self.moving_edge[0]
             else:
