@@ -19,7 +19,7 @@ Types of changes:
 
 - Heustics for rearrangement move sequence calculations. (#35)
 - Exact methods for rearrangement distance computation. (#37)
-- JOSS article.
+- JOSS article. (#39)
 
 ## [0.0.6] - (2023-08-09)
 
