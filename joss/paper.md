@@ -10,7 +10,7 @@ authors:
     orcid: 0000-0002-5192-1470
     affiliation: 1 
 affiliations:
- - name: Rijksinstituut voor Volksgezondheid en Milieu
+ - name: National Institute for Public Health and the Environment, Bioinformatics and Computing, Bilthoven, The Netherlands
    index: 1
 date: 12 January 2024
 bibliography: paper.bib
