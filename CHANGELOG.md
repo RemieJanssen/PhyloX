@@ -13,7 +13,13 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.0.3] - (Unreleased)
+## [1.0.4] - (Unreleased)
+
+## [1.0.3] - (2024-01-20)
+
+### Changed
+
+- ReadTheDocs requirements, so that it builds again.
 
 ## [1.0.2] - (2024-01-20)
 
