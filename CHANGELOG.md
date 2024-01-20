@@ -21,6 +21,10 @@ Types of changes:
 - Exact methods for rearrangement distance computation. (#37)
 - JOSS article. (#39)
 
+### Changed
+
+- Release action that also creates a github release, but only when a tag is added to the commit. (#41)
+
 ## [0.0.6] - (2023-08-09)
 
 ### Added
