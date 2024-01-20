@@ -43,7 +43,7 @@ release current version
 git checkout release
 git merge main
 git tag [version number]
-git push
+git push origin [version number]
 ```
 
 ### Linting
