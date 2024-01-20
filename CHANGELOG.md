@@ -13,7 +13,13 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [0.0.8] - (Unreleased)
+## [1.0.1] - (Unreleased)
+
+## [1.0.0] - (2024-01-20)
+
+### Changed
+
+- Version number, for first official release
 
 ## [0.0.7] - (2024-01-20)
 
