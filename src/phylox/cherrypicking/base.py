@@ -399,7 +399,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
             (
                 new_parent_of_x,
                 node_x,
-                {LENGTH_ATTR: length_incoming_x - height_pair_x},
+                {LENGTH_ATTR: height_pair_x},
             ),  # "no_of_trees": no_of_trees_incoming_x + len(red_trees)
             (
                 new_parent_of_y,
@@ -533,7 +533,7 @@ class CherryPickingMixin:
     @classmethod
     def from_cherry_picking_sequence(cls, sequence, heights=None, label_leaves=True):
         network = cls()
-        heights = heights or [[1, 1]] * len(sequence)
+        heights = heights or [[h, h] for h in range(1,len(sequence)+1)]
         for pair, height in zip(reversed(sequence), reversed(heights)):
             add_pair(
                 network, *pair, height=height, inplace=True, nodes_by_label=label_leaves

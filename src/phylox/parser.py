@@ -68,7 +68,7 @@ def dinetwork_to_extended_newick(network):
 
         children_strings = []
         for child in cut_network.successors(node):
-            child_str = node_to_newick(child)
+            child_str = str(node_to_newick(child))
             if has_bootstraps or has_probabilities:
                 length = cut_network[node][child].get(LENGTH_ATTR, "")
                 bootstrap = cut_network[node][child].get("bootstrap", "")
