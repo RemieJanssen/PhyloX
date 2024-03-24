@@ -3,10 +3,13 @@ import unittest
 import pytest
 
 from phylox import DiNetwork
+from phylox.classes import is_orchard
 from phylox.classes.dinetwork import is_stack_free
 from phylox.generators.mcmc import sample_mcmc_networks
+from phylox.generators.randomTC import generate_network_random_tree_child_sequence
 from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.movetype import MoveType
+
 
 
 class TestMCMCSamples(unittest.TestCase):
@@ -169,3 +172,23 @@ class TestMCMCSamples(unittest.TestCase):
             self.assertTrue(is_isomorphic(sample1, sample2))
         for sample1, sample3 in zip(samples1, samples3):
             self.assertFalse(is_isomorphic(sample1, sample3))
+
+    def test_main_example_docs(self):
+        # Generate an arbitrary orchard network with 10 leaves and 5 reticulations
+        start_network = generate_network_random_tree_child_sequence(10, 5, seed=4321)
+        # Generate 100 orchard networks with 10 leaves and 5 reticulations
+        sampled_networks = sample_mcmc_networks(
+            start_network,
+            {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
+            number_of_samples=100,
+            burn_in=5,
+            restriction_map=is_orchard,
+            seed=1234,
+            add_root_if_necessary=True,
+            correct_symmetries=False,
+        )
+        # do not test the writing part of the example
+        # # Write the sampled networks to a file
+        # with open("sampled_networks.nwk", "w") as f:
+        #     for network in sampled_networks:
+        #         f.write(network.newick() + "\n")
