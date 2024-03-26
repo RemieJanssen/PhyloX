@@ -51,16 +51,17 @@ The final code looks like this:
    from phylox.rearrangement.move import MoveType
 
    # Generate an arbitrary orchard network with 10 leaves and 5 reticulations
-   start_network = generate_network_random_tree_child_sequence(10, 5)
-   # Generate 1000 orchard networks with 10 leaves and 5 reticulations
+   start_network = generate_network_random_tree_child_sequence(10, 5, seed=4321)
+   # Generate 100 orchard networks with 10 leaves and 5 reticulations
    sampled_networks = sample_mcmc_networks(
       start_network, 
       {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
       number_of_samples=100, 
-      burn_in=100,
+      burn_in=5,
       restriction_map=is_orchard, 
       seed=1234,
       add_root_if_necessary=True,
+      correct_symmetries=False,
    )
    # Write the sampled networks to a file
    with open("sampled_networks.nwk", "w") as f:

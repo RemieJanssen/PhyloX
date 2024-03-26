@@ -262,12 +262,13 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
         """
         return self.out_degree(node) > 1 and self.in_degree(node) <= 1
 
-    def newick(self):
+    def newick(self, simple=False):
         """
         Returns a newick string representing the network.
 
+        :param simple: Boolean, indicating whether to create a simple newick string without parameters
         :return: a newick string.
         """
         from phylox.parser import dinetwork_to_extended_newick
 
-        return dinetwork_to_extended_newick(self)
+        return dinetwork_to_extended_newick(self, simple=simple)

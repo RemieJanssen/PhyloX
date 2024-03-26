@@ -109,7 +109,7 @@ def random_tree_child_subsequence(seq, r, seed=None):
 
 @py_random_state("seed")
 def generate_network_random_tree_child_sequence(
-    leaves, reticulations, label_leaves=False, seed=None
+    leaves, reticulations, label_leaves=True, seed=None
 ):
     """
     Returns a random tree-child network with a given number of leaves and reticulations

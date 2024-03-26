@@ -133,7 +133,7 @@ def sample_mcmc_networks(
     number_of_leaves = len(network.leaves)
     if add_root_if_necessary:
         for root in network.roots:
-            if network.out_degree(root) >= 1:
+            if network.out_degree(root) > 1:
                 new_root = find_unused_node(network)
                 network.add_edges_from([(new_root, root)])
                 root = new_root

@@ -67,7 +67,6 @@ def is_orchard(network):
     """
     if len(network) == 0:
         return True
-    leaves = network.leaves
     root = list(network.roots)[0]
 
     # make a copy and fix a root edge
@@ -77,6 +76,7 @@ def is_orchard(network):
         while new_node in network_copy.nodes:
             new_node -= 1
         network_copy.add_edge(new_node, root)
+    leaves = network_copy.leaves
 
     # try to reduce the network copy
     done = False

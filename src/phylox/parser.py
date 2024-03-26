@@ -7,13 +7,14 @@ from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
 
 
-def dinetwork_to_extended_newick(network):
+def dinetwork_to_extended_newick(network, simple=False):
     """
     Converts a phylogenetic network to a Newick string.
     The newick string has :length:bootstrap:probability annotations if any edge has a bootstrap or probability.
     If only lengths are available, the newick string has :length annotations.
 
     :param network: a phylogenetic network, i.e., a phylox DiNetwork.
+    :param simple: Boolean, indicating whether to create a simple newick string without parameters
     :return: a string in extended Newick format for phylogenetic networks.
 
     :example:
@@ -68,13 +69,13 @@ def dinetwork_to_extended_newick(network):
 
         children_strings = []
         for child in cut_network.successors(node):
-            child_str = node_to_newick(child)
-            if has_bootstraps or has_probabilities:
+            child_str = str(node_to_newick(child))
+            if (has_bootstraps or has_probabilities) and not simple:
                 length = cut_network[node][child].get(LENGTH_ATTR, "")
                 bootstrap = cut_network[node][child].get("bootstrap", "")
                 probability = cut_network[node][child].get("probability", "")
                 child_str += f":{length}:{bootstrap}:{probability}"
-            elif has_lengths:
+            elif has_lengths and not simple:
                 child_str += f":{cut_network[node][child].get(LENGTH_ATTR, '')}"
             children_strings.append(child_str)
 
