@@ -27,17 +27,6 @@ from phylox import DiNetwork
 from phylox.constants import LENGTH_ATTR, PROBABILITY_ATTR, LABEL_ATTR
 
 
-# For each choice of reticulation arcs, calculate the distance between all pairs of taxa
-# Add up all these distances for each pair, weighed by the probability of this embedded tree
-# The hyb rates are e^(-hybridization_rate*sum_for_pair-offset) for each pair.
-#####
-# Updating distances between pairs can be done smartly:
-#  for a speciation event, the distances simply increase by two times the time to speciation, and the new species copies the distances from its sister species
-#  for an extinction event, the distances simply increase by two times the time to speciation, and the distances to the extinct species are removed.
-#  for a HGT event, only the rates for the receiving taxon have to be updated. They can be computed from the distances to the receiving and the donating easily
-#  for a hyb event, all paths go via exactly one of the parent species, so we can use those distances again.
-# Updating hybridization rates is done within the generate_heath_network function
-
 def gamma_distribution_pdf(value, mean, shape):
     """
     A reparameterization of the Gamma Distribution from scipy stats,
@@ -194,6 +183,17 @@ def suppress_degree_two_nodes(network):
     network.remove_nodes_from(to_remove)
     return network
 
+
+# For each choice of reticulation arcs, calculate the distance between all pairs of taxa
+# Add up all these distances for each pair, weighed by the probability of this embedded tree
+# The hyb rates are e^(-hybridization_rate*sum_for_pair-offset) for each pair.
+#####
+# Updating distances between pairs can be done smartly:
+#  for a speciation event, the distances simply increase by two times the time to speciation, and the new species copies the distances from its sister species
+#  for an extinction event, the distances simply increase by two times the time to speciation, and the distances to the extinct species are removed.
+#  for a HGT event, only the rates for the receiving taxon have to be updated. They can be computed from the distances to the receiving and the donating easily
+#  for a hyb event, all paths go via exactly one of the parent species, so we can use those distances again.
+# Updating hybridization rates is done within the generate_heath_network function
 @np_random_state("seed")
 def generate_heath_network(
     time_limit=1.0,
