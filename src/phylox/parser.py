@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from phylox import DiNetwork
 from phylox.base import find_unused_node
-from phylox.constants import LABEL_ATTR, LENGTH_ATTR, RETIC_PREFIX
+from phylox.constants import LABEL_ATTR, LENGTH_ATTR, PROBABILITY_ATTR, RETIC_PREFIX
 
 
 def dinetwork_to_extended_newick(network, simple=False):
@@ -57,7 +57,7 @@ def dinetwork_to_extended_newick(network, simple=False):
         "bootstrap" in cut_network[parent][child] for parent, child in cut_network.edges
     )
     has_probabilities = any(
-        "probability" in cut_network[parent][child]
+        PROBABILITY_ATTR in cut_network[parent][child]
         for parent, child in cut_network.edges
     )
 
@@ -73,7 +73,7 @@ def dinetwork_to_extended_newick(network, simple=False):
             if (has_bootstraps or has_probabilities) and not simple:
                 length = cut_network[node][child].get(LENGTH_ATTR, "")
                 bootstrap = cut_network[node][child].get("bootstrap", "")
-                probability = cut_network[node][child].get("probability", "")
+                probability = cut_network[node][child].get(PROBABILITY_ATTR, "")
                 child_str += f":{length}:{bootstrap}:{probability}"
             elif has_lengths and not simple:
                 child_str += f":{cut_network[node][child].get(LENGTH_ATTR, '')}"
@@ -97,7 +97,7 @@ def _split_reticulation_node(network, node, retic_id):
     """
 
     parents = [
-        (parent, network[parent][node].get("probability", 0))
+        (parent, network[parent][node].get(PROBABILITY_ATTR, 0))
         for parent in network.predecessors(node)
     ]
     parents.sort(key=lambda x: -x[1])
@@ -116,9 +116,9 @@ def _split_reticulation_node(network, node, retic_id):
         bootstrap = network[parent][node].get("bootstrap")
         if bootstrap is not None:
             network[parent][new_node]["bootstrap"] = bootstrap
-        probability = network[parent][node].get("probability")
+        probability = network[parent][node].get(PROBABILITY_ATTR)
         if probability is not None:
-            network[parent][new_node]["probability"] = probability
+            network[parent][new_node][PROBABILITY_ATTR] = probability
         network.remove_edge(parent, node)
     return network
 
@@ -195,14 +195,14 @@ def _json_to_dinetwork(json, network=None, root_node=None):
     node_attrs = _label_and_attrs_to_dict(json["label_and_attr"])
     node = json.get("retic_id") or root_node or find_unused_node(network)
     network.add_node(node)
-    if "label" in node_attrs:
-        network.nodes[node]["label"] = node_attrs["label"]
+    if LABEL_ATTR in node_attrs:
+        network.nodes[node][LABEL_ATTR] = node_attrs[LABEL_ATTR]
     for child_dict in json.get("children", []):
         child_attrs = _label_and_attrs_to_dict(child_dict["label_and_attr"])
         child_attrs_without_label_and_children = {
             k: v
             for k, v in child_attrs.items()
-            if k not in ("label", "children", "retic_id")
+            if k not in (LABEL_ATTR, "children", "retic_id")
         }
         child = child_attrs.get("retic_id", find_unused_node(network))
         network.add_edge(node, child, **child_attrs_without_label_and_children)
@@ -217,26 +217,26 @@ def _label_and_attrs_to_dict(label_and_attrs):
     For example, the string "A:1.1:0.9:0.8" is converted to
     {"label": "A", "length": 1.1, "bootstrap": 0.9, "probability": 0.8}
     """
-    attrs_dict = {"label": label_and_attrs}
+    attrs_dict = {LABEL_ATTR: label_and_attrs}
     if ":" in label_and_attrs:
         label = label_and_attrs.split(":")[0]
         attrs = label_and_attrs.split(":")[1:]
         if len(attrs) == 1:
             attrs_dict = {
-                "label": label,
-                "length": float(attrs[0]),
+                LABEL_ATTR: label,
+                LENGTH_ATTR: float(attrs[0]),
             }
         elif len(attrs) == 3:
             attrs_dict = {
-                "label": label,
-                "length": float(attrs[0]),
+                LABEL_ATTR: label,
+                LENGTH_ATTR: float(attrs[0]),
                 "bootstrap": float(attrs[1]),
-                "probability": float(attrs[2]),
+                PROBABILITY_ATTR: float(attrs[2]),
             }
-    if "#" in attrs_dict["label"]:
-        label, retic_id = attrs_dict["label"].split("#")
-        attrs_dict["label"] = label
+    if "#" in attrs_dict[LABEL_ATTR]:
+        label, retic_id = attrs_dict[LABEL_ATTR].split("#")
+        attrs_dict[LABEL_ATTR] = label
         attrs_dict["retic_id"] = RETIC_PREFIX + retic_id[1:]
-    if "label" in attrs_dict and attrs_dict["label"] == "":
-        attrs_dict.pop("label")
+    if LABEL_ATTR in attrs_dict and attrs_dict[LABEL_ATTR] == "":
+        attrs_dict.pop(LABEL_ATTR)
     return attrs_dict

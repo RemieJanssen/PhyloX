@@ -135,7 +135,7 @@ def parse_args():
         help="Shape parameter for the update gamma distribution",
     )
     parser.add_argument(
-        "-s", "--simple", action="store_true", help="Enable simple output"
+        "-s", "--simple", action="store_true", help="Enable simple output: i.e. less print statements"
     )
 
     args = parser.parse_args()
