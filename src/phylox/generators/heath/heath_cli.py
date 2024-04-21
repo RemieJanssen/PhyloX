@@ -9,26 +9,27 @@ import numpy as np
 import scipy.stats
 
 # from AddEdgesToTree import *
-from phylox.generators.heath.heath import RestrictToLeafSet, generate_heath_network
+from phylox.generators.heath.heath import restrict_network_to_leaf_set, generate_heath_network
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="""
         Runs a speciation-extinction-HGT-hybridization model for the given time (--time) or until a certain number of extant taxa (--taxa) is reached. If all lineages go extinct before the given time is reached, another attempt is made.
-        
-        Each extant taxon has its own speciation, HGT, and extinction rates (1/mean_time_until_next_event). 
-        
-        The hybridization rate of a pair of species is a function of the weighed distance between these species (sum of all up-down distances, weighed by their probability). 
-        
-        There are prior speciation/extinction/HGT rate distributions: gamma distributions with a given mean and a shape parameter for speciation (--speciation_parameters) and extinction (--extinction_parameters), HGT is turned off by default. 
-        
-        If a HGT event happens for a given taxon, another taxon (including itself) is chosen uniformly at random to donate genetic material (uniformly distributed contribution in [0,max_hgt] where max_hgt is determined by the --hgt_inheritance parameter). After speciation or hybridization, each rate of the new lineages is set by multiplying the (weighted mean) rate of the parent lineage(s) by a gamma-distributed factor with mean 1 and a shape parameter (--update-shape-parameter), and then accepting this rate with a probability proportional to the prior distribution for this rate. This gives an ultrametric network on the extant species.
-        
+
+        Each extant taxon has its own speciation, HGT, and extinction rates (1/mean_time_until_next_event).
+
+        The hybridization rate of a pair of species is a function of the weighed distance between these species (sum of all up-down distances, weighed by their probability).
+
+        There are prior speciation/extinction/HGT rate distributions: gamma distributions with a given mean and a shape parameter for speciation (--speciation_parameters) and extinction (--extinction_parameters), HGT is turned off by default.
+
+        If an HGT event happens for a given taxon, another taxon (including itself) is chosen uniformly at random to donate genetic material (uniformly distributed contribution in [0,max_hgt] where max_hgt is determined by the --hgt_inheritance parameter). After speciation or hybridization, each rate of the new lineages is set by multiplying the (weighted mean) rate of the parent lineage(s) by a gamma-distributed factor with mean 1 and a shape parameter (--update-shape-parameter), and then accepting this rate with a probability proportional to the prior distribution for this rate. This gives an ultrametric network on the extant species.
+
         Optional arguments:
-            -ti or --time followed by the total length (float) for the network. 
+            -ti or --time followed by the total length (float) for the network.
             -ta or --taxa followed by the number of taxa at which the simulation stops. If all lineages go extinct before the given number of taxa is reached, another attempt is made.
-            -ce or --count_extinct to also count the extinct taxa as part of the taxa limit.-oe or --only_extant to return the network restricted to the extant leaves
+            -ce or --count_extinct to also count the extinct taxa as part of the taxa limit.
+            -oe or --only_extant to return the network restricted to the extant leaves
         Rates:
             -sp or --speciation_parameters followed by a mean (float) and a shape parameter (float) for the gamma distribution of the speciation rate.
             -ext or --extinction_parameters followed by a mean (float) and a shape parameter (float) for the gamma distribution of the extinction rate.
@@ -41,16 +42,17 @@ def parse_args():
         right bound: r
         left rate:   rl
         right rate:  rr.
-        
-        |
-        lr+---
-        |     \
-        |      \
-        |       \
-        rr+      -----
-        |
-        0 +---+----+-----
-        0   l    r""",
+
+           |
+        lr +---
+           |   \\
+           |    \\
+           |     \\
+        rr +      -----
+           |
+         0 +---+----+-----
+           0   l    r
+        """,
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -73,6 +75,12 @@ def parse_args():
         "--count_extinct",
         action="store_true",
         help="Count extinct taxa as part of the taxa limit",
+    )
+    parser.add_argument(
+        "-oe",
+        "--only_extant",
+        action="store_true",
+        help="Return the generated network restricted to the extant leaves, by removing extinct species and cleaning up the network.",
     )
     parser.add_argument(
         "-sp",
@@ -133,6 +141,7 @@ def parse_args():
         "time_limit": args.time_limit,
         "taxa_limit": args.taxa_limit,
         "count_extinct": args.count_extinct,
+        "only_extant": args.only_extant,
         "speciation_rate_mean": args.speciation_parameters[0]
         if args.speciation_parameters
         else None,
@@ -170,6 +179,10 @@ def parse_args():
 
 
 def main():
+    """
+    A command line tool `phylox-generator-heath` for generating networks with the heath generator in this module.
+    Type `phylox-generator-heath --help` in the command line for usage guidance.
+    """
     params = parse_args()
     # Find a network
     if params["taxa_limit"]:
@@ -189,8 +202,8 @@ def main():
         network, hybrid_nodes, leaves, no_of_extinct = generate_heath_network(**params)
 
     # Restrict to extant leaves if wanted
-    if only_extant:
-        network = RestrictToLeafSet(network, leaves)
+    if params["only_extant"]:
+        network = restrict_network_to_leaf_set(network, leaves)
 
     for e in network.edges:
         info = ""

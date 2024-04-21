@@ -31,26 +31,38 @@ import scipy.stats
 #  for an extinction event, the distances simply increase by two times the time to speciation, and the distances to the extinct species are removed.
 #  for a HGT event, only the rates for the receiving taxon have to be updated. They can be computed from the distances to the receiving and the donating easily
 #  for a hyb event, all paths go via exactly one of the parent species, so we can use those distances again.
-def UpdateHybridizationRates():
+def update_hybridization_rates():
     return False
     # This is done within the CalculateNetwork function
 
 
-def GammaDistributionPDF(value, mean, shape):
+def gamma_distribution_pdf(value, mean, shape):
+    """
+    A reparameterization of the Gamma Distribution from scipy stats,
+    with mean parameter instead of a shape parameter.
+
+    """
     scale = mean / shape
     return scipy.stats.gamma.pdf(value, shape, 0, scale)
 
 
-def CalculateNewRate(parent_rate, prior_mean, prior_shape, update_shape):
+def update_rate(parent_rate, prior_mean, prior_shape, update_shape):
+    """
+    Generates the new value for a rate used in the Heath generator based on
+     - the current value,
+     - the multiplicative update factor `random.gammavariate(<update_shape>, 1 / <update_shape>)`
+     - the prior Gamma Distribution for the rate type `GammaDistributionPDF(rate_value, prior_mean, prior_shape)`
+    """
+
     proposed_rate = parent_rate * random.gammavariate(update_shape, 1 / update_shape)
-    if random.random() < GammaDistributionPDF(
+    if random.random() < gamma_distribution_pdf(
         proposed_rate, prior_mean, prior_shape
-    ) / GammaDistributionPDF(parent_rate, prior_mean, prior_shape):
+    ) / gamma_distribution_pdf(parent_rate, prior_mean, prior_shape):
         return proposed_rate
     return parent_rate
 
 
-def CalculateAllNewRates(
+def update_all_rates(
     parent_rates,
     update_shape,
     speciation_rate_mean,
@@ -62,30 +74,54 @@ def CalculateAllNewRates(
     hgt_rate_mean,
     hgt_rate_shape,
 ):
-    sp_rate = CalculateNewRate(
+    """
+    Updates all rates for the Heath generator using the `update_rate` function.
+    """
+    sp_rate = update_rate(
         parent_rates[0], speciation_rate_mean, speciation_rate_shape, update_shape
     )
     ext_rate = 0
     if ext_used:
-        ext_rate = CalculateNewRate(
+        ext_rate = update_rate(
             parent_rates[1], extinction_rate_mean, extinction_rate_shape, update_shape
         )
     hgt_rate = 0
     if hgt_used:
-        hgt_rate = CalculateNewRate(
+        hgt_rate = update_rate(
             parent_rates[2], hgt_rate_mean, hgt_rate_shape, update_shape
         )
     return (sp_rate, ext_rate, hgt_rate)
 
 
-def DistanceToRate(
+def graph_distance_to_hybridization_rate(
     distance,
     hybridization_left_bound,
     hybridization_right_bound,
     hybridization_left_rate,
     hybridization_right_rate,
 ):
-    # TODO Update this rate function, make it more of a gradual switch?
+    """
+    Returns a hybdridization rate for a given distance.
+    The distance represents the evolutionary distance between two extant species.
+    The function is used in the Heath generator to determine the hybdridization rate between two current taxa,
+    where the distance is a weighthed sum of all up-down distances between the two taxa in the current network.
+    The dependency on the distance takes the following shape:
+        left bound:  l
+        right bound: r
+        left rate:   rl
+        right rate:  rr.
+
+           |
+        lr +---
+           |   \\
+           |    \\
+           |     \\
+        rr +      -----
+           |
+         0 +---+----+-----
+           0   l    r
+    where the distance is on the x-axis, and the hybridization rate on the y-axis.
+    """
     if distance <= hybridization_left_bound:
         return hybridization_left_rate
     elif distance >= hybridization_right_bound:
@@ -97,7 +133,12 @@ def DistanceToRate(
     )
 
 
-def RestrictToLeafSet(network, leaves_to_keep, suppress_trivial_blobs=False):
+def restrict_network_to_leaf_set(network, leaves_to_keep):
+    """
+    Removes all leaves in the network that are not in the `leaves_to_keep` container.
+    Then cleans up the network, by iteratively removing out-degree 0 nodes that are not in the `leaves_to_keep` set, and suppressing in-degree 1 out-degree 1 nodes.
+    Modifies the network in place and returns it.
+    """
     # find leaves to remove
     leaves_to_keep = set(leaves_to_keep)
     remove_nodes = set()
@@ -114,18 +155,17 @@ def RestrictToLeafSet(network, leaves_to_keep, suppress_trivial_blobs=False):
             if network.out_degree(p) == 0:
                 remove_nodes.add(p)
 
-    # optionally: suppress biconnected components with indegree-1 and outdegree-1
-    if suppress_trivial_blobs:
-        # TODO: write this function.
-        # What to do with the length of the resulting arc? the blob may have multiple paths, do we average?
-        print("suppressing trivial blobs is not implemented yet")
-
     # suppress degree-2 nodes
-    network = SuppressDegree2(network)
+    network = suppress_degree_two_nodes(network)
     return network
 
 
-def SuppressDegree2(network):
+def suppress_degree_two_nodes(network):
+    """
+    Suppresses degree 2 (in-degree 1 out-degree 1) nodes of the network in place and
+    returns the network. The length of the new edge is the sum of the lengths of the old two edges.
+    If the bottom edge had a probability, then this probability is given to the new edge.
+    """
     to_remove = []
     to_check = set(list(network.nodes())[:])
     while to_check:
@@ -157,7 +197,7 @@ def generate_heath_network(
     speciation_rate_mean=2.0,
     speciation_rate_shape=2.0,
     ext_used=True,
-    count_extinct=0,
+    count_extinct=False,
     extinction_rate_mean=2.0,
     extinction_rate_shape=2.0,
     hgt_used=False,
@@ -171,6 +211,54 @@ def generate_heath_network(
     hybridization_right_rate=None,
     simple_output=False,
 ):
+    """
+    CURRENTLY DOES NOT RETURN A PHYLOX.NETWORK YET!
+    THE RANDOM GENERATOR IS ALSO NOT SEEDED YET!
+
+    Runs a speciation-extinction-HGT-hybridization model for the given time (`time_limit`)
+    or until a certain number of extant taxa (`taxa_limit`) is reached.
+    If all lineages go extinct before the given time is reached, another attempt is made.
+    Each extant taxon has its own speciation, HGT, and extinction rates (`rate=1/mean_time_until_next_event`).
+    Hybridization rates are `evolutionary distance` dependent, with a function determined by global parameters
+
+    There are prior speciation/extinction/HGT rate distributions:
+    gamma distributions with a given mean and a shape parameter for speciation
+    (`speciation_rate_mean` and `speciation_rate_shape`)
+    and extinction (`extinction_rate_mean` and `extinction_rate_shape`),
+    HGT (Horizontal gene transfer) is turned off by default, bu can be turned on by setting `hgt_used=True`.
+    This also requires you to set the paramaters for the HGT rate distribution (`hgt_rate_mean` and `hgt_rate_shape`).
+    Extinction can be turned off by setting `ext_used=False`.
+
+    If an HGT event happens for a given taxon, another taxon (including itself) is chosen
+    uniformly at random to donate genetic material (uniformly distributed contribution in `[0,max_hgt]`
+    where `max_hgt` is determined by the `hgt_inheritance`).
+
+    If hybridization is turned on (`hyb_used=True`), the hybdridization rate between two taxa
+    is calculated as a function of the distance between those taxa. This distance is a weighthed
+    sum of all up-down distances between the two taxa in the current network.
+    The dependency on the distance takes the following shape:
+        `hybridization_left_bound`:  l
+        `hybridization_right_bound`: r
+        `hybridization_left_rate`:   rl
+        `hybridization_right_rate`:  rr.
+
+           |
+        lr +---
+           |   \\
+           |    \\
+           |     \\
+        rr +      -----
+           |
+         0 +---+----+-----
+           0   l    r
+    where the distance is on the x-axis, and the hybridization rate on the y-axis.
+
+    After speciation or hybridization, each rate of the new lineages is set by multiplying the
+    (weighted mean) rate of the parent lineage(s) by a gamma-distributed factor with mean 1 and
+    a shape parameter (`update_shape`), and then accepting this rate with a probability
+    proportional to the prior distribution for this rate.
+    This gives an ultrametric network on the extant species.
+    """
     # Initiate the network
     nw = nx.DiGraph()
     nw.add_node(0)
@@ -234,7 +322,7 @@ def generate_heath_network(
                 random_number -= rates[0]
             if splitting_leaf == None:
                 if not simple_output:
-                    print("ouch, speciation rate computed wrong")
+                    print("error, speciation rate computed wrong")
             nw.add_weighted_edges_from(
                 [
                     (splitting_leaf, current_node, 0),
@@ -244,7 +332,7 @@ def generate_heath_network(
             )
             # Update the rates and distances
             # rates
-            leaf_rates[current_node] = CalculateAllNewRates(
+            leaf_rates[current_node] = update_all_rates(
                 leaf_rates[splitting_leaf],
                 update_shape,
                 speciation_rate_mean,
@@ -256,7 +344,7 @@ def generate_heath_network(
                 hgt_rate_mean,
                 hgt_rate_shape,
             )
-            leaf_rates[current_node + 1] = CalculateAllNewRates(
+            leaf_rates[current_node + 1] = update_all_rates(
                 leaf_rates[splitting_leaf],
                 update_shape,
                 speciation_rate_mean,
@@ -363,7 +451,7 @@ def generate_heath_network(
                 if not simple_output:
                     print("ouch, hgt rate computed wrong")
             if len(leaves) > 1:
-                hgt_donor_leaf = random.sample(leaves - set([hgt_acceptor_leaf]), 1)[0]
+                hgt_donor_leaf = random.sample(sorted(leaves - set([hgt_acceptor_leaf])), 1)[0]
                 for p in nw.predecessors(hgt_acceptor_leaf):
                     parent_acceptor = p
                 nw.add_weighted_edges_from(
@@ -382,7 +470,7 @@ def generate_heath_network(
                 no_of_hybrids += 1
                 # Update the rates and distances
                 # rates
-                leaf_rates[current_node + 1] = CalculateAllNewRates(
+                leaf_rates[current_node + 1] = update_all_rates(
                     tuple(
                         prob * x + (1 - prob) * y
                         for x, y in zip(
@@ -458,7 +546,7 @@ def generate_heath_network(
             # i.e.: pick two leaf nodes, create a hybrid between these two leaves
             random_number = random.random() * current_hybridization_rate
             for pair, distance in distances.items():
-                pair_rate = DistanceToRate(
+                pair_rate = graph_distance_to_hybridization_rate(
                     distance,
                     hybridization_left_bound,
                     hybridization_right_bound,
@@ -492,7 +580,7 @@ def generate_heath_network(
 
             # Update the rates and distances
             # rates
-            leaf_rates[current_node + 1] = CalculateAllNewRates(
+            leaf_rates[current_node + 1] = update_all_rates(
                 tuple(
                     prob * x + (1 - prob) * y
                     for x, y in zip(leaf_rates[hyb_pair[0]], leaf_rates[hyb_pair[1]])
@@ -583,7 +671,7 @@ def generate_heath_network(
         if hyb_used:
             for pair, distance in distances.items():
                 distances[pair] += 2 * extra_time
-                current_hybridization_rate += DistanceToRate(
+                current_hybridization_rate += graph_distance_to_hybridization_rate(
                     distances[pair],
                     hybridization_left_bound,
                     hybridization_right_bound,

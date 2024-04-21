@@ -53,8 +53,24 @@ precommit is yet to be configured, for now, simply run black and isort.
 ### Documentation
 
 Documentation is in the docs folder, and is created uses sphinx.
-to build the documentation, go to the docs folder and do:
+
+#### Requirements
+You may need to install the requirements from `docs/requirements.txt` first. Make sure to use python<=3.11.*, for example:
+```
+conda create -n phylox-sphinx
+conda activate phylox-sphinx
+python install python==3.11.*
+pip install -r docs/requirements.txt
+```
+
+#### Creating documentation
+to build the documentation, go to the docs folder and run:
 ```
 make html
 ```
 the docs will be in `docs/build/html`.
+
+If you re-run the build, you can first remove the old autosummary files. If you do not, it will not update them.
+
+
+
