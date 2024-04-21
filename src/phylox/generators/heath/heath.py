@@ -99,20 +99,22 @@ def graph_distance_to_hybridization_rate(
     The function is used in the Heath generator to determine the hybdridization rate between two current taxa,
     where the distance is a weighthed sum of all up-down distances between the two taxa in the current network.
     The dependency on the distance takes the following shape:
-        left bound:  l
-        right bound: r
-        left rate:   rl
-        right rate:  rr.
+     - hybridization_left_bound:  l
+     - hybridization_right_bound: r
+     - hybridization_left_rate:   rl
+     - hybridization_right_rate:  rr.
 
-    >>>       |
-    >>>    lr +---
-    >>>       |   \\
-    >>>       |    \\
-    >>>       |     \\
-    >>>    rr +      -----
-    >>>       |
-    >>>     0 +---+----+-----
-    >>>       0   l    r
+    ::
+
+           |
+        lr +---
+           |   \\
+           |    \\
+           |     \\
+        rr +      -----
+           |
+         0 +---+----+-----
+           0   l    r
 
     where the distance is on the x-axis, and the hybridization rate on the y-axis.
     """
@@ -245,15 +247,17 @@ def generate_heath_network(
      - `hybridization_left_rate`:   rl
      - `hybridization_right_rate`:  rr.
 
-    >>>       |
-    >>>    lr +---
-    >>>       |   \\
-    >>>       |    \\
-    >>>       |     \\
-    >>>    rr +      -----
-    >>>       |
-    >>>     0 +---+----+-----
-    >>>       0   l    r
+    ::
+
+           |
+        lr +---
+           |   \\
+           |    \\
+           |     \\
+        rr +      -----
+           |
+         0 +---+----+-----
+           0   l    r
 
     where the distance is on the x-axis, and the hybridization rate on the y-axis.
 
