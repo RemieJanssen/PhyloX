@@ -115,15 +115,16 @@ def graph_distance_to_hybridization_rate(
         left rate:   rl
         right rate:  rr.
 
-           |
-        lr +---
-           |   \\
-           |    \\
-           |     \\
-        rr +      -----
-           |
-         0 +---+----+-----
-           0   l    r
+    >>>       |
+    >>>    lr +---
+    >>>       |   \\
+    >>>       |    \\
+    >>>       |     \\
+    >>>    rr +      -----
+    >>>       |
+    >>>     0 +---+----+-----
+    >>>       0   l    r
+
     where the distance is on the x-axis, and the hybridization rate on the y-axis.
     """
     if distance <= hybridization_left_bound:
@@ -239,20 +240,21 @@ def generate_heath_network(
     is calculated as a function of the distance between those taxa. This distance is a weighthed
     sum of all up-down distances between the two taxa in the current network.
     The dependency on the distance takes the following shape:
-        `hybridization_left_bound`:  l
-        `hybridization_right_bound`: r
-        `hybridization_left_rate`:   rl
-        `hybridization_right_rate`:  rr.
+     - `hybridization_left_bound`:  l
+     - `hybridization_right_bound`: r
+     - `hybridization_left_rate`:   rl
+     - `hybridization_right_rate`:  rr.
 
-           |
-        lr +---
-           |   \\
-           |    \\
-           |     \\
-        rr +      -----
-           |
-         0 +---+----+-----
-           0   l    r
+    >>>       |
+    >>>    lr +---
+    >>>       |   \\
+    >>>       |    \\
+    >>>       |     \\
+    >>>    rr +      -----
+    >>>       |
+    >>>     0 +---+----+-----
+    >>>       0   l    r
+
     where the distance is on the x-axis, and the hybridization rate on the y-axis.
 
     After speciation or hybridization, each rate of the new lineages is set by multiplying the

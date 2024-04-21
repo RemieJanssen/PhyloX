@@ -14,14 +14,10 @@ phylox.generators.heath.heath
    .. autosummary::
       :toctree:
    
-      CalculateAllNewRates
-      CalculateNewRate
-      DistanceToRate
-      GammaDistributionPDF
-      RestrictToLeafSet
-      SuppressDegree2
-      UpdateHybridizationRates
-      generate_heath_network
+      gamma_distribution_pdf
+      graph_distance_to_hybridization_rate
+      restrict_network_to_leaf_set
+      suppress_degree_two_nodes
    
    
 

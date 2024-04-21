@@ -1,6 +1,6 @@
-phylox.generators.heath.heath.generate\_heath\_network
+phylox.generators.heath.heath.gamma\_distribution\_pdf
 ======================================================
 
 .. currentmodule:: phylox.generators.heath.heath
 
-.. autofunction:: generate_heath_network
+.. autofunction:: gamma_distribution_pdf
