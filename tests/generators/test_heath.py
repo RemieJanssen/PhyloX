@@ -39,6 +39,7 @@ class TestHeathNetwork(unittest.TestCase):
             hybridization_left_rate=0.1,
             hybridization_right_rate=0.05,
             simple_output=False,
+            seed=1,
         )
         self.assertGreaterEqual(len(network.leaves), taxa_limit)
 
