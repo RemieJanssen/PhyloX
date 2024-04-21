@@ -261,8 +261,10 @@ def generate_heath_network(
     proportional to the prior distribution for this rate.
     This gives an ultrametric network on the extant species.
 
-    Returns a network without leaf labels,
-    the set of hybrid nodes, the set of extant taxa, and the number of extinct taxa.
+    The random seed can be set with the `seed` parameter.
+
+    Returns a network without leaf labels, the set of hybrid nodes,
+    the set of extant taxa, and the number of extinct taxa.
     """
     # Initiate the network
     nw = DiNetwork()
