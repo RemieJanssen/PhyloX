@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MoveType(str, Enum):
     NONE = "NONE"
     TAIL = "TAIL"

@@ -17,6 +17,7 @@ from phylox.constants import LABEL_ATTR
 # Simulation functions
 ############################################
 
+
 # _a_n is a normalizing constant defined in
 # Equation (2) of Aldous1996 (so the sum of
 # the values is equal to 1. It is not

@@ -1,6 +1,11 @@
 import unittest
 
-from phylox.generators.heath.heath import graph_distance_to_hybridization_rate, suppress_degree_two_nodes, restrict_network_to_leaf_set, generate_heath_network
+from phylox.generators.heath.heath import (
+    graph_distance_to_hybridization_rate,
+    suppress_degree_two_nodes,
+    restrict_network_to_leaf_set,
+    generate_heath_network,
+)
 from phylox.isomorphism import is_isomorphic
 
 
@@ -30,8 +35,8 @@ class TestHeathNetwork(unittest.TestCase):
             hyb_used=True,
             hybridization_left_bound=0.05,
             hybridization_right_bound=0.1,
-            hybridization_left_rate=.1,
-            hybridization_right_rate=.05,
+            hybridization_left_rate=0.1,
+            hybridization_right_rate=0.05,
             simple_output=False,
         )
 

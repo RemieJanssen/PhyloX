@@ -451,7 +451,9 @@ def generate_heath_network(
                 if not simple_output:
                     print("ouch, hgt rate computed wrong")
             if len(leaves) > 1:
-                hgt_donor_leaf = random.sample(sorted(leaves - set([hgt_acceptor_leaf])), 1)[0]
+                hgt_donor_leaf = random.sample(
+                    sorted(leaves - set([hgt_acceptor_leaf])), 1
+                )[0]
                 for p in nw.predecessors(hgt_acceptor_leaf):
                     parent_acceptor = p
                 nw.add_weighted_edges_from(

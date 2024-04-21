@@ -8,7 +8,6 @@ PMID: 30703035 DOI: 10.1109/TCBB.2019.2895344
 Adapted by RemieJanssen to output networks with a given number of leaves and reticulations
 """
 
-
 import networkx as nx
 import numpy as np
 from networkx.utils.decorators import np_random_state, py_random_state

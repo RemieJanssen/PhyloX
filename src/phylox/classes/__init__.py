@@ -9,7 +9,6 @@ Originally written by Remie Janssen for the paper
 by Remie Janssen and Pengy Liu.
 """
 
-
 from .dinetwork import (
     is_binary,
     is_tree_based,

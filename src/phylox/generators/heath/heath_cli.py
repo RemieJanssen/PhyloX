@@ -9,7 +9,10 @@ import numpy as np
 import scipy.stats
 
 # from AddEdgesToTree import *
-from phylox.generators.heath.heath import restrict_network_to_leaf_set, generate_heath_network
+from phylox.generators.heath.heath import (
+    restrict_network_to_leaf_set,
+    generate_heath_network,
+)
 
 
 def parse_args():
@@ -142,35 +145,35 @@ def parse_args():
         "taxa_limit": args.taxa_limit,
         "count_extinct": args.count_extinct,
         "only_extant": args.only_extant,
-        "speciation_rate_mean": args.speciation_parameters[0]
-        if args.speciation_parameters
-        else None,
-        "speciation_rate_shape": args.speciation_parameters[1]
-        if args.speciation_parameters
-        else None,
-        "extinction_rate_mean": args.extinction_parameters[0]
-        if args.extinction_parameters
-        else None,
-        "extinction_rate_shape": args.extinction_parameters[1]
-        if args.extinction_parameters
-        else None,
+        "speciation_rate_mean": (
+            args.speciation_parameters[0] if args.speciation_parameters else None
+        ),
+        "speciation_rate_shape": (
+            args.speciation_parameters[1] if args.speciation_parameters else None
+        ),
+        "extinction_rate_mean": (
+            args.extinction_parameters[0] if args.extinction_parameters else None
+        ),
+        "extinction_rate_shape": (
+            args.extinction_parameters[1] if args.extinction_parameters else None
+        ),
         "ext_used": not args.no_extinction,
         "hgt_rate_mean": args.hgt_parameters[0] if args.hgt_parameters else None,
         "hgt_rate_shape": args.hgt_parameters[1] if args.hgt_parameters else None,
         "hgt_used": args.hgt_parameters is not None,
-        "hybridization_left_bound": args.hybridization_factor[0]
-        if args.hybridization_factor
-        else None,
+        "hybridization_left_bound": (
+            args.hybridization_factor[0] if args.hybridization_factor else None
+        ),
         "hgt_inheritance": args.hgt_inheritance,
-        "hybridization_right_bound": args.hybridization_factor[1]
-        if args.hybridization_factor
-        else None,
-        "hybridization_left_rate": args.hybridization_factor[2]
-        if args.hybridization_factor
-        else None,
-        "hybridization_right_rate": args.hybridization_factor[3]
-        if args.hybridization_factor
-        else None,
+        "hybridization_right_bound": (
+            args.hybridization_factor[1] if args.hybridization_factor else None
+        ),
+        "hybridization_left_rate": (
+            args.hybridization_factor[2] if args.hybridization_factor else None
+        ),
+        "hybridization_right_rate": (
+            args.hybridization_factor[3] if args.hybridization_factor else None
+        ),
         "hyb_used": args.hybridization_factor is not None,
         "update_shape": args.update_shape_parameter,
         "simple_output": args.simple,
