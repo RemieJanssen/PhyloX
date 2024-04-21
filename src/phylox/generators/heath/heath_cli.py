@@ -65,6 +65,7 @@ def parse_args():
         dest="time_limit",
         type=float,
         help="Total length for the network",
+        default=1.0,
     )
     parser.add_argument(
         "-ta",
@@ -92,6 +93,7 @@ def parse_args():
         type=float,
         metavar=("mean", "shape"),
         help="Mean and shape parameter for the gamma distribution of the speciation rate",
+        default=(2.0, 2.0),
     )
     parser.add_argument(
         "-ext",
@@ -100,6 +102,7 @@ def parse_args():
         type=float,
         metavar=("mean", "shape"),
         help="Mean and shape parameter for the gamma distribution of the extinction rate",
+        default=(1.0, 1.0)
     )
     parser.add_argument(
         "-noext",
@@ -119,6 +122,7 @@ def parse_args():
         "--hgt_inheritance",
         type=float,
         help="Maximum contribution of a donor taxon to the genome of the recipient taxon",
+        default=.05,
     )
     parser.add_argument(
         "-hyb",
@@ -133,9 +137,17 @@ def parse_args():
         "--update_shape_parameter",
         type=float,
         help="Shape parameter for the update gamma distribution",
+        default=2.0,
     )
     parser.add_argument(
-        "-s", "--simple", action="store_true", help="Enable simple output: i.e. less print statements"
+        "-s",
+        "--seed",
+        type=int,
+        help="Seed for the random generator",
+        default=1,
+    )
+    parser.add_argument(
+        "-si", "--simple", action="store_true", help="Enable simple output: i.e. less print statements"
     )
 
     args = parser.parse_args()
@@ -177,6 +189,7 @@ def parse_args():
         "hyb_used": args.hybridization_factor is not None,
         "update_shape": args.update_shape_parameter,
         "simple_output": args.simple,
+        "seed": args.seed,
     }
     return params
 
@@ -187,6 +200,8 @@ def main():
     Type `phylox-generator-heath --help` in the command line for usage guidance.
     """
     params = parse_args()
+    generator_params = {**params}
+    generator_params.pop("only_extant")
     # Find a network
     if params["taxa_limit"]:
         leaves = []
@@ -198,11 +213,11 @@ def main():
             if not params["simple_output"]:
                 print("starting over")
             network, hybrid_nodes, leaves, no_of_extinct = generate_heath_network(
-                **params
+                **generator_params
             )
     else:
-        print(params)
-        network, hybrid_nodes, leaves, no_of_extinct = generate_heath_network(**params)
+        print(generator_params)
+        network, hybrid_nodes, leaves, no_of_extinct = generate_heath_network(**generator_params)
 
     # Restrict to extant leaves if wanted
     if params["only_extant"]:
