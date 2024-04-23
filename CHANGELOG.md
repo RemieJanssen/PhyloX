@@ -16,6 +16,7 @@ Types of changes:
 ## [1.0.4] - (Unreleased)
 
 - Fixed main example from the documentation. (#42)
+- Cleaned up Heath network generator. (#48)
 
 ## [1.0.3] - (2024-01-20)
 
