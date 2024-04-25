@@ -74,7 +74,7 @@ PhyloX is equipped to handle all the aspects pf phylogenetic networks mentioned 
 
 ## I/O
 PhyloX handles all stages of a phylogenetic workflow involving networks. This starts and ends with input/output of networks. The [DiNetwork class](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.dinetwork.html), which is used to represent phylogenetic networks in PhyloX, inherits from the [DiGraph](https://networkx.org/documentation/stable/reference/classes/digraph.html) class of NetworkX [@SciPyProceedings_11]. Hence, `phylox.DiNetwork` objects can simply be created using the API of `networkx.DiGraph`, and adding labels to the leaves:
-```
+```python
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
 
@@ -85,7 +85,7 @@ network.nodes[3][LABEL_ATTR] = "leaf2"
 ```
 
 The same can be achieved with a modified initialization of DiNetwork:
-```
+```python
 from phylox import DiNetwork
 
 network = DiNetwork(
@@ -96,7 +96,7 @@ network = DiNetwork(
 
 Alternatively, the network can be initialized from a Newick string with
 
-```
+```python
 from phylox import DiNetwork
 
 network = DiNetwork.from_newick("((leaf1,leaf2));")
@@ -105,9 +105,38 @@ network = DiNetwork.from_newick("((leaf1,leaf2));")
 For output, it is also possible to use functionality from NetworkX. For example, it is possible to output the list of edges or to create a drawing of the network. Of course, output as Newick string is also available with PhyloX with `network.newick()`. This outputs all edge information in rich Newick format by default, but can also be forced to output an extended Newick string without edge information.
 
 ## Generating networks
- - random seeds
- - many of the known phylogenetic network generators
-   - MCMC with classes [@klawitter2020spaces]
+Networks can also be generated randomly in PhyloX, which can be utilized to create test sets for new methods. The implemented generators are based on the code from [@janssen2021comparing]. These include generators based on evolutionary models, such as the [LGT generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.lgt.html) and the [ZODS generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.zods.html) based on [@pons2019generation] and [@zhang2018bayesian], but also a [Metropolis-Hastings sampler] enabling uniform sampling from classes of networks.
+
+The latter makes use of a large part of the functionality of PhyloX, especially when sampling orchard networks: after generating or choosing a starting network, the []`phylox.generators.mcmc.sample_mcmc_networks`](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.mcmc.html) randomly traverses the space of phylogenetic networks using the [rearrangement module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.rearrangement.html), and rejects proposals if the resulting network is not orchard using the [cherry-picking module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.html).
+
+```python
+from phylox.generators.randomTC import generate_network_random_tree_child_sequence
+from phylox.generators.mcmc import sample_mcmc_networks
+from phylox.classes import is_orchard
+from phylox.rearrangement.move import MoveType
+
+# Generate an arbitrary orchard network with 10 leaves and 5 reticulations
+start_network = generate_network_random_tree_child_sequence(10, 5, seed=4321)
+# Generate 100 orchard networks with 10 leaves and 5 reticulations
+sampled_networks = sample_mcmc_networks(
+  start_network,
+  {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
+  number_of_samples=100,
+  burn_in=5,
+  restriction_map=is_orchard,
+  add_root_if_necessary=True,
+  correct_symmetries=False,
+  seed=1234,
+)
+# Write the sampled networks to a file
+with open("sampled_networks.nwk", "w") as f:
+  for network in sampled_networks:
+      f.write(network.newick() + "\n")
+```
+
+For this sampler to work correctly, the space of networks that is sampled from needs to be connected. That is, it has to be possible to transform each network into each other network in the space using the selected rearrangement moves. In the example above, this means that the space of orchard network with 10 leaves and 5 reticulations needs to be connected under tail moves and head moves (i.e. rSPR moves).
+
+This is something the user needs to check or prove themselves, as it is not viable to check this computationally. Fortunately, such connectivity results have been studied in detail [@klawitter2020spaces; @thesis_janssen; @van2022orchard; @ERDOS2021205]. For example, the result needed to prove that this example is correct can be found in [@van2022orchard].
 
 
 ## Comparing networks
