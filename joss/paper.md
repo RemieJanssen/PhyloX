@@ -12,7 +12,7 @@ authors:
 affiliations:
  - name: National Institute for Public Health and the Environment, Bioinformatics and Computing group, Bilthoven, The Netherlands
    index: 1
-date: \today
+date: 25 April 2024
 bibliography: paper.bib
 ---
 
@@ -64,7 +64,7 @@ To test phylogenetic network methods, one either needs to source or create a tes
 The paper [@janssen2021comparing] contains a comparison of several 'generators', including several previously existing ones (e.g., [@pons2019generation] and [@zhang2018bayesian]) and a new extention of a tree generator to networks.
 
 ## Representing networks
-There are some common representations of phylogenetic networks. As they are graphs, there is the obvious option to represent them as a list of edges. Another commonly used representation is the extended Newick format [@cardona2008extended]. The extended Newick notation has a further extension (Rich Newick format) that adds numerical parameters to the edges of the network, such as the branch length, and the inheritance probability (for incoming edges of a reticulation node) [@riceRichNewick; @wen2018inferring].
+Because phylogenetic networks are graphs, a common representation is as a list of edges. Another commonly used representation is the extended Newick format [@cardona2008extended]. The extended Newick notation has a further extension (Rich Newick format) that adds numerical parameters to the edges of the network, such as the branch length, and the inheritance probability (for incoming edges of a reticulation node) [@riceRichNewick; @wen2018inferring].
 
 
 
@@ -73,9 +73,36 @@ There are some common representations of phylogenetic networks. As they are grap
 PhyloX is equipped to handle all the aspects pf phylogenetic networks mentioned in the previous section. It is written primarily for explorative research into algorithmic aspects of phylogenetic networks, although application focused implementations can also be realized with it. An example is the software [@https://doi.org/10.4121/c679cd3c-0815-4021-a727-bcb8b9174b27.v1] for the paper [@bernardini2023constructing], which uses cherry-picking methods in combination with machine learning to efficiently combine a large number of trees into a phylogenetic network. This software shares some of its basic code with the [cherrypicking module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.html) and the [generators module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.html) of PhyloX.
 
 ## I/O
-- similar to networkx, but with labels
-- from/to newick
-- images (networkx)
+PhyloX handles all stages of a phylogenetic workflow involving networks. This starts and ends with input/output of networks. The [DiNetwork class](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.dinetwork.html), which is used to represent phylogenetic networks in PhyloX, inherits from the [DiGraph](https://networkx.org/documentation/stable/reference/classes/digraph.html) class of NetworkX [@SciPyProceedings_11]. Hence, `phylox.DiNetwork` objects can simply be created using the API of `networkx.DiGraph`, and adding labels to the leaves:
+```
+from phylox import DiNetwork
+from phylox.constants import LABEL_ATTR
+
+network = DiNetwork()
+network.add_edges_from(((0,1),(1,2),(1,3)))
+network.nodes[2][LABEL_ATTR] = "leaf1"
+network.nodes[3][LABEL_ATTR] = "leaf2"
+```
+
+The same can be achieved with a modified initialization of DiNetwork:
+```
+from phylox import DiNetwork
+
+network = DiNetwork(
+    edges=((0,1),(1,2),(1,3)),
+    labels=[(2,"leaf1"), (3,"leaf2")]
+)
+```
+
+Alternatively, the network can be initialized from a Newick string with
+
+```
+from phylox import DiNetwork
+
+network = DiNetwork.from_newick("((leaf1,leaf2));")
+```
+
+For output, it is also possible to use functionality from NetworkX. For example, it is possible to output the list of edges or to create a drawing of the network. Of course, output as Newick string is also available with PhyloX with `network.newick()`. This outputs all edge information in rich Newick format by default, but can also be forced to output an extended Newick string without edge information.
 
 ## Generating networks
  - random seeds
