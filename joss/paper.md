@@ -12,7 +12,7 @@ authors:
 affiliations:
  - name: National Institute for Public Health and the Environment, Bioinformatics and Computing group, Bilthoven, The Netherlands
    index: 1
-date: 12 January 2024
+date: \today
 bibliography: paper.bib
 ---
 
@@ -20,7 +20,10 @@ bibliography: paper.bib
 
 PhyloX is a Python package with tools for generating, manipulating, and analyzing phylogenetic networks. It uses the NetworkX package [@SciPyProceedings_11] for basic graph operations. This has the added benefit that the powerful graph tools from NetworkX can be used directly on the phylogenetic networks as well. The aim of the package is to be of general use to phylogenetic network researchers, with a current focus on I/O, random generation of networks, cherry-picking methods, rearrangement operations, and the identification of classes and properties of networks.
 
+
+
 # Phylogenetic networks
+
 In the study of the evolutionary history of biological species and languages, it is common to represent putative histories using graphs. Traditionally, at least in biology, these graphs were most often trees, such as the well known tree drawn by Charles Darwin in one of his notebooks. A tree like this called a phylogenetic tree. In some cases, the evolutionary history includes complex processes like horizontal gene transfer and hybridization. These processes cause a *reticulate* (i.e. network-like) structure in the evolutionary history, which requires phylogenetic networks to be used for representing the evolutionary histories.
 
 A *directed phylogenetic network* (e.g., [@huson2010phylogenetic]) is a directed acyclic graph with four types of nodes:
@@ -63,9 +66,11 @@ The paper [@janssen2021comparing] contains a comparison of several 'generators',
 ## Representing networks
 There are some common representations of phylogenetic networks. As they are graphs, there is the obvious option to represent them as a list of edges. Another commonly used representation is the extended Newick format [@cardona2008extended]. The extended Newick notation has a further extension (Rich Newick format) that adds numerical parameters to the edges of the network, such as the branch length, and the inheritance probability (for incoming edges of a reticulation node) [@riceRichNewick; @wen2018inferring].
 
+
+
 # PhyloX Functionality
 
-PhyloX is equipped to handle all the aspects pf phylogenetic networks mentioned in the previous section.
+PhyloX is equipped to handle all the aspects pf phylogenetic networks mentioned in the previous section. It is written primarily for explorative research into algorithmic aspects of phylogenetic networks, although application focused implementations can also be realized with it. An example is the software [@https://doi.org/10.4121/c679cd3c-0815-4021-a727-bcb8b9174b27.v1] for the paper [@bernardini2023constructing], which uses cherry-picking methods in combination with machine learning to efficiently combine a large number of trees into a phylogenetic network. This software shares some of its basic code with the [cherrypicking module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.html) and the [generators module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.html) of PhyloX.
 
 ## I/O
 - similar to networkx, but with labels
@@ -84,10 +89,10 @@ Based on all the properties above, PhyloX provides a toolkit to compare networks
 
 
 # Statement of Need
+
 Currently, there is no Python package that enables a full workflow for analysing properties and methods of phylogenetic networks. Isolated scripts for this purpose do appear on GitHub or as pseudo-code regularly, most often as part of publications studying one method or one property [@zhang2018bayesian; @pons2019generation; @janssen2020combining; @janssen2020linear; @janssen2021rearranging]. Combining such scripts requires substantial work, for example because the phylogenetic networks themselves are represented by different Python classes with their own methods.
 
 This package, PhyloX, aims to bring these scripts together: it standardizes implementations of several basic objects related to phylogenetic networks, such as the networks themselves, the labelling of the nodes, and rearrangement moves. It currently implements a limited but important set of basic functions: I/O for networks (e.g. lists of edges and extended newick format), network generation for test sets, comparing networks resulting from reconstruction methods, and computing several well-used network properties such as the reticulation number, the level, and the number of cherries.
-
 
 ## Related packages
 As mentioned above, there are currently no Python packages that enable a complete workflow for phylogenetic networks. However, some Python packages are available that enable part of this workflow or a very similar one. In this section, we compare the functionality of several of these packages to PhyloX, focussing only on usability for phylogenetic networks.
@@ -106,12 +111,16 @@ This phylogenetics module, [Phylo](https://biopython.org/wiki/Phylo) [@talevich2
 Like Biopython's phylogenetics package, the [DendroPy](https://github.com/jeetsukumaran/DendroPy) package focuses on phylogenetic trees [@sukumaran2010dendropy]. Unlike Biopython, the implementation of the trees in DendroPy is graph based, making it more suited for analyses of phylogenetic networks. This could still require large changes, as some properties of trees are built into the code on a fairly fundamental level, such as each node having (at most one) [parent node](https://github.com/jeetsukumaran/DendroPy/blob/cc82ab774ed83831b5c5125278d88c3c614c2d8a/src/dendropy/datamodel/treemodel/_node.py#L55C14-L55C26).
 
 
+
 # Availability
+
 The code of PhyloX is available as an open source project on [GitHub](https://github.com/RemieJanssen/PhyloX) under the BSD 3-Clause license. The package is also available via [PyPI](https://pypi.org/project/phylox/), so it can be installed via pip (or pip in conda), and updates to the release branch are automatically converted into new versions of the package. The releases are recorded in [Zenodo](https://zenodo.org/records/10122404) so persistent identifiers can be used to cite specific releases of the software. When citing this software, please make sure to also cite the original source of the code, which is mentioned in the [documentation](https://phylox.readthedocs.io/) of each method or class.
 
 \section{Acknowledgements}
 Most of the code has been written in the form of separate scripts during the author's PhD project, which was conducted under Leo van Iersel's \orcidlink{0000-0001-7142-4706} Vidi grant: 639.072.6
 
 Anyone willing to contribute is very welcome to do so via pull requests and issues on GitHub!
+
+
 
 # References
