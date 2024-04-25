@@ -107,8 +107,7 @@ For output, it is also possible to use functionality from NetworkX. For example,
 ## Generating networks
 Networks can also be generated randomly in PhyloX, which can be utilized to create test sets for new methods. The implemented generators are based on the code from [@janssen2021comparing]. These include generators based on evolutionary models, such as the [LGT generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.lgt.html) and the [ZODS generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.zods.html) based on [@pons2019generation] and [@zhang2018bayesian], but also a [Metropolis-Hastings sampler] enabling uniform sampling from classes of networks.
 
-The latter makes use of a large part of the functionality of PhyloX, especially when sampling orchard networks: after generating or choosing a starting network, the []`phylox.generators.mcmc.sample_mcmc_networks`](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.mcmc.html) randomly traverses the space of phylogenetic networks using the [rearrangement module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.rearrangement.html), and rejects proposals if the resulting network is not orchard using the [cherry-picking module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.html).
-
+The latter makes use of a large part of the functionality of PhyloX, especially when sampling orchard networks: after generating or choosing a starting network, the [`phylox.generators.mcmc.sample_mcmc_networks`](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.mcmc.html) randomly traverses the space of phylogenetic networks using the [rearrangement module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.rearrangement.html), and rejects proposals if the resulting network is not orchard using the [cherry-picking module](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.html).
 ```python
 from phylox.generators.randomTC import generate_network_random_tree_child_sequence
 from phylox.generators.mcmc import sample_mcmc_networks
@@ -119,25 +118,24 @@ from phylox.rearrangement.move import MoveType
 start_network = generate_network_random_tree_child_sequence(10, 5, seed=4321)
 # Generate 100 orchard networks with 10 leaves and 5 reticulations
 sampled_networks = sample_mcmc_networks(
-  start_network,
-  {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
-  number_of_samples=100,
-  burn_in=5,
-  restriction_map=is_orchard,
-  add_root_if_necessary=True,
-  correct_symmetries=False,
-  seed=1234,
+    start_network,
+    {MoveType.TAIL: 0.5, MoveType.HEAD: 0.5},
+    number_of_samples=100,
+    burn_in=5,
+    restriction_map=is_orchard,
+    add_root_if_necessary=True,
+    correct_symmetries=False,
+    seed=1234,
 )
 # Write the sampled networks to a file
 with open("sampled_networks.nwk", "w") as f:
-  for network in sampled_networks:
-      f.write(network.newick() + "\n")
+    for network in sampled_networks:
+        f.write(network.newick() + "\n")
 ```
 
 For this sampler to work correctly, the space of networks that is sampled from needs to be connected. That is, it has to be possible to transform each network into each other network in the space using the selected rearrangement moves. In the example above, this means that the space of orchard network with 10 leaves and 5 reticulations needs to be connected under tail moves and head moves (i.e. rSPR moves).
 
 This is something the user needs to check or prove themselves, as it is not viable to check this computationally. Fortunately, such connectivity results have been studied in detail [@klawitter2020spaces; @thesis_janssen; @van2022orchard; @ERDOS2021205]. For example, the result needed to prove that this example is correct can be found in [@van2022orchard].
-
 
 ## Comparing networks
 Based on all the properties above, PhyloX provides a toolkit to compare networks. For example, it can be used to determine whether two networks are [isomorphic](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.isomorphism.base.is_isomorphic.html#phylox.isomorphism.base.is_isomorphic) (i.e., the same); whether they have the same [properties](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.networkproperties.html): level, number of blobs, reticulation number, and number of (reticulated) cherries; whether one is [contained](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.cherrypicking.tree_child_sequences.html#phylox.cherrypicking.tree_child_sequences.tree_child_network_contains) in the other, if both are tree-child; and whether they are similar with respect to a [rearangement distance](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.rearrangement.exact_distance.html#module-phylox.rearrangement.exact_distance).
