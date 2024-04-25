@@ -102,7 +102,7 @@ from phylox import DiNetwork
 network = DiNetwork.from_newick("((leaf1,leaf2));")
 ```
 
-For output, it is also possible to use functionality from NetworkX. For example, it is possible to output the list of edges or to create a drawing of the network. Of course, output as Newick string is also available with PhyloX with `network.newick()`. This outputs all edge information in rich Newick format by default, but can also be forced to output an extended Newick string without edge information.
+For output, it is also possible to use functionality from NetworkX. For example, it is possible to output the list of edges or to create a drawing of the network. Of course, output as Newick string is also available with PhyloX (with `network.newick()` for a network called `network` as in the example code blocks above). This outputs all edge information in rich Newick format by default, but can also be forced to output an extended Newick string without edge information.
 
 ## Generating networks
 Networks can also be generated randomly in PhyloX, which can be utilized to create test sets for new methods. The implemented generators are based on the code from [@janssen2021comparing]. These include generators based on evolutionary models, such as the [LGT generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.lgt.html) and the [ZODS generator](https://phylox.readthedocs.io/en/v1.0.3/_autosummary/phylox.generators.zods.html) based on [@pons2019generation] and [@zhang2018bayesian], but also a [Metropolis-Hastings sampler] enabling uniform sampling from classes of networks.
