@@ -17,9 +17,12 @@ git clone git@github.com:<your_github_username>/PhyloX.git
 cd phylox
 git checkout -b [yourname]-[description_of_branch]
 ```
-Then make some changes and push the branch. In the resulting output, there should be a link to github for opening a pull request for your newly pushed branch. Make sure to set `RemieJanssen:main` as the base, i.e. the branch to merge into.
+
+Then make some changes and push the branch.
 ```
 git add [your changed file]
 git commit -m "[some message describing the changes]"
 git push -u origin [yourname]-[description_of_branch]
 ```
+
+Now create a merge request for your branch. Make sure to set `RemieJanssen/PhyloX:main` as the base, i.e. the branch to merge into. See [this page](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) on the GitHub docs for more guidance.
