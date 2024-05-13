@@ -227,12 +227,14 @@ def _label_and_attrs_to_dict(label_and_attrs):
                 LENGTH_ATTR: float(attrs[0]),
             }
         elif len(attrs) == 3:
-            attrs_dict = {
-                LABEL_ATTR: label,
-                LENGTH_ATTR: float(attrs[0]),
-                "bootstrap": float(attrs[1]),
-                PROBABILITY_ATTR: float(attrs[2]),
-            }
+            attrs_dict = {LABEL_ATTR: label}
+            if attrs[0]:
+                attrs_dict[LENGTH_ATTR] = float(attrs[0])
+            if attrs[1]:
+                attrs_dict["bootstrap"] = float(attrs[1])
+            if attrs[2]:
+                attrs_dict[PROBABILITY_ATTR] = float(attrs[2])
+
     if "#" in attrs_dict[LABEL_ATTR]:
         label, retic_id = attrs_dict[LABEL_ATTR].split("#")
         attrs_dict[LABEL_ATTR] = label

@@ -17,6 +17,8 @@ Types of changes:
 
 - Fixed main example from the documentation. (#42)
 - Cleaned up Heath network generator. (#48)
+- Added more context and description of PhyloX to the JOSS paper. (#52)
+- More robust Newick parser: allow empty properties. (#55)
 
 ## [1.0.3] - (2024-01-20)
 
