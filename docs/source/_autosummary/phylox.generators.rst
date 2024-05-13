@@ -28,6 +28,7 @@ phylox.generators
    :template: custom-module-template.rst
    :recursive:
 
+   phylox.generators.heath
    phylox.generators.lgt
    phylox.generators.mcmc
    phylox.generators.randomTC

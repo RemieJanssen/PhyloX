@@ -11,7 +11,6 @@ from phylox.isomorphism import is_isomorphic
 from phylox.rearrangement.movetype import MoveType
 
 
-
 class TestMCMCSamples(unittest.TestCase):
     def test_sample_no_moves(self):
         network = DiNetwork(

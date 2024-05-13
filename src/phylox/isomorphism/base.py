@@ -18,6 +18,7 @@ ISOMETRY_LABEL_PREFIX = "isometry_label_prefix_"
 #: The prefix used for automorphism labels.
 AUTOMORPHISM_LABEL_PREFIX = "automorphism_label_prefix_"
 
+
 # Checks whether the nodes with the given attributes have the same label
 def _same_isometry_labels(node1_attributes, node2_attributes):
     """
