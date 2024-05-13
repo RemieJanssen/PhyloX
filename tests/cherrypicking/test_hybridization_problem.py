@@ -7,6 +7,12 @@ from phylox.constants import LENGTH_ATTR
 
 
 class TestHybridizationProblem(unittest.TestCase):
+    def test_newick_input(self):
+        network = "(1,(2,3));"
+        problem = HybridizationProblem([network], newick_strings=True)
+        result = problem.CPSBound(progress=True)
+        self.assertEqual(len(result), 2)
+
     def test_one_tree(self):
         network = DiNetwork(
             edges=[(1, 2), (2, 3), (2, 4)],

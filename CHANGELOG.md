@@ -20,6 +20,7 @@ Types of changes:
 - Added more context and description of PhyloX to the JOSS paper. (#52)
 - More robust Newick parser: allow empty properties. (#55)
 - Add docstrings for LGT generator and for from_cherry_picking_sequence. (#60)
+- Fix and test Newick input for HybridizationProblem. (#61)
 
 ## [1.0.3] - (2024-01-20)
 
