@@ -1,1 +1,1 @@
-from .base import generate_network_lgt
+from .base import generate_network_lgt, generate_network_lgt_conditional

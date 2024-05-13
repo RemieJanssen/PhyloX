@@ -44,8 +44,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
     @classmethod
     def from_newick(cls, newick):
         """
-        Creates a network from a newick string.
-        Not implemented.
+        Creates a PhyloX DiNetwork network from a newick string.
 
         :param newick: a newick string.
         :return: a network.
