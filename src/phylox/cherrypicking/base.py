@@ -532,6 +532,17 @@ def cherry_height(network, x, y):
 class CherryPickingMixin:
     @classmethod
     def from_cherry_picking_sequence(cls, sequence, heights=None, label_leaves=True):
+        """
+        Creates a PhyloX DiNetwork network from a cherry picking sequence, 
+        and possibly a matching sequence of heights of the cherries.
+
+        :param sequence: a cherry picking sequence (i.e., a list of 2-tuples)
+        :param heights: a list of positive floats with the same length as 
+          `sequence`. If None, the heights will be set to consecutive integers
+        :param label_leaves: Bool, whether to label the leaves 
+          with the nodes/labels used in the sequence
+        :return: a network.
+        """        
         network = cls()
         heights = heights or [[h, h] for h in range(1, len(sequence) + 1)]
         for pair, height in zip(reversed(sequence), reversed(heights)):

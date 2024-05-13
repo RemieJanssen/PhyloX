@@ -17,7 +17,6 @@ phylox.generators.lgt.base
       compute_hash
       internal_and_external_pairs
       internal_blobs
-      last_node
       leaves
       lgt
       reticulations
