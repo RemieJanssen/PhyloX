@@ -59,7 +59,7 @@ class HybridizationProblem:
         list_of_networks = list_of_networks or []
         for n in list_of_networks:
             if newick_strings:
-                network = DiNetwork(newick=n)
+                network = DiNetwork.from_newick(n)
             else:
                 network = n
             self.trees[len(self.trees)] = network
