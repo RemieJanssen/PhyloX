@@ -13,8 +13,11 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.0.5] - (Unreleased)
+## [1.0.6] - (Unreleased)
 
+## [1.0.5] - (2024-05-15)
+
+ - Rerelase because of failed pypi upload.
 
 ## [1.0.4] - (2024-05-15)
 
