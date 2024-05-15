@@ -13,7 +13,10 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.0.4] - (Unreleased)
+## [1.0.5] - (Unreleased)
+
+
+## [1.0.4] - (2024-05-15)
 
 - Fixed main example from the documentation. (#42)
 - Cleaned up Heath network generator. (#48)
