@@ -21,6 +21,7 @@ Types of changes:
 - More robust Newick parser: allow empty properties. (#55)
 - Add docstrings for LGT generator and for from_cherry_picking_sequence. (#60)
 - Fix and test Newick input for HybridizationProblem. (#61)
+- Fix bug in HybridizationProblem with lengths due to caching and degree-2 roots. (#62)
 
 ## [1.0.3] - (2024-01-20)
 
