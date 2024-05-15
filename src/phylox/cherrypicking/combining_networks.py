@@ -20,6 +20,7 @@ from phylox.cherrypicking import (
     reduce_pair,
 )
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
+from phylox.exceptions import NoSolutionException
 
 # prefix for harmonized node names
 HARMONIZE_NODES_BY_LABEL_PREFIX = "hnbl__"
@@ -29,6 +30,7 @@ class HybridizationProblem:
     """
     A class to represent a hybridization problem.
     I.e. a set of phylogenetic networks that need to be combined into a single phylogenetic network.
+    The networks all need to have a unique root with out-degree 1.
 
     :param list_of_networks: a list of phylogenetic networks, each given as a phylox.DiNetwork.
     :param newick_strings: if True, the input trees are given as newick strings, otherwise as phylox.DiNetworks.
@@ -59,9 +61,12 @@ class HybridizationProblem:
         list_of_networks = list_of_networks or []
         for n in list_of_networks:
             if newick_strings:
-                network = DiNetwork.from_newick(n)
+                network = DiNetwork.from_newick(n, add_root_edge=True)
             else:
                 network = n
+                for root in network.roots:
+                    if network.out_degree(root) > 1:
+                        raise NoSolutionException("No solution can be found, as an input network has a root with out-degree > 1.")
             self.trees[len(self.trees)] = network
             self.distances = self.distances and all(
                 [LENGTH_ATTR in edge[2] for edge in network.edges(data=True)]
@@ -342,8 +347,13 @@ class HybridizationProblem:
             print("found all reducible pairs")
         while copy_of_inputs.trees:
             if progress:
-                print("Sequence has length: " + str(len(CPS)))
-                print(str(len(copy_of_inputs.trees)) + " trees left.\n")
+                print()
+                print(f"Sequence has length: {len(CPS)}")
+                print(f"Current sequence: {CPS}")
+                print(f"Networks left: {len(copy_of_inputs.trees)}\n")
+                for nw_index, nw in copy_of_inputs.trees.items():
+                    print(f"  Network {nw_index}: {nw.newick()}\n    {nw.edges()}")
+                print()
                 # First reduce trivial cherries
                 print("Reducing trivial pairs")
             (
@@ -449,14 +459,14 @@ class HybridizationProblem:
                 del reducible_pairs[pair]
         # Add the trees to the right pairs again
         for index in new_red_trees:
-            if index in self.trees:
-                t = self.trees[index]
-                red_pairs_t = find_all_reducible_pairs(t)
-                for pair in red_pairs_t:
-                    if pair in reducible_pairs:
-                        reducible_pairs[pair].add(index)
-                    else:
-                        reducible_pairs[pair] = set([index])
+            if index not in self.trees:
+                continue
+            t = self.trees[index]
+            red_pairs_t = find_all_reducible_pairs(t)
+            for pair in red_pairs_t:
+                if pair not in reducible_pairs:
+                    reducible_pairs[pair] = set()
+                reducible_pairs[pair].add(index)
         return reducible_pairs
 
     def Reduce_Pair_In_All(self, pair, reducible_pairs=dict()):
@@ -484,7 +494,6 @@ class HybridizationProblem:
                     reduced_trees_for_pair += [i]
                 elif cherry_type == CHERRYTYPE.CHERRY:
                     reduced_trees_for_pair += [i]
-                    t.leaves.remove(pair[0])
                 if len(t.edges()) <= 1:
                     del self.trees[i]
         return set(reduced_trees_for_pair)
