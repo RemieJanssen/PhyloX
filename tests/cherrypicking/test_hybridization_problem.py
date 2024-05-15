@@ -635,6 +635,20 @@ class TestHybridizationProblemLengths(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertTrue(check_cherry_picking_sequence(network, result, labels=True))
 
+    def test_two_trees_lengths(self):
+        network1 = DiNetwork.from_newick("(1:2,(2:1,3:1):1);", add_root_edge=True)
+        network2 = DiNetwork.from_newick("((1:0.5,2:0.5):0.5,3:1);", add_root_edge=True)
+        networks = (network1, network2)
+
+        problem = HybridizationProblem(list_of_networks=networks, newick_strings=False)
+        sequence = problem.CPSBound(seed=1, progress=True, lengths=True)
+        result_network = DiNetwork.from_cherry_picking_sequence(sequence)
+        result = problem.CPSBound(lengths=True, progress=True)
+        self.assertEqual(len(result), 3)
+        for nw in networks:
+            self.assertTrue(check_cherry_picking_sequence(nw, result, labels=True))
+        self.assertTrue(check_cherry_picking_sequence(result_network, result, labels=True))
+
     def test_multiple_missing_lengths(self):
         network1 = DiNetwork(
             edges=[

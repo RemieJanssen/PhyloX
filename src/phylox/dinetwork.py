@@ -5,7 +5,7 @@ from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox.cherrypicking.base import CherryPickingMixin
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-
+from phylox.base import find_unused_node
 
 class DiNetwork(nx.DiGraph, CherryPickingMixin):
     """
@@ -36,22 +36,37 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
             "_leaves",
             "_reticulations",
             "_roots",
-            "_reticulation_number, _labels, _label_to_node_dict",
+            "_reticulation_number",
+            "_labels",
+            "_label_to_node_dict",
         ]:
             if hasattr(self, attr):
                 delattr(self, attr)
 
     @classmethod
-    def from_newick(cls, newick):
+    def from_newick(cls, newick, add_root_edge=False):
         """
         Creates a PhyloX DiNetwork network from a newick string.
 
         :param newick: a newick string.
+        :param add_root_edge: whether to add a root edge of length 0
+          if not explicitly defined by the newick string.
         :return: a network.
         """
         from phylox.parser import extended_newick_to_dinetwork
 
-        return extended_newick_to_dinetwork(newick)
+        network = extended_newick_to_dinetwork(newick)
+        if not add_root_edge:
+            return network
+
+        for root in network.roots:
+            if network.out_degree(root) > 1:
+                new_root = find_unused_node(network)
+                network.add_edges_from([(new_root, root, {LENGTH_ATTR: 0})])
+                root = new_root
+        network._clear_cached()
+        return network
+
 
     def _set_leaves(self):
         """
