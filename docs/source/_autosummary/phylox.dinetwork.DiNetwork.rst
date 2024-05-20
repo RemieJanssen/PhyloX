@@ -18,6 +18,7 @@ phylox.dinetwork.DiNetwork
    
       ~DiNetwork.__init__
       ~DiNetwork.child
+      ~DiNetwork.find_unused_node
       ~DiNetwork.from_cherry_picking_sequence
       ~DiNetwork.from_newick
       ~DiNetwork.is_leaf

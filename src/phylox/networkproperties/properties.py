@@ -2,7 +2,6 @@ import math
 
 import networkx as nx
 
-from phylox.base import find_unused_node
 from phylox.cherrypicking import is_second_in_reducible_pair
 
 
@@ -135,7 +134,7 @@ def b2_balance(network, connect_roots=False):
         return 0
     if len(roots) > 1:
         if connect_roots:
-            new_root = find_unused_node(network)
+            new_root = network.find_unused_node()
             for root in roots:
                 network.add_edge(new_root, root)
         else:

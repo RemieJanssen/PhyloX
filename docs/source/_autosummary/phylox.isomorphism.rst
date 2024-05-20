@@ -1,4 +1,4 @@
-phylox.isomorphism
+﻿phylox.isomorphism
 ==================
 
 .. automodule:: phylox.isomorphism

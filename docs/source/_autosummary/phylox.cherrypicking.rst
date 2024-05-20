@@ -1,4 +1,4 @@
-phylox.cherrypicking
+﻿phylox.cherrypicking
 ====================
 
 .. automodule:: phylox.cherrypicking

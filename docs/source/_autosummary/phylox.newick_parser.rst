@@ -1,7 +1,7 @@
-phylox.parser
-=============
+﻿phylox.newick\_parser
+=====================
 
-.. automodule:: phylox.parser
+.. automodule:: phylox.newick_parser
 
    
    

@@ -1,7 +1,6 @@
 from copy import deepcopy
 from enum import Enum
 
-from phylox.base import find_unused_node, suppress_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
 
 
@@ -228,6 +227,8 @@ def reduce_pair(network, x, y, inplace=False, nodes_by_label=False):
     True
     """
 
+    from phylox import suppress_node
+
     if not inplace:
         network = deepcopy(network)
     if nodes_by_label:
@@ -299,8 +300,8 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
 
         node_x = 2 if nodes_by_label else x
         node_y = 3 if nodes_by_label else y
-        root = find_unused_node(network, exclude=[node_x, node_y])
-        parent = find_unused_node(network, exclude=[root, node_x, node_y])
+        root = network.find_unused_node(exclude=[node_x, node_y])
+        parent = network.find_unused_node(exclude=[root, node_x, node_y])
         network.add_weighted_edges_from(
             [
                 (root, parent, 0),
@@ -343,7 +344,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
 
     # add all edges around y
     network.remove_edge(parent_node_y, node_y)
-    new_parent_of_y = find_unused_node(network)
+    new_parent_of_y = network.find_unused_node()
     network.add_edges_from(
         [
             (parent_node_y, new_parent_of_y, old_edge_data),
@@ -353,7 +354,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
 
     # Now also add edges around x
     node_x = (
-        network.label_to_node_dict.get(x, find_unused_node(network))
+        network.label_to_node_dict.get(x, network.find_unused_node())
         if nodes_by_label
         else x
     )
@@ -389,7 +390,7 @@ def add_pair(network, x, y, height=[1, 1], inplace=False, nodes_by_label=False):
 
     # create a new reticulation vertex above x to attach the hybrid arc to
     height_pair_x = min(height_goal_x, length_incoming_x)
-    new_parent_of_x = find_unused_node(network)
+    new_parent_of_x = network.find_unused_node()
     old_edge_data = network.edges[parent_node_x, node_x]
     old_edge_data[LENGTH_ATTR] = length_incoming_x - height_pair_x
 

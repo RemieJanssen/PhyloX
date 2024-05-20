@@ -15,6 +15,8 @@ Types of changes:
 
 ## [1.0.6] - (Unreleased)
 
+ - Improve navigability of docs. (#63)
+
 ## [1.0.5] - (2024-05-15)
 
  - Rerelase because of failed pypi upload.

@@ -6,12 +6,56 @@
 Welcome to PhyloX's documentation!
 ==================================
 
+Phylox DiNetwork
+----------------
+
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
+   :caption: Phylox DiNetwork
 
-   phylox
+   phylox.dinetwork
+   phylox.newick_parser
+   phylox.isomorphism
+
+Network properties
+------------------
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+   :caption: Network properties
+
+   phylox.classes
+   phylox.networkproperties
+
+Network operations
+------------------
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+   :caption: Network operations
+
+   phylox.generators
+   phylox.cherrypicking
+   phylox.rearrangement
+
+Supporting modules
+------------------
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+   :caption: Supporting modules
+
+   phylox.constants
+   phylox.exceptions
+
 
 PhyloX is a python package for parsing, manipulating, and analysing phylogenetic networks.
 By building upon the widely used `NetworkX <https://networkx.github.io/>`_ package, PhyloX provides a simple and intuitive interface for working with phylogenetic networks.
@@ -19,16 +63,26 @@ Unlike other packages like `Biopython <https://biopython.org/>`_ and `DendroPy <
 Moreover, PhyloX is designed to work with networks that have internally labelled nodes, multiple roots, and non-binary nodes (although not all methods are implemented for all these types of networks).
 
 Some of the features of PhyloX include:
- - Reading and writing phylogenetic networks in extended Newick format with internal node labels, edge lengths, support values, and inheritance probabilities.- Generating random phylogenetic networks with several different models.
- - Modifying and analysing phylogenetic networks using rearrangement moves
-   - Calculating the rearrangement distance between two network (exact and heuristically).
+ - Generating or reading and writing phylogenetic networks.
+
+   - Reading from extended Newick format (:func:`phylox.dinetwork.DiNetwork.from_newick`) with internal node labels, edge lengths, support values, and inheritance probabilities.
+   - Building from a cherry-picking sequence (:func:`phylox.dinetwork.DiNetwork.from_cherry_picking_sequence`)
+   - Generating random phylogenetic networks with several different models (:mod:`phylox.generators`).
+
+ - Modifying and analysing phylogenetic networks using rearrangement moves (:mod:`phylox.rearrangement`).
+
+   - Calculating the rearrangement distance between two networks (exact and heuristically).
    - Generating the set of all networks that can be reached from a given network using a single rearrangement move.
    - Moves are robust objects, that give meaningful error messages when they are applied to networks that they are not applicable to.
- - Cherry-picking methods for phylogenetic networks.
-   - Checking whether a network is orchard
+
+ - Cherry-picking methods for phylogenetic networks (:mod:`phylox.cherrypicking`).
+
+   - Checking whether a network is an orchard network (:func:`phylox.classes.is_orchard`). 
    - Network containment checking for tree-child networks using cherry-picking sequences.
    - Combining networks using cherry-picking sequences.
- - Isomorpism functions for phylogenetic networks.
+
+ - Isomorpism functions for phylogenetic networks (:mod:`phylox.isomorphism`).
+
    - Checking whether two networks are isomorphic.
    - Counting the number of automorphisms of a network.
 

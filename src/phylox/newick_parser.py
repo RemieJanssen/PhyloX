@@ -1,9 +1,16 @@
+"""
+The module handles parsing of Newick strings.
+
+The edges can have attached properties, each edge can have 0, 1, or 3 properties. 
+If there is just one, it will be read as a branch length.
+If there are three, then the first is the branch length, the second is the bootstrap value, and the third is the inheritance probability along that edge (useful for incoming edges of reticulation nodes).
+"""
+
 import json
 import re
 from copy import deepcopy
 
 from phylox import DiNetwork
-from phylox.base import find_unused_node
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR, PROBABILITY_ATTR, RETIC_PREFIX
 
 
@@ -20,7 +27,7 @@ def dinetwork_to_extended_newick(network, simple=False):
     :example:
     >>> from phylox import DiNetwork
     >>> from phylox.constants import LENGTH_ATTR
-    >>> from phylox.parser import dinetwork_to_extended_newick
+    >>> from phylox.newick_parser import dinetwork_to_extended_newick
     >>> network = DiNetwork(
     ...     edges=[
     ...         (0, 1, {LENGTH_ATTR: 1.0}),
@@ -106,7 +113,7 @@ def _split_reticulation_node(network, node, retic_id):
     network.nodes[node][LABEL_ATTR] = node_label + "#R" + str(retic_id)
     new_node_label = node_label + "#H" + str(retic_id)
     for parent, probability in parents[1:]:
-        new_node = find_unused_node(network)
+        new_node = network.find_unused_node()
         network.add_edge(parent, new_node)
         network.nodes[new_node][LABEL_ATTR] = new_node_label
 
@@ -193,7 +200,7 @@ def _json_to_dinetwork(json, network=None, root_node=None):
     network = network or DiNetwork()
 
     node_attrs = _label_and_attrs_to_dict(json["label_and_attr"])
-    node = json.get("retic_id") or root_node or find_unused_node(network)
+    node = json.get("retic_id") or root_node or network.find_unused_node()
     network.add_node(node)
     if LABEL_ATTR in node_attrs:
         network.nodes[node][LABEL_ATTR] = node_attrs[LABEL_ATTR]
@@ -204,7 +211,7 @@ def _json_to_dinetwork(json, network=None, root_node=None):
             for k, v in child_attrs.items()
             if k not in (LABEL_ATTR, "children", "retic_id")
         }
-        child = child_attrs.get("retic_id", find_unused_node(network))
+        child = child_attrs.get("retic_id", network.find_unused_node())
         network.add_edge(node, child, **child_attrs_without_label_and_children)
         _json_to_dinetwork(child_dict, network, root_node=child)
     return network

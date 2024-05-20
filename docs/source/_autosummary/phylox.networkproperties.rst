@@ -1,4 +1,4 @@
-phylox.networkproperties
+﻿phylox.networkproperties
 ========================
 
 .. automodule:: phylox.networkproperties
