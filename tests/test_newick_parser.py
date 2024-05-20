@@ -3,7 +3,7 @@ import unittest
 from phylox import DiNetwork
 from phylox.constants import LABEL_ATTR
 from phylox.isomorphism import is_isomorphic
-from phylox.parser import dinetwork_to_extended_newick, extended_newick_to_dinetwork
+from phylox.newick_parser import dinetwork_to_extended_newick, extended_newick_to_dinetwork
 
 
 class TestExtendedNewickToDiNetwork(unittest.TestCase):

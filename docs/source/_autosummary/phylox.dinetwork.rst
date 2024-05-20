@@ -1,4 +1,4 @@
-phylox.dinetwork
+﻿phylox.dinetwork
 ================
 
 .. automodule:: phylox.dinetwork
@@ -8,6 +8,14 @@ phylox.dinetwork
    
 
    
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      remove_unlabeled_leaves
+      suppress_node
    
    
 

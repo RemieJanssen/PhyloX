@@ -1,4 +1,4 @@
-phylox.rearrangement
+﻿phylox.rearrangement
 ====================
 
 .. automodule:: phylox.rearrangement

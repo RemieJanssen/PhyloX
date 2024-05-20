@@ -1,11 +1,107 @@
+"""
+The module containing the main class of this package: `phylox.DiNetwork`.
+
+The phylox.DiNetwork class represents a directed phylogenetic network, i.e., a directed acyclic graph with labeled nodes.
+Although such networks conventionally only have one root, and the labels are only attached to leaves, this class can handle multi-rooted networks with internal (or no labels) as well.
+Note that not all methods in this package handle these different types of networks, and the safest usage is with binary networks, with one root and labelled leaves.
+"""
+
+
 import random
 
+from copy import deepcopy
 import networkx as nx
 from networkx.utils.decorators import np_random_state, py_random_state
 
 from phylox.cherrypicking.base import CherryPickingMixin
 from phylox.constants import LABEL_ATTR, LENGTH_ATTR
-from phylox.base import find_unused_node
+
+def suppress_node(network, node):
+    """
+    Suppresses a degree-2 node node and returns true if successful.
+    The new arc has length length(p,node)+length(node,c).
+    Returns false if node is not a degree-2 node.
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network to suppress a node in.
+    node : str or int
+        The node to suppress.
+
+    Returns
+    -------
+    bool
+        True if the node was suppressed, False otherwise.
+
+    Examples
+    --------
+    >>> from phylox import DiNetwork
+    >>> network = DiNetwork()
+    >>> network.add_edges_from([(0, 1, {'length': 1}), (1, 2, {'length': 1})])
+    >>> suppress_node(network, 1)
+    True
+    >>> network.edges(data=True)
+    OutEdgeDataView([(0, 2, {'length': 2})])
+    """
+    if not (network.out_degree(node) == 1 and network.in_degree(node) == 1):
+        return False
+    parent = network.parent(node)
+    child = network.child(node)
+    network.add_edges_from([(parent, child, network[parent][node])])
+    if LENGTH_ATTR in network[parent][node] and LENGTH_ATTR in network[node][child]:
+        network[parent][child][LENGTH_ATTR] = (
+            network[parent][node][LENGTH_ATTR] + network[node][child][LENGTH_ATTR]
+        )
+    network.remove_node(node)
+    return True
+
+
+def remove_unlabeled_leaves(network, inplace=True):
+    """
+    Iteratively removes unlabeled leaves until none are left, then suppresses all degree-2 nodes.
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network to remove unlabeled leaves from.
+    inplace : bool
+        Whether to modify the network in place or return a copy.
+
+    Returns
+    -------
+    phylox.DiNetwork
+        The network with unlabeled leaves removed.
+
+    Examples
+    --------
+    >>> from phylox import DiNetwork
+    >>> from phylox.constants import LABEL_ATTR
+    >>> network = DiNetwork(
+    ...     edges=[(0, 1), (1, 2), (1, 3), (3, 4), (3, 5)],
+    ...     labels=[(2, 'a'), (4, 'b')],
+    ... )
+    >>> network = remove_unlabeled_leaves(network)
+    >>> network.edges()
+    OutEdgeView([(0, 1), (1, 2), (1, 4)])
+    >>> network.nodes(data=True)
+    NodeDataView({0: {}, 1: {}, 2: {'label': 'a'}, 4: {'label': 'b'}})
+    """
+    if not inplace:
+        network = deepcopy(network)
+
+    nodes_to_check = set(deepcopy(network.nodes))
+    while nodes_to_check:
+        v = nodes_to_check.pop()
+        if network.out_degree(v) == 0 and LABEL_ATTR not in network.nodes[v]:
+            for p in network.predecessors(v):
+                nodes_to_check.add(p)
+            network.remove_node(v)
+    list_nodes = deepcopy(network.nodes)
+    for v in list_nodes:
+        suppress_node(network, v)
+    return network
+
 
 class DiNetwork(nx.DiGraph, CherryPickingMixin):
     """
@@ -53,7 +149,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
           if not explicitly defined by the newick string.
         :return: a network.
         """
-        from phylox.parser import extended_newick_to_dinetwork
+        from phylox.newick_parser import extended_newick_to_dinetwork
 
         network = extended_newick_to_dinetwork(newick)
         if not add_root_edge:
@@ -61,7 +157,7 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
 
         for root in network.roots:
             if network.out_degree(root) > 1:
-                new_root = find_unused_node(network)
+                new_root = network.find_unused_node()
                 network.add_edges_from([(new_root, root, {LENGTH_ATTR: 0})])
                 root = new_root
         network._clear_cached()
@@ -283,6 +379,36 @@ class DiNetwork(nx.DiGraph, CherryPickingMixin):
         :param simple: Boolean, indicating whether to create a simple newick string without parameters
         :return: a newick string.
         """
-        from phylox.parser import dinetwork_to_extended_newick
+        from phylox.newick_parser import dinetwork_to_extended_newick
 
         return dinetwork_to_extended_newick(self, simple=simple)
+
+    def find_unused_node(self, exclude=[]):
+        """
+        Find an unused node in the network.
+
+        Parameters
+        ----------
+        exclude : list
+            A list of additional nodes to exclude from the search.
+
+        Returns
+        -------
+        int
+            The unused node.
+
+        Examples
+        --------
+        >>> from phylox import DiNetwork
+        >>> network = DiNetwork()
+        >>> network.add_edges_from([(0, 1), (1, 2), (2, 3)])
+        >>> network.find_unused_node()
+        -1
+        >>> network.find_unused_node(exclude=[-1])
+        -2
+        """
+
+        new_node = -1
+        while new_node in self.nodes or new_node in exclude:
+            new_node -= 1
+        return new_node

@@ -4,7 +4,7 @@ import numpy as np
 from networkx.utils.decorators import np_random_state
 from networkx.exception import NetworkXError
 
-from phylox.base import find_unused_node, suppress_node
+from phylox import suppress_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 from phylox.rearrangement.invertsequence import from_edge
 from phylox.rearrangement.movability import check_valid
@@ -299,9 +299,9 @@ class Move(object):
                         "Either a start_node and end_node, or a network must be given."
                     )
                 if self.start_node is None:
-                    self.start_node = find_unused_node(network)
+                    self.start_node = network.find_unused_node()
                 if self.end_node is None:
-                    self.end_node = find_unused_node(network, exclude=[self.start_node])
+                    self.end_node = network.find_unused_node(exclude=[self.start_node])
 
                 if self.start_edge == self.end_edge:
                     raise InvalidMoveDefinitionException(
@@ -508,10 +508,10 @@ class Move(object):
             )
         elif movetype == MoveType.VPLU:
             available_reticulations = list(available_reticulations) or [
-                find_unused_node(network)
+                network.find_unused_node()
             ]
             available_tree_nodes = list(available_tree_nodes) or [
-                find_unused_node(network, exclude=available_reticulations)
+                network.find_unused_node(exclude=available_reticulations)
             ]
             start_edge = edges[seed.choice(num_edges)]
             end_edge = edges[seed.choice(num_edges)]

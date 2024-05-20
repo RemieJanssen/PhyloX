@@ -5,7 +5,6 @@ import networkx as nx
 import numpy as np
 from networkx.utils.decorators import np_random_state
 
-from phylox.base import find_unused_node
 from phylox.exceptions import InvalidMoveDefinitionException, InvalidMoveException
 from phylox.isomorphism import count_automorphisms
 from phylox.rearrangement.invertsequence import from_edge
@@ -134,7 +133,7 @@ def sample_mcmc_networks(
     if add_root_if_necessary:
         for root in network.roots:
             if network.out_degree(root) > 1:
-                new_root = find_unused_node(network)
+                new_root = network.find_unused_node()
                 network.add_edges_from([(new_root, root)])
                 root = new_root
         roots = network._set_roots()

@@ -47,6 +47,7 @@ autosummary_mock_imports = [
     "enum",
 ]
 
+modindex_common_prefix = ["phylox."]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
