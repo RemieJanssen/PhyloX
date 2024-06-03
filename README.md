@@ -1,4 +1,7 @@
 [![DOI](https://zenodo.org/badge/650049974.svg)](https://zenodo.org/doi/10.5281/zenodo.10122403)
+[![JOSS](https://joss.theoj.org/papers/d63bf1aae710fd400a2aba922b359cd7/status.svg)](https://joss.theoj.org/papers/d63bf1aae710fd400a2aba922b359cd7)
+[![Documentation Status](https://readthedocs.org/projects/phylox/badge/?version=latest)](https://phylox.readthedocs.io/en/latest/?badge=latest)
+
 
 # PhyloX
 
