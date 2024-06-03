@@ -24,7 +24,7 @@ PhyloX is a Python package with tools for generating, manipulating, and analyzin
 
 # Phylogenetic networks
 
-In the study of the evolutionary history of biological species and languages, it is common to represent putative histories using graphs. Traditionally, at least in biology, these graphs were most often trees, such as the well known tree drawn by Charles Darwin in one of his notebooks. A tree like this called a phylogenetic tree. In some cases, the evolutionary history includes complex processes like horizontal gene transfer and hybridization. These processes cause a *reticulate* (i.e. network-like) structure in the evolutionary history, which requires phylogenetic networks to be used for representing the evolutionary histories.
+In the study of the evolutionary history of biological species and languages, it is common to represent putative histories using graphs. Traditionally, at least in biology, these graphs were most often trees, such as the well known tree drawn by Charles Darwin in one of his notebooks. A tree like this is called a phylogenetic tree. In some cases, the evolutionary history includes complex processes like horizontal gene transfer and hybridization. These processes cause a *reticulate* (i.e. network-like) structure in the evolutionary history, which requires phylogenetic networks to be used for representing the evolutionary histories.
 
 A *directed phylogenetic network* (e.g., [@huson2010phylogenetic]) is a directed acyclic graph with four types of nodes:
  - a *root*: an in-degree 0, out-degree 1 node,
@@ -35,7 +35,7 @@ A *directed phylogenetic network* (e.g., [@huson2010phylogenetic]) is a directed
 A network is *binary* if each reticulation node has in-degree 2, and each tree node has in-degree 2. An *undirected phylogenetic network* is the underlying undirected graph of a directed phylogenetic network, retaining the labelling of the leaf nodes.
 
 ## Network properties
-When analysing or comparing phylogenetic networks or phylogenetic network methods, it is often useful to extract some (numerical) parameters from the networks. Some of the most used properties are the *reticulation number* (the number of reticulation nodes in a binary network), the number of *blobs* (biconnected components of the network), and the *level* (the maximum reticulation numberamong all blobs of the network). Of course, there are more, like the recently introduced $B_2$-balance index of the network [@franccois2021revisiting].
+When analysing or comparing phylogenetic networks or phylogenetic network methods, it is often useful to extract some (numerical) parameters from the networks. Some of the most used properties are the *reticulation number* (the number of reticulation nodes in a binary network), the number of *blobs* (biconnected components of the network), and the *level* (the maximum reticulation number among all blobs of the network). Of course, there are more, like the recently introduced $B_2$-balance index of the network [@franccois2021revisiting].
 
 ## Classes of networks
 In research on phylogenetic networks, it is common to restrict attention to some well-known classes of phylogenetic networks. These classes put additional restrictions on the definition of a network, for the benefit of computational efficiency, to model certain biological restraints, or for both.
