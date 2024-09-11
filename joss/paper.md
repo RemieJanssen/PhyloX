@@ -6,7 +6,7 @@ tags:
   - Phylogenetics
   - Graph theory
 authors:
-  - name: Henk Harmsen
+  - name: Remie Janssen
     orcid: 0000-0002-5192-1470
     affiliation: 1
 affiliations:
@@ -14,7 +14,6 @@ affiliations:
    index: 1
 date: 25 April 2024
 bibliography: paper.bib
-csl: apa-no-initials.csl
 ---
 
 # Summary
