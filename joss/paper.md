@@ -40,7 +40,7 @@ When analysing or comparing phylogenetic networks or phylogenetic network method
 ## Classes of networks
 In research on phylogenetic networks, it is common to restrict attention to some well-known classes of phylogenetic networks. These classes put additional restrictions on the definition of a network, for the benefit of computational efficiency, to model certain biological restraints, or for both.
 
-Kong et al. [@kong2022classes] gives a good overview of most well-known classes of directed phylogenetic networks, and their biological interpretation. For example, tree-child networks are networks in where each ancestral species has a descendant among the extant taxa (the leaves) through only mutation in the network [@4407681]. Mathematically, tree-child networks are characterized as networks in which each non-leaf node has at least one child that is not a reticulation node.
+@kong2022classes gives a good overview of most well-known classes of directed phylogenetic networks, and their biological interpretation. For example, tree-child networks are networks in where each ancestral species has a descendant among the extant taxa (the leaves) through only mutation in the network [@4407681]. Mathematically, tree-child networks are characterized as networks in which each non-leaf node has at least one child that is not a reticulation node.
 
 ## Cherry-picking
 A basic structure in any network or tree is the *cherry*, a pair of leaves with a common parent. A modified version often found in phylogenetic networks is the *reticulated cherry*, an ordered pair of leaves $(x, y)$ which are related through the three edges $(p_x, x)$, $(p_y, y)$, and $(p_y, p_x)$.
