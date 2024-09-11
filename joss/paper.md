@@ -14,7 +14,7 @@ affiliations:
    index: 1
 date: 25 April 2024
 bibliography: paper.bib
-csl: chicago-author-date.csl
+csl: apa-no-initials.csl
 ---
 
 # Summary
