@@ -14,6 +14,7 @@ affiliations:
    index: 1
 date: 25 April 2024
 bibliography: paper.bib
+csl: apa.csl
 ---
 
 # Summary
