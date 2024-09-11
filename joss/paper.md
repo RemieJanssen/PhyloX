@@ -6,8 +6,8 @@ tags:
   - Phylogenetics
   - Graph theory
 authors:
-  - name: Remie Janssen
-    orcid: 0000-0002-5192-1470
+  - name: Henk Harmnsen
+    orcid: 0000-0000-0000-0000
     affiliation: 1
 affiliations:
  - name: National Institute for Public Health and the Environment, Bioinformatics and Computing group, Bilthoven, The Netherlands
