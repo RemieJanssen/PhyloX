@@ -6,7 +6,7 @@ tags:
   - Phylogenetics
   - Graph theory
 authors:
-  - name: Janssen, Remie
+  - name: Janssen, R.
     orcid: 0000-0002-5192-1470
     affiliation: 1
 affiliations:
