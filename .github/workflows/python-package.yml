@@ -15,7 +15,7 @@ jobs:
       matrix:
         version:
           - python: "3.7"
-            system: ubuntu-20.04
+            system: ubuntu-22.04
           - python: "3.8"
             system: ubuntu-latest
           - python: "3.9"
