@@ -69,7 +69,7 @@ def acceptance_probability(
             )
     if symmetries:
         # correct for number of representations, i.e., symmetries.
-        p *= count_automorphisms(network) / count_automorphisms(result_network)
+        p *= count_automorphisms(result_network) / count_automorphisms(network)
     return p
 
 
