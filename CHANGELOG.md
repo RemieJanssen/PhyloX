@@ -13,7 +13,9 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.1.1] - (Unreleased)
+## [1.1.2] - (Unreleased)
+
+## [1.1.1] - (2025-09-29)
 
  - Yield per network instead of returning all in one list. (#77)
  - Update github workflow pytest to use variable ubuntu version per python version. (#77)
