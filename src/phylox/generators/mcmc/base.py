@@ -184,5 +184,4 @@ def sample_mcmc_networks(
                 available_tree_nodes.add(move.removed_edge[0])
                 available_reticulations.add(move.removed_edge[1])
                 network = result_network
-        sample.append(network)
-    return sample
+        yield network
