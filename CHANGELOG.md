@@ -13,7 +13,11 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.1.0] - (Unreleased)
+## [1.1.1] - (Unreleased)
+
+ - Yield per network instead of returning all in one list. (#77)
+
+## [1.1.0] - (2024-07-15)
 
  - Improve navigability of docs. (#64)
 
