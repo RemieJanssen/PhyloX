@@ -13,7 +13,9 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.1.2] - (Unreleased)
+## [1.1.3] - (Unreleased)
+
+## [1.1.2] - (2025-09-29)
 
  - Fix symmetry correction factor in the acceptance probability for MCMC sampling. (#78)
 
