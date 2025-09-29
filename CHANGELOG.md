@@ -15,6 +15,8 @@ Types of changes:
 
 ## [1.1.2] - (Unreleased)
 
+ - Fix symmetry correction factor in the acceptance probability for MCMC sampling. (#78)
+
 ## [1.1.1] - (2025-09-29)
 
  - Yield per network instead of returning all in one list. (#77)
