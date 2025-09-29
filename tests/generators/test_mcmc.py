@@ -22,12 +22,12 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.VPLU: 0.1,
             MoveType.VMIN: 0.1,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=1,
             burn_in=0,
-        )
+        ))
         self.assertEqual(len(samples), 1)
         self.assertEqual(len(samples[0].edges()), 4)
         self.assertTrue(is_isomorphic(network, samples[0]))
@@ -40,12 +40,12 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.TAIL: 0.5,
             MoveType.HEAD: 0.5,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=10,
             burn_in=10,
-        )
+        ))
         self.assertEqual(len(samples), 10)
         for sample in samples:
             self.assertEqual(len(sample.edges()), 4)
@@ -59,13 +59,13 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.TAIL: 0.5,
             MoveType.HEAD: 0.5,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=10,
             burn_in=10,
             add_root_if_necessary=True,
-        )
+        ))
         self.assertEqual(len(samples), 10)
         for sample in samples:
             self.assertEqual(len(sample.edges()), 5)
@@ -78,12 +78,12 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.VPLU: 0.5,
             MoveType.VMIN: 0.5,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=3,
             burn_in=3,
-        )
+        ))
         self.assertEqual(len(samples), 3)
 
     def test_sample_vertical_ignore_symmetry(self):
@@ -94,13 +94,13 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.VPLU: 0.5,
             MoveType.VMIN: 0.5,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=10,
             burn_in=20,
             correct_symmetries=False,
-        )
+        ))
         self.assertEqual(len(samples), 10)
 
     def test_sample_horizontal_stack_free(self):
@@ -121,14 +121,14 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.TAIL: 0.5,
             MoveType.HEAD: 0.5,
         }
-        samples = sample_mcmc_networks(
+        samples = list(sample_mcmc_networks(
             network,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=100,
             burn_in=25,
             correct_symmetries=False,
             restriction_map=is_stack_free,
-        )
+        ))
         self.assertEqual(len(samples), 100)
         for sample in samples:
             self.assertTrue(is_stack_free(sample))
@@ -143,27 +143,27 @@ class TestMCMCSamples(unittest.TestCase):
             MoveType.TAIL: 0.5,
             MoveType.HEAD: 0.5,
         }
-        samples1 = sample_mcmc_networks(
+        samples1 = list(sample_mcmc_networks(
             network1,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=number_of_samples,
             burn_in=10,
             seed=1,
-        )
-        samples2 = sample_mcmc_networks(
+        ))
+        samples2 = list(sample_mcmc_networks(
             network1,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=number_of_samples,
             burn_in=10,
             seed=1,
-        )
-        samples3 = sample_mcmc_networks(
+        ))
+        samples3 = list(sample_mcmc_networks(
             network1,
             move_type_probabilities=move_type_probabilities,
             number_of_samples=number_of_samples,
             burn_in=10,
             seed=2,
-        )
+        ))
         self.assertEqual(len(samples1), number_of_samples)
         self.assertEqual(len(samples2), number_of_samples)
         self.assertEqual(len(samples3), number_of_samples)
