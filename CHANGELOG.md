@@ -16,6 +16,7 @@ Types of changes:
 ## [1.1.1] - (Unreleased)
 
  - Yield per network instead of returning all in one list. (#77)
+ - Update github workflow pytest to use variable ubuntu version per python version. (#77)
 
 ## [1.1.0] - (2024-07-15)
 
