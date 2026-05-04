@@ -12,39 +12,39 @@ import networkx as nx
 from phylox.constants import LABEL_ATTR, MUVECTOR_ATTR
 from phylox.networkproperties.murepresentation import add_mu_vectors_as_attribute
 
-#: The node attribute used to store the isometry label of a node.
-ISOMETRY_LABEL_ATTR = "isometry_label"
-#: The prefix used for isometry labels.
-ISOMETRY_LABEL_PREFIX = "isometry_label_prefix_"
+#: The node attribute used to store the isomorphism label of a node.
+ISOM_LABEL_ATTR = "isomorphism_label"
+#: The prefix used for isomorphism labels.
+ISOM_LABEL_PREFIX = "isomorphism_label_prefix_"
 #: The prefix used for automorphism labels.
 AUTOMORPHISM_LABEL_PREFIX = "automorphism_label_prefix_"
 
 
 # Checks whether the nodes with the given attributes have the same label
-def _same_isometry_labels(node1_attributes, node2_attributes):
+def _same_isom_labels(node1_attributes, node2_attributes):
     """
     Checks whether two nodes have the same label
 
     :param node1_attributes: the attributes of a node
     :param node2_attributes: the attributes of a node
-    :return: True if the isometry label attribute ISOMETRY_LABEL_ATTR is the same, False otherwise.
+    :return: True if the isomorphism label attribute ISOM_LABEL_ATTR is the same, False otherwise.
     """
-    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(
-        ISOMETRY_LABEL_ATTR
+    return node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(
+        ISOM_LABEL_ATTR
     ) and node1_attributes.get(MUVECTOR_ATTR) == node2_attributes.get(MUVECTOR_ATTR) #Also compare mu-vectors
 
 
 # Checks whether the nodes with the given attributes have the same label
-def _same_isometry_labels_and_labels(node1_attributes, node2_attributes):
+def _same_isom_labels_and_labels(node1_attributes, node2_attributes):
     """
     Checks whether two nodes have the same label
 
     :param node1_attributes: the attributes of a node
     :param node2_attributes: the attributes of a node
-    :return: True if the isometry label attribute ISOMETRY_LABEL_ATTR is the same, False otherwise.
+    :return: True if the isomorphism label attribute ISOM_LABEL_ATTR is the same, False otherwise.
     """
-    return node1_attributes.get(ISOMETRY_LABEL_ATTR) == node2_attributes.get(
-        ISOMETRY_LABEL_ATTR
+    return node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(
+        ISOM_LABEL_ATTR
     ) and node1_attributes.get(LABEL_ATTR) == node2_attributes.get(LABEL_ATTR
     ) and node1_attributes.get(MUVECTOR_ATTR) == node2_attributes.get(MUVECTOR_ATTR) #Also compare mu-vectors
 
@@ -85,16 +85,16 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     add_mu_vectors_as_attribute(nw1)
     add_mu_vectors_as_attribute(nw2)
 
-    same_labels = _same_isometry_labels_and_labels # Setting same_labels here unnecessary?
+    same_labels = _same_isom_labels_and_labels # Setting same_labels here unnecessary?
     if ignore_labels:
-        same_labels = _same_isometry_labels
+        same_labels = _same_isom_labels
 
     partial_isomorphism = partial_isomorphism or []
     for i, corr in enumerate(partial_isomorphism):
         if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]]):
             return False
-        nw1.nodes[corr[0]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_PREFIX}{i}"
-        nw2.nodes[corr[1]][ISOMETRY_LABEL_ATTR] = f"{ISOMETRY_LABEL_PREFIX}{i}"
+        nw1.nodes[corr[0]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
+        nw2.nodes[corr[1]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
 
     return nx.is_isomorphic(nw1, nw2, node_match=same_labels)
 
@@ -122,9 +122,9 @@ def _count_automorphisms(
     """
     nodes_available = nodes_available or []
     nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
-    same_labels = _same_isometry_labels_and_labels
+    same_labels = _same_isom_labels_and_labels
     if ignore_labels:
-        same_labels = _same_isometry_labels
+        same_labels = _same_isom_labels
 
     number_of_automorphisms = 1
     while nodes_to_do:

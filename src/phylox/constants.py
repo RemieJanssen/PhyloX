@@ -14,3 +14,4 @@ RETIC_PREFIX = "__#R"
 
 #: The node attribute used to store the mu-vector of a node
 MUVECTOR_ATTR = "mu-vector"
+MUVECTOR_UNLABELED_ATTR = "mu-vector-unlabeled"

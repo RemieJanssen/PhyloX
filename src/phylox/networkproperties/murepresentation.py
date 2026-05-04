@@ -1,12 +1,14 @@
 """
 A module for generating the mu-vectors for a given DiNetwork.
 The mu-vectors are added as attributes to the nodes.
+
 author: Christopher Reichling
+co-author: Remie Janssen
 """
 
 import networkx as nx
 import numpy as np
-from phylox.constants import LABEL_ATTR, MUVECTOR_ATTR
+from phylox.constants import LABEL_ATTR, MUVECTOR_ATTR, MUVECTOR_UNLABELED_ATTR
 
 def add_mu_vectors_as_attribute(network):
 
