@@ -21,12 +21,12 @@ AUTOMORPHISM_LABEL_PREFIX = "automorphism_label_prefix_"
 
 
 # Checks whether the nodes with the given attributes have the same label
-def _same_isom_labels(node1_attributes, node2_attributes):
+def _same_isom_labels(node1_attributes, node2_attributes, *args, **kwargs):
     """
     Checks whether two nodes have the same label
 
-    :param node1_attributes: the attributes of a node
-    :param node2_attributes: the attributes of a node
+    :param node1_attributes: dict, the attributes of the first node
+    :param node2_attributes: dict, the attributes of the second node
     :return: True if the isomorphism label attribute ISOM_LABEL_ATTR is the same, False otherwise.
     """
     return node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(
@@ -35,21 +35,20 @@ def _same_isom_labels(node1_attributes, node2_attributes):
 
 
 # Checks whether the nodes with the given attributes have the same label
-def _same_isom_labels_and_labels(node1_attributes, node2_attributes):
+def _same_isom_labels_and_labels(node1_attributes, node2_attributes, label_attr=LABEL_ATTR):
     """
-    Checks whether two nodes have the same label
+    Checks whether two nodes have the same isomorphism label and the same node label.
 
-    :param node1_attributes: the attributes of a node
-    :param node2_attributes: the attributes of a node
-    :return: True if the isomorphism label attribute ISOM_LABEL_ATTR is the same, False otherwise.
+    :param node1_attributes: dict, the attributes of the first node
+    :param node2_attributes: dict, the attributes of the second node
+    :param label_attr: str, the key used for the node label attribute (default: LABEL_ATTR)
+    :return: True if the isomorphism label attribute ISOM_LABEL_ATTR is the same and the node label (node attribute: `label_attr`) is the same, False otherwise.
     """
-    return node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(
-        ISOM_LABEL_ATTR
-    ) and node1_attributes.get(LABEL_ATTR) == node2_attributes.get(LABEL_ATTR
-    ) and node1_attributes.get(MUVECTOR_ATTR) == node2_attributes.get(MUVECTOR_ATTR) #Also compare mu-vectors
+    return (node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(ISOM_LABEL_ATTR)
+            and node1_attributes.get(label_attr) == node2_attributes.get(label_attr))
 
-# Checks whether two networks are labeled isomorpgic
-def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=False):
+# Checks whether two networks are labeled isomorphic
+def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=False, label_attr=LABEL_ATTR, use_mu_vector=False):
     """
     Determines whether two networks are labeled isomorphic.
 
@@ -78,20 +77,29 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
     nw1 = deepcopy(network1)
     nw2 = deepcopy(network2)
 
-    """
-    The mu-vectors of all the nodes in both networks are calculated and added as attributes
-    for speeding up the is_isomorphic function (less calls to nx.is_isomorphic)
-    """
-    add_mu_vectors_as_attribute(nw1)
-    add_mu_vectors_as_attribute(nw2)
+    if use_mu_vector:
+        if label_attr != LABEL_ATTR:
+            raise ValueError("Cannot use mu vector and a custom label_attr.")
+        if ignore_labels:
+            label_attr = MUVECTOR_UNLABELED_ATTR
+            add_unlabeled_mu_vectors_as_attribute(nw1)
+            add_unlabeled_mu_vectors_as_attribute(nw2)
+        else:
+            label_attr = MUVECTOR_ATTR
+            add_mu_vectors_as_attribute(nw1)
+            add_mu_vectors_as_attribute(nw2)
 
-    same_labels = _same_isom_labels_and_labels # Setting same_labels here unnecessary?
-    if ignore_labels:
+    same_labels = _same_isom_labels_and_labels
+    if ignore_labels and not use_mu_vector:
+        # mu_vector uses the label_attr, so in that case we DO need to check
+        # the labels even if we want to ignore the node labels.
         same_labels = _same_isom_labels
 
+    # convert the partial isomorphism to labels ISOM_LABEL_ATTR, where two
+    # nodes have the same ISOM_LABEL_ATTR if they are mapped to each other
     partial_isomorphism = partial_isomorphism or []
     for i, corr in enumerate(partial_isomorphism):
-        if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]]):
+        if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]], label_attr=label_attr):
             return False
         nw1.nodes[corr[0]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
         nw2.nodes[corr[1]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
@@ -122,9 +130,6 @@ def _count_automorphisms(
     """
     nodes_available = nodes_available or []
     nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
-    same_labels = _same_isom_labels_and_labels
-    if ignore_labels:
-        same_labels = _same_isom_labels
 
     number_of_automorphisms = 1
     while nodes_to_do:
