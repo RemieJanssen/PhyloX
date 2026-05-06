@@ -98,7 +98,7 @@ def _init_mu_representation(network):
         node = stack.pop()
         if LABEL_ATTR not in network.nodes[node]:
             network.nodes[node][MUVECTOR_ATTR] = np.zeros(no_of_labels, int)
-        network.nodes[node][MUVECTOR_ATTR] += np.sum(network.nodes[c][MUVECTOR_ATTR] for c in network.successors(node))
+        network.nodes[node][MUVECTOR_ATTR] += sum(network.nodes[c][MUVECTOR_ATTR] for c in network.successors(node))
         done.add(node)
         for p in network.predecessors(node):
             if all([pc in done for pc in network.successors(p)]):
