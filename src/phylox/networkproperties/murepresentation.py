@@ -38,7 +38,7 @@ def add_unlabeled_mu_vectors_as_attribute(network):
     _init_mu_representation(network)
 
     for node in network.nodes:
-        network.nodes[node][MUVECTOR_UNLABELED_ATTR] = (int(x) for x in sorted(network.nodes[node][MUVECTOR_ATTR]))
+        network.nodes[node][MUVECTOR_UNLABELED_ATTR] = tuple([int(x) for x in sorted(network.nodes[node][MUVECTOR_ATTR])])
 
 def add_mu_vectors_as_attribute(network):
     """
