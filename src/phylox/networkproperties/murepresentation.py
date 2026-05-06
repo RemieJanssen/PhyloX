@@ -22,6 +22,18 @@ def add_unlabeled_mu_vectors_as_attribute(network):
     and the network is modified in place.
 
     :param network: a DiNetwork
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.murepresentation import add_unlabeled_mu_vectors_as_attribute
+    >>> network = DiNetwork.from_newick("((A,B),C);")
+    >>> add_unlabeled_mu_vectors_as_attribute(network)
+    >>> network.nodes[network.labels["A"][0]].get(MUVECTOR_UNLABELED_ATTR)
+    (0, 0, 1)
+    >>> network.nodes[network.labels["B"][0]].get(MUVECTOR_UNLABELED_ATTR)
+    (0, 0, 1)
+    >>> network.nodes[network.labels["C"][0]].get(MUVECTOR_UNLABELED_ATTR)
+    (0, 0, 1)
     """
     _init_mu_representation(network)
 
@@ -42,6 +54,18 @@ def add_mu_vectors_as_attribute(network):
     and the network is modified in place.
 
     :param network: a DiNetwork
+
+    :example:
+    >>> from phylox import DiNetwork
+    >>> from phylox.networkproperties.murepresentation import add_mu_vectors_as_attribute
+    >>> network = DiNetwork.from_newick("((A,B),C);")
+    >>> add_mu_vectors_as_attribute(network)
+    >>> network.nodes[network.labels["A"][0]].get(MUVECTOR_ATTR)
+    ('A', 1, 0, 0)
+    >>> network.nodes[network.labels["B"][0]].get(MUVECTOR_ATTR)
+    ('B', 0, 1, 0)
+    >>> network.nodes[network.labels["C"][0]].get(MUVECTOR_ATTR)
+    ('C', 0, 0, 1)
     """
     _init_mu_representation(network)
 
@@ -69,7 +93,7 @@ def _init_mu_representation(network):
 
     stack = list(network.leaves)
     no_of_labels = len(network.labels)
-    done = {}
+    done = set()
     while stack:
         node = stack.pop()
         if LABEL_ATTR not in network.nodes[node]:
@@ -78,7 +102,7 @@ def _init_mu_representation(network):
         done.add(node)
         for p in network.predecessors(node):
             if all([pc in done for pc in network.successors(p)]):
-                stack.add(p)
+                stack.append(p)
 
 
 def _init_mu_representation_at_labels(network):
@@ -99,7 +123,7 @@ def _init_mu_representation_at_labels(network):
     # labels are sorted so that we can have a tuple for the mu-vector
     label_index_dict = {label: i for i, label in enumerate(sorted(network.labels.keys()))}
     no_of_labels = len(label_index_dict)
-    for label, index in label_index_dict:
+    for label, index in label_index_dict.items():
         nodes = network.labels[label]
         if len(nodes)>1:
             raise ValueError("Cannot compute the mu-representation of a multi-labeled network.")
