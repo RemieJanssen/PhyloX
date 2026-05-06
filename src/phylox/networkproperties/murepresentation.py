@@ -71,7 +71,7 @@ def add_mu_vectors_as_attribute(network):
 
     for node in network.nodes:
         node_label = network.nodes[node].get(LABEL_ATTR, "")
-        network.nodes[node][MUVECTOR_ATTR] = (node_label, *network.nodes[node][MUVECTOR_ATTR])
+        network.nodes[node][MUVECTOR_ATTR] = (node_label, *(int(x) for x in network.nodes[node][MUVECTOR_ATTR]))
 
 
 def _init_mu_representation(network):
