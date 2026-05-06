@@ -24,6 +24,12 @@ jobs:
             system: ubuntu-latest
           - python: "3.11"
             system: ubuntu-latest
+          - python: "3.12"
+            system: ubuntu-latest
+          - python: "3.13"
+            system: ubuntu-latest
+          - python: "3.14"
+            system: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
