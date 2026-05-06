@@ -9,8 +9,8 @@ from copy import deepcopy
 
 import networkx as nx
 
-from phylox.constants import LABEL_ATTR, MUVECTOR_ATTR
-from phylox.networkproperties.murepresentation import add_mu_vectors_as_attribute
+from phylox.constants import LABEL_ATTR, MUVECTOR_ATTR, MUVECTOR_UNLABELED_ATTR
+from phylox.networkproperties.murepresentation import add_mu_vectors_as_attribute, add_unlabeled_mu_vectors_as_attribute
 
 #: The node attribute used to store the isomorphism label of a node.
 ISOM_LABEL_ATTR = "isomorphism_label"
@@ -31,7 +31,7 @@ def _same_isom_labels(node1_attributes, node2_attributes, *args, **kwargs):
     """
     return node1_attributes.get(ISOM_LABEL_ATTR) == node2_attributes.get(
         ISOM_LABEL_ATTR
-    ) and node1_attributes.get(MUVECTOR_ATTR) == node2_attributes.get(MUVECTOR_ATTR) #Also compare mu-vectors
+    )
 
 
 # Checks whether the nodes with the given attributes have the same label
@@ -79,6 +79,7 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
 
     if use_mu_vector:
         if label_attr != LABEL_ATTR:
+            # TODO: use the custom label attr to calculate the mu-vectors, then this becomes a valid choice?
             raise ValueError("Cannot use mu vector and a custom label_attr.")
         if ignore_labels:
             label_attr = MUVECTOR_UNLABELED_ATTR
@@ -89,17 +90,19 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
             add_mu_vectors_as_attribute(nw1)
             add_mu_vectors_as_attribute(nw2)
 
-    same_labels = _same_isom_labels_and_labels
+    same_labels_fn = _same_isom_labels_and_labels
     if ignore_labels and not use_mu_vector:
         # mu_vector uses the label_attr, so in that case we DO need to check
         # the labels even if we want to ignore the node labels.
-        same_labels = _same_isom_labels
+        same_labels_fn = _same_isom_labels
+    same_labels = (lambda x, y: same_labels_fn(x,y,label_attr=label_attr))
+
 
     # convert the partial isomorphism to labels ISOM_LABEL_ATTR, where two
     # nodes have the same ISOM_LABEL_ATTR if they are mapped to each other
     partial_isomorphism = partial_isomorphism or []
     for i, corr in enumerate(partial_isomorphism):
-        if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]], label_attr=label_attr):
+        if not same_labels(nw1.nodes[corr[0]], nw2.nodes[corr[1]]):
             return False
         nw1.nodes[corr[0]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
         nw2.nodes[corr[1]][ISOM_LABEL_ATTR] = f"{ISOM_LABEL_PREFIX}{i}"
