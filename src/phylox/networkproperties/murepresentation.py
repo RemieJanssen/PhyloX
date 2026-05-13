@@ -82,11 +82,6 @@ def _init_mu_representation(network):
     ----------
     network : phylox.DiNetwork
         The network to initialize the mu-represenation in
-
-    Raises
-    ------
-    ValueError
-        If two or more nodes have the same node label (raised in _init_mu_representation_at_labels)
     """
 
     _init_mu_representation_at_labels(network)
@@ -114,10 +109,6 @@ def _init_mu_representation_at_labels(network):
     network : phylox.DiNetwork
         The network to initialize the mu-represenation in
 
-    Raises
-    ------
-    ValueError
-        If two or more nodes have the same node label.
     """
 
     # labels are sorted so that we can have a tuple for the mu-vector
@@ -125,11 +116,9 @@ def _init_mu_representation_at_labels(network):
     no_of_labels = len(label_index_dict)
     for label, index in label_index_dict.items():
         nodes = network.labels[label]
-        if len(nodes)>1:
-            raise ValueError("Cannot compute the mu-representation of a multi-labeled network.")
         if not nodes:
             # if for some reason there is a label with no nodes
             continue
-        node = nodes[0]
-        network.nodes[node][MUVECTOR_ATTR] = np.zeros(no_of_labels, int)
-        network.nodes[node][MUVECTOR_ATTR][index] = 1
+        for node in nodes:
+            network.nodes[node][MUVECTOR_ATTR] = np.zeros(no_of_labels, int)
+            network.nodes[node][MUVECTOR_ATTR][index] = 1
