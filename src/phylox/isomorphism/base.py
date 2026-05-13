@@ -54,6 +54,11 @@ def is_isomorphic(network1, network2, partial_isomorphism=None, ignore_labels=Fa
 
     :param network1: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
     :param network2: a phylogenetic network, i.e., a DAG with leaf labels stored as the node attribute LABEL_ATTR.
+    :param partial_isomorphism: a list of node pairs, one from network1 and one from network2 each.
+        These pairs are mapped to each other.
+    :param ignore_labels: ignore node labels (attr LABEL_ATTR) when deciding isomorphism.
+    :param label_attr: the label attr for the nodes to use instead of the default node attr LABEL_ATTR.
+    :param use_mu_vector: Compute mu-vectors for all nodes and use the fact that mu-vectors are retained by an isomorphism.
     :return: True if the networks are labeled isomorphic, False otherwise.
 
     :example:
@@ -116,6 +121,7 @@ def _count_automorphisms(
     partial_isomorphism=None,
     nodes_available=None,
     nodes_to_do=None,
+    use_mu_vector=False
 ):
     """
     Determines the number of automorphisms of a network.
@@ -129,10 +135,24 @@ def _count_automorphisms(
     :param partial_isomorphism: a partial isomorphism between the network and itself.
     :param nodes_available: the nodes that are available to be matched.
     :param nodes_to_do: the nodes that still need to be matched.
+    :param use_mu_vector: Compute mu-vectors for all nodes and use the fact that mu-vectors are retained by an automorphism.
     :return: the number of automorphisms of the network.
     """
     nodes_available = nodes_available or []
     nodes_to_do = nodes_to_do if nodes_to_do is not None else set(network.nodes())
+
+    # to use mu vectors, precompute the vectors for the network here once and use label_attr
+    # if we pass use_mu_vector to is_isomorphic, the vectors will be recomputed each time
+    label_attr=LABEL_ATTR
+    if use_mu_vector:
+        if ignore_labels:
+            label_attr = MUVECTOR_UNLABELED_ATTR
+            add_unlabeled_mu_vectors_as_attribute(network)
+            ignore_labels=False
+        else:
+            label_attr = MUVECTOR_ATTR
+            add_mu_vectors_as_attribute(network)
+
 
     number_of_automorphisms = 1
     while nodes_to_do:
@@ -147,6 +167,7 @@ def _count_automorphisms(
                 partial_isomorphism=partial_isomorphism
                 + [(node_to_remove, try_to_match_node)],
                 ignore_labels=ignore_labels,
+                label_attr=label_attr
             ):
                 matches += 1
         number_of_automorphisms *= matches
@@ -154,7 +175,7 @@ def _count_automorphisms(
     return number_of_automorphisms
 
 
-def count_automorphisms(network, ignore_labels=False):
+def count_automorphisms(network, ignore_labels=False, use_mu_vector=False):
     """
     Determines the number of automorphisms of a network.
 
@@ -175,8 +196,10 @@ def count_automorphisms(network, ignore_labels=False):
     2
     """
     partial_isomorphism = [(a, a) for a in network.nodes()]
+
     return _count_automorphisms(
         network,
         ignore_labels=ignore_labels,
         partial_isomorphism=partial_isomorphism,
+        use_mu_vector=use_mu_vector
     )

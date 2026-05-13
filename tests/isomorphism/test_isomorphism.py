@@ -213,3 +213,49 @@ class TestAutomorphism(unittest.TestCase):
         )
         self.assertEqual(count_automorphisms(network), 4)
         self.assertEqual(count_automorphisms(network, ignore_labels=True), 4)
+
+
+    def test_automorphism_simple_mu(self):
+        network = DiNetwork(
+            edges=[(1, 2), (2, 3), (2, 4)],
+            labels=[(3, "a"), (4, "b")],
+        )
+        self.assertEqual(count_automorphisms(network, use_mu_vector=True), 1)
+        self.assertEqual(count_automorphisms(network, ignore_labels=True, use_mu_vector=True), 2)
+
+    def test_automorphism_larger_mu(self):
+        network = DiNetwork(
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 5),
+                (3, 6),
+                (4, 5),
+                (4, 6),
+                (5, 7),
+                (6, 8),
+            ],
+            labels=[(7, "a"), (8, "b")],
+        )
+        self.assertEqual(count_automorphisms(network, use_mu_vector=True), 2)
+        self.assertEqual(count_automorphisms(network, ignore_labels=True, use_mu_vector=True), 4)
+
+    def test_automorphism_larger_strange_labels_mu(self):
+        network = DiNetwork(
+            edges=[
+                (1, 2),
+                (2, 3),
+                (2, 4),
+                (3, 5),
+                (3, 6),
+                (4, 5),
+                (4, 6),
+                (5, 7),
+                (6, 8),
+            ],
+            labels=[(7, "a"), (8, "a")],
+        )
+        self.assertEqual(count_automorphisms(network, use_mu_vector=True), 4)
+        self.assertEqual(count_automorphisms(network, ignore_labels=True, use_mu_vector=True), 4)
+
