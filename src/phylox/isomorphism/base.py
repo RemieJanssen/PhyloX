@@ -161,6 +161,9 @@ def _count_automorphisms(
         nodes_to_do.remove(node_to_remove)
         matches = 1
         for try_to_match_node in nodes_available:
+            # check the labels of the matched nodes before going into the expensive is_isomorphic check
+            if not ignore_labels and network.nodes[try_to_match_node].get(label_attr) != network.nodes[node_to_remove].get(label_attr):
+                continue
             if is_isomorphic(
                 network,
                 network,
