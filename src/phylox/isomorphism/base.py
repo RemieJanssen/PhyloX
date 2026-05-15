@@ -121,7 +121,7 @@ def _count_automorphisms(
     partial_isomorphism=None,
     nodes_available=None,
     nodes_to_do=None,
-    use_mu_vector=False
+    use_mu_vector=True
 ):
     """
     Determines the number of automorphisms of a network.
@@ -178,7 +178,7 @@ def _count_automorphisms(
     return number_of_automorphisms
 
 
-def count_automorphisms(network, ignore_labels=False, use_mu_vector=False):
+def count_automorphisms(network, ignore_labels=False, use_mu_vector=True):
     """
     Determines the number of automorphisms of a network.
 
