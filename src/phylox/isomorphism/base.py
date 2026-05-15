@@ -197,6 +197,10 @@ def count_automorphisms(network, ignore_labels=False, use_mu_vector=True):
     8
     >>> count_automorphisms(network, ignore_labels=False)
     2
+    >>> count_automorphisms(network, ignore_labels=True, use_mu_vector=False)
+    8
+    >>> count_automorphisms(network, ignore_labels=False, use_mu_vector=False)
+    2
     """
     partial_isomorphism = [(a, a) for a in network.nodes()]
 

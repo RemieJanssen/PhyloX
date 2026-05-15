@@ -35,10 +35,11 @@ def add_unlabeled_mu_vectors_as_attribute(network):
     >>> network.nodes[network.labels["C"][0]].get(MUVECTOR_UNLABELED_ATTR)
     (0, 0, 1)
     """
-    _init_mu_representation(network)
+    _init_mu_representation_at_leaves_uniquely(network, MUVECTOR_UNLABELED_ATTR)
+    _propagate_mu_representation(network, MUVECTOR_UNLABELED_ATTR)
 
     for node in network.nodes:
-        network.nodes[node][MUVECTOR_UNLABELED_ATTR] = tuple([int(x) for x in sorted(network.nodes[node][MUVECTOR_ATTR])])
+        network.nodes[node][MUVECTOR_UNLABELED_ATTR] = tuple([int(x) for x in sorted(network.nodes[node][MUVECTOR_UNLABELED_ATTR])])
 
 def add_mu_vectors_as_attribute(network):
     """
@@ -67,15 +68,16 @@ def add_mu_vectors_as_attribute(network):
     >>> network.nodes[network.labels["C"][0]].get(MUVECTOR_ATTR)
     ('C', 0, 0, 1)
     """
-    _init_mu_representation(network)
+    _init_mu_representation_at_labels(network, MUVECTOR_ATTR)
+    _propagate_mu_representation(network, MUVECTOR_ATTR)
 
     for node in network.nodes:
         node_label = network.nodes[node].get(LABEL_ATTR, "")
         network.nodes[node][MUVECTOR_ATTR] = (node_label, *(int(x) for x in network.nodes[node][MUVECTOR_ATTR]))
 
 
-def _init_mu_representation(network):
-    """Sets the mu-vectors for all nodes as a np.array.
+def _propagate_mu_representation(network, mu_label_attr):
+    """Propagates the mu-vectors for all nodes as a np.array.
     Modifies the network in place.
 
     Parameters
@@ -84,24 +86,20 @@ def _init_mu_representation(network):
         The network to initialize the mu-represenation in
     """
 
-    _init_mu_representation_at_labels(network)
-
     stack = list(network.leaves)
-    no_of_labels = len(network.labels)
     done = set()
     while stack:
         node = stack.pop()
-        if LABEL_ATTR not in network.nodes[node]:
-            network.nodes[node][MUVECTOR_ATTR] = np.zeros(no_of_labels, int)
-        network.nodes[node][MUVECTOR_ATTR] += sum(network.nodes[c][MUVECTOR_ATTR] for c in network.successors(node))
+        network.nodes[node][mu_label_attr] += sum(network.nodes[c][mu_label_attr] for c in network.successors(node))
         done.add(node)
         for p in network.predecessors(node):
             if all([pc in done for pc in network.successors(p)]):
                 stack.append(p)
 
 
-def _init_mu_representation_at_labels(network):
-    """Sets the mu-vectors for all nodes with labels in `MUVECTOR_ATTR` as a np.array.
+def _init_mu_representation_at_labels(network, mu_label_attr):
+    """Sets the mu-vectors for all nodes with labels in mu_label_attr as a np.array.
+    All other nodes are set as all-zero arrays.
     Modifies the network in place.
 
     Parameters
@@ -114,11 +112,35 @@ def _init_mu_representation_at_labels(network):
     # labels are sorted so that we can have a tuple for the mu-vector
     label_index_dict = {label: i for i, label in enumerate(sorted(network.labels.keys()))}
     no_of_labels = len(label_index_dict)
+
+    for node in network.nodes:
+        network.nodes[node][mu_label_attr] = np.zeros(no_of_labels, int)
+
     for label, index in label_index_dict.items():
         nodes = network.labels[label]
         if not nodes:
             # if for some reason there is a label with no nodes
             continue
         for node in nodes:
-            network.nodes[node][MUVECTOR_ATTR] = np.zeros(no_of_labels, int)
-            network.nodes[node][MUVECTOR_ATTR][index] = 1
+            network.nodes[node][mu_label_attr][index] = 1
+
+
+def _init_mu_representation_at_leaves_uniquely(network, mu_label_attr):
+    """Sets the mu-vectors for all leaves uniquely in mu_label_attr as a np.array.
+    All other nodes are set as all-zero arrays.
+    Modifies the network in place.
+
+    Parameters
+    ----------
+    network : phylox.DiNetwork
+        The network to initialize the mu-represenation in
+
+    """
+    no_of_leaves = len(list(network.leaves))
+
+    for node in network.nodes:
+        network.nodes[node][mu_label_attr] = np.zeros(no_of_leaves, int)
+
+    # labels are sorted so that we can have a tuple for the mu-vector
+    for index, node in enumerate(network.leaves):
+        network.nodes[node][mu_label_attr][index] = 1

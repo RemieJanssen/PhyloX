@@ -71,8 +71,8 @@ class TestMuRepresentationUnlabeled(unittest.TestCase):
         )
         add_unlabeled_mu_vectors_as_attribute(network)
         self.check_labels_in_vector(network)
-        self.assertEqual(network.nodes[1][MUVECTOR_UNLABELED_ATTR], (1, 1, 2))
-        self.assertEqual(network.nodes[2][MUVECTOR_UNLABELED_ATTR], (0, 1, 2))
+        self.assertEqual(network.nodes[1][MUVECTOR_UNLABELED_ATTR], (1, 2))
+        self.assertEqual(network.nodes[2][MUVECTOR_UNLABELED_ATTR], (1, 2))
 
 
 
