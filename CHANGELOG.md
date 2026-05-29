@@ -16,6 +16,8 @@ Types of changes:
 ## [1.1.3] - (Unreleased)
 
  - Remove autosummary files from git repo, as they are generated automatically by sphinx. (#82)
+ - Add mu-vector implementation to speed up isomorphism checking. (#83)
+ - Correct the name for isomorphism checking constant ISOMETRY_LABEL_ATTR -> ISOM_LABEL_ATTR etc. (#83)
 
 ## [1.1.2] - (2025-09-29)
 

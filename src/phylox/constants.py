@@ -11,3 +11,7 @@ PROBABILITY_ATTR = "probability"
 
 #: Prefix for the node name of a reticulation node when parsing a phylogenetic network from newick
 RETIC_PREFIX = "__#R"
+
+#: The node attribute used to store the mu-vector of a node
+MUVECTOR_ATTR = "mu-vector"
+MUVECTOR_UNLABELED_ATTR = "mu-vector-unlabeled"
