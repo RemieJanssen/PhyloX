@@ -13,7 +13,10 @@ Types of changes:
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [1.1.3] - (Unreleased)
+## [1.1.4] - (Unreleased)
+
+
+## [1.1.3] - (2026-05-29)
 
  - Remove autosummary files from git repo, as they are generated automatically by sphinx. (#82)
  - Add mu-vector implementation to speed up isomorphism checking. (#83)
